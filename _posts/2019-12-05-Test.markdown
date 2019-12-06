@@ -1,0 +1,17 @@
+---
+layout: post
+title:  "Testing my GitHub blog!"
+date:   2019-12-05 16:27:35 -0800
+categories: misc
+---
+
+# A test post!
+This is a test!
+
+Let's look at some code:
+
+{% highlight C# %}
+int i = 0
+{% endhighlight %}
+
+kthxbye
