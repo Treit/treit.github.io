@@ -72,4 +72,4 @@ If you have the fundamentals, we can speak the same language. I can explain that
 
 I will probably even show you exactly what the raw data looks like:
 
-![Binary Data](/assets/numbers1.png)
+![Binary Data](/images/numbers1.png)
