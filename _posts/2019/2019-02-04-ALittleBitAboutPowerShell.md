@@ -61,11 +61,12 @@ Get-ChildItem cert:\LocalMachine\My | ForEach-Object {$_.ThumbPrint} | Select-Ob
 
 <p>Staring at the spew of warnings from the analyzer, I wanted to identify the unique set of warning codes that were firing, so I could suppress them for this particular project. This is the kind of thing PowerShell just excels at. I dumped the giant blob of text sitting on my screen into a scratch file and ran the following:</p>
 
-    cat c:\temp\foo.txt | ?{$_ -match "(VSTHRD.+?):"} | %{$matches[1]} | Select-Object -Unique
-    VSTHRD002
-    VSTHRD200
-    VSTHRD105
-
+{% highlight PowerShell %}
+cat c:\temp\foo.txt | ?{$_ -match "(VSTHRD.+?):"} | %{$matches[1]} | Select-Object -Unique
+VSTHRD002
+VSTHRD200
+VSTHRD105
+{% endhighlight %}
 
 <p>Great, out of the roughly 20 rules in this analyzer, we are hitting three of them and now I know exactly which rule identifiers to put in the .ruleset file to suppress them.</p>
 
