@@ -16,7 +16,7 @@ Hmm. Not too helpful. So...what now? If you've been programming for a while, you
 
 If you're one of an alarming number of recent computer science grads, you may be more likely to break out into a cold sweat. If accomplishing the task is tied to something important, like, say, doing well on a programming interview, you might start to panic a bit.
 
-In a [previous post]({% post_url 2019-03-11-BitAndBytesPart1 %}) I discussed the experience of interviewing multiple bright young computer science majors who struggled to write a program to work with simple binary data.
+In a [previous post]({% post_url 2019/2019-03-11-BitAndBytesPart1 %}) I discussed the experience of interviewing multiple bright young computer science majors who struggled to write a program to work with simple binary data.
 
 Specifically, we discussed a recurring pattern where the candidate does not understand that "32-bit integers" stored as "binary data" in a file will require them to read the actual byte values that make up those integers.
 

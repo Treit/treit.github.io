@@ -5,7 +5,7 @@ date:   2019-02-06 16:00:00 -0800
 categories: PowerShell
 ---
 
-I concluded a [previous post]({% post_url 2019-02-04-ALittleBitAboutPowerShell %}) discussing some tidbits about PowerShell with the comment that you should make good use of your $profile.
+I concluded a [previous post]({% post_url 2019/2019-02-04-ALittleBitAboutPowerShell %}) discussing some tidbits about PowerShell with the comment that you should make good use of your $profile.
 
 So what's $profile? Let's see:
 
