@@ -1,0 +1,220 @@
+I" M<p>There have been a lot of improvements to the .NET SDKs recently, driven in particular by the needs of .NET Core. Among the many changes is the newer, much lighter-weight project file syntax.</p>
+
+<p>For a while there was an attempt to move project files to a JSON-based syntax (project.json), the deprecation of which seems to have been at least slightly controversial. I was lucky enough to miss most of that, as I didn’t really start working on anything outside of the full Windows-only .NET framework until the past year or so. (A bit of dabbling in running F# on Linux being a small exception.)</p>
+
+<p>So, .NET project files (.csproj, .fsproj, etc.) will continue to be XML-based for the foreseeable future. However, that’s not to say there have not been some very significant improvements to the format, not the least of which are the following:</p>
+
+<p>Most project items are inferred and do not need to be explicitly stated, making the project files both smaller and simpler.</p>
+
+<p>PackageReference supersedes the old packages.config model for specifying your NuGet package dependencies.
+Both ProjectReference and the newer PackageReference are now transitive by default, meaning your project will have implicit references to the entire dependency graph, not just one-level deep. This can be both a good thing and a bad thing, but luckily the behavior can be turned on or off as needed.
+Here is an example of a minimal .csproj file, for a small project (project A) that has two dependencies: first on another project (Project B) and then on the System.Memory NuGet package:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;Project Sdk="Microsoft.NET.Sdk"&gt;
+    &lt;PropertyGroup&gt;
+        &lt;TargetFramework&gt;netstandard2.0&lt;/TargetFramework&gt;
+    &lt;/PropertyGroup&gt;
+    &lt;ItemGroup&gt;
+        &lt;PackageReference Include="System.Memory" Version="4.5.2" /&gt;
+    &lt;/ItemGroup&gt;
+    &lt;ItemGroup&gt;
+        &lt;ProjectReference Include="..\B\B.csproj" /&gt;
+    &lt;/ItemGroup&gt;
+&lt;/Project&gt;
+</code></pre></div></div>
+
+<p>As you can see, the new format is quite minimal and clean. Source code files are included implicitly and sensible defaults are provided for most of the many other properties that litter the more traditional, full-.NET project file syntax.</p>
+
+<p>This is great if you are starting fresh and creating new projects from scratch, but what do you do if you are trying to, say, move a large existing codebase to .NET Standard and have many large, existing C# projects in the legacy format?</p>
+
+<p>Luckily, Hans van Bakel has provided a nifty little tool to help with the process, and after using it to convert a few hundred projects I can attest that it really works great! I originally found out about it when a colleague pointed me to Scott Hanselman’s always-excellent blog post on the subject.</p>
+
+<p>The tool can be installed as follows:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dotnet tool install --global Project2015To2017.Migrate2017.Tool
+</code></pre></div></div>
+
+<p>(If you do not yet have a recent .NET SDK installed and the above command does not work, I would recommend going ahead and installing that first.)</p>
+
+<p>If, like me, you are going to be converting many projects, I highly recommend creating yourself a little PowerShell helper function. Just add something like this to your $profile:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>function conv
+{
+    dotnet-migrate-2017 migrate $args[0]
+    $fldr = (Split-Path $args[0])
+    Remove-Item $fldr\Backup -rec -force
+}
+</code></pre></div></div>
+
+<p>In addition to saving typing, I’m assuming you are using a source control system like Git, making the backup copy created by the tool redundant. Therefore, the above wrapper script removes the backup folder.</p>
+
+<p>Converting a project
+Let’s convert a project! As an example, I’m going to use a simple HelloWorld console application that has a reference to another project and a NuGet package reference. Here it is in all of it’s ugly, traditional csproj style glory:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="nt">&lt;Project</span> <span class="na">ToolsVersion=</span><span class="s">"15.0"</span> <span class="na">xmlns=</span><span class="s">"http://schemas.microsoft.com/developer/msbuild/2003"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;Import</span> <span class="na">Project=</span><span class="s">"$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"</span> <span class="na">Condition=</span><span class="s">"Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;PropertyGroup&gt;</span>
+        <span class="nt">&lt;Configuration</span> <span class="na">Condition=</span><span class="s">" '$(Configuration)' == '' "</span><span class="nt">&gt;</span>Debug<span class="nt">&lt;/Configuration&gt;</span>
+        <span class="nt">&lt;Platform</span> <span class="na">Condition=</span><span class="s">" '$(Platform)' == '' "</span><span class="nt">&gt;</span>AnyCPU<span class="nt">&lt;/Platform&gt;</span>
+        <span class="nt">&lt;ProjectGuid&gt;</span>{BDC0B8D7-BEE5-417E-B5F5-3922E793C8CE}<span class="nt">&lt;/ProjectGuid&gt;</span>
+        <span class="nt">&lt;OutputType&gt;</span>Exe<span class="nt">&lt;/OutputType&gt;</span>
+        <span class="nt">&lt;RootNamespace&gt;</span>HelloWorld<span class="nt">&lt;/RootNamespace&gt;</span>
+        <span class="nt">&lt;AssemblyName&gt;</span>HelloWorld<span class="nt">&lt;/AssemblyName&gt;</span>
+        <span class="nt">&lt;TargetFrameworkVersion&gt;</span>v4.7.2<span class="nt">&lt;/TargetFrameworkVersion&gt;</span>
+        <span class="nt">&lt;FileAlignment&gt;</span>512<span class="nt">&lt;/FileAlignment&gt;</span>
+        <span class="nt">&lt;AutoGenerateBindingRedirects&gt;</span>true<span class="nt">&lt;/AutoGenerateBindingRedirects&gt;</span>
+        <span class="nt">&lt;Deterministic&gt;</span>true<span class="nt">&lt;/Deterministic&gt;</span>
+    <span class="nt">&lt;/PropertyGroup&gt;</span>
+    <span class="nt">&lt;PropertyGroup</span> <span class="na">Condition=</span><span class="s">" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;PlatformTarget&gt;</span>AnyCPU<span class="nt">&lt;/PlatformTarget&gt;</span>
+        <span class="nt">&lt;DebugSymbols&gt;</span>true<span class="nt">&lt;/DebugSymbols&gt;</span>
+        <span class="nt">&lt;DebugType&gt;</span>full<span class="nt">&lt;/DebugType&gt;</span>
+        <span class="nt">&lt;Optimize&gt;</span>false<span class="nt">&lt;/Optimize&gt;</span>
+        <span class="nt">&lt;OutputPath&gt;</span>bin\Debug\<span class="nt">&lt;/OutputPath&gt;</span>
+        <span class="nt">&lt;DefineConstants&gt;</span>DEBUG;TRACE<span class="nt">&lt;/DefineConstants&gt;</span>
+        <span class="nt">&lt;ErrorReport&gt;</span>prompt<span class="nt">&lt;/ErrorReport&gt;</span>
+        <span class="nt">&lt;WarningLevel&gt;</span>4<span class="nt">&lt;/WarningLevel&gt;</span>
+    <span class="nt">&lt;/PropertyGroup&gt;</span>
+    <span class="nt">&lt;PropertyGroup</span> <span class="na">Condition=</span><span class="s">" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;PlatformTarget&gt;</span>AnyCPU<span class="nt">&lt;/PlatformTarget&gt;</span>
+        <span class="nt">&lt;DebugType&gt;</span>pdbonly<span class="nt">&lt;/DebugType&gt;</span>
+        <span class="nt">&lt;Optimize&gt;</span>true<span class="nt">&lt;/Optimize&gt;</span>
+        <span class="nt">&lt;OutputPath&gt;</span>bin\Release\<span class="nt">&lt;/OutputPath&gt;</span>
+        <span class="nt">&lt;DefineConstants&gt;</span>TRACE<span class="nt">&lt;/DefineConstants&gt;</span>
+        <span class="nt">&lt;ErrorReport&gt;</span>prompt<span class="nt">&lt;/ErrorReport&gt;</span>
+        <span class="nt">&lt;WarningLevel&gt;</span>4<span class="nt">&lt;/WarningLevel&gt;</span>
+    <span class="nt">&lt;/PropertyGroup&gt;</span>
+    <span class="nt">&lt;ItemGroup&gt;</span>
+        <span class="nt">&lt;Reference</span> <span class="na">Include=</span><span class="s">"System"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;Reference</span> <span class="na">Include=</span><span class="s">"System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;HintPath&gt;</span>packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll<span class="nt">&lt;/HintPath&gt;</span>
+        <span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;Reference</span> <span class="na">Include=</span><span class="s">"System.Core"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;Reference</span> <span class="na">Include=</span><span class="s">"System.Memory, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;HintPath&gt;</span>packages\System.Memory.4.5.2\lib\netstandard2.0\System.Memory.dll<span class="nt">&lt;/HintPath&gt;</span>
+        <span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;Reference</span> <span class="na">Include=</span><span class="s">"System.Numerics"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;Reference</span> <span class="na">Include=</span><span class="s">"System.Numerics.Vectors, Version=4.1.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;HintPath&gt;</span>packages\System.Numerics.Vectors.4.4.0\lib\net46\System.Numerics.Vectors.dll<span class="nt">&lt;/HintPath&gt;</span>
+        <span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;Reference</span> <span class="na">Include=</span><span class="s">"System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;HintPath&gt;</span>packages\System.Runtime.CompilerServices.Unsafe.4.5.2\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll<span class="nt">&lt;/HintPath&gt;</span>
+        <span class="nt">&lt;/Reference&gt;</span>
+        <span class="nt">&lt;Reference</span> <span class="na">Include=</span><span class="s">"System.Xml.Linq"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;Reference</span> <span class="na">Include=</span><span class="s">"System.Data.DataSetExtensions"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;Reference</span> <span class="na">Include=</span><span class="s">"Microsoft.CSharp"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;Reference</span> <span class="na">Include=</span><span class="s">"System.Data"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;Reference</span> <span class="na">Include=</span><span class="s">"System.Net.Http"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;Reference</span> <span class="na">Include=</span><span class="s">"System.Xml"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;/ItemGroup&gt;</span>
+    <span class="nt">&lt;ItemGroup&gt;</span>
+        <span class="nt">&lt;Compile</span> <span class="na">Include=</span><span class="s">"Program.cs"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;Compile</span> <span class="na">Include=</span><span class="s">"Properties\AssemblyInfo.cs"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;/ItemGroup&gt;</span>
+    <span class="nt">&lt;ItemGroup&gt;</span>
+        <span class="nt">&lt;None</span> <span class="na">Include=</span><span class="s">"App.config"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;None</span> <span class="na">Include=</span><span class="s">"packages.config"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;/ItemGroup&gt;</span>
+    <span class="nt">&lt;ItemGroup&gt;</span>
+        <span class="nt">&lt;ProjectReference</span> <span class="na">Include=</span><span class="s">"..\SampleLibrary\SampleLibrary.csproj"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;Project&gt;</span>{99e7fcdd-9bab-457c-ad10-65a11dea2d33}<span class="nt">&lt;/Project&gt;</span>
+        <span class="nt">&lt;Name&gt;</span>SampleLibrary<span class="nt">&lt;/Name&gt;</span>
+        <span class="nt">&lt;/ProjectReference&gt;</span>
+    <span class="nt">&lt;/ItemGroup&gt;</span>
+    <span class="nt">&lt;Import</span> <span class="na">Project=</span><span class="s">"$(MSBuildToolsPath)\Microsoft.CSharp.targets"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/Project&gt;</span>
+</code></pre></div></div>
+
+<p>Using our helper PowerShell function, we can simply change to the folder where the project lives, run conv HelloWorld.csprojand the tool will do all of the heavy lifting.</p>
+
+<p><img src="/images/2019-02-17/prompt1.png" alt="Prompt" /></p>
+
+<p>After running the conversion, we get the following result:
+        <?xml version="1.0" encoding="utf-8"?>
+        <Project Sdk="Microsoft.NET.Sdk">
+            <PropertyGroup>
+                <ProjectGuid>{BDC0B8D7-BEE5-417E-B5F5-3922E793C8CE}</ProjectGuid>
+                <OutputType>Exe</OutputType>
+                <TargetFramework>net472</TargetFramework>
+                <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+                <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+                <OutputPath>bin\$(Configuration)\</OutputPath>
+            </PropertyGroup>
+            <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+                <DebugType>full</DebugType>
+            </PropertyGroup>
+            <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+                <DebugType>pdbonly</DebugType>
+            </PropertyGroup>
+            <ItemGroup>
+                <PackageReference Include="Newtonsoft.Json" Version="11.0.1"></PackageReference>
+                <PackageReference Include="System.Buffers" Version="4.4.0"></PackageReference>
+                <PackageReference Include="System.Memory" Version="4.5.2"></PackageReference>
+                <PackageReference Include="System.Numerics.Vectors" Version="4.4.0"></PackageReference>
+                <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2"></PackageReference>
+            </ItemGroup>
+            <ItemGroup>
+                <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+                <HintPath>packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+                </Reference>
+                <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+                <HintPath>packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
+                </Reference>
+                <Reference Include="System.Memory, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+                <HintPath>packages\System.Memory.4.5.2\lib\netstandard2.0\System.Memory.dll</HintPath>
+                </Reference>
+                <Reference Include="System.Numerics.Vectors, Version=4.1.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+                <HintPath>packages\System.Numerics.Vectors.4.4.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+                </Reference>
+                <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+                <HintPath>packages\System.Runtime.CompilerServices.Unsafe.4.5.2\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+                </Reference>
+                <Reference Include="System.Data.DataSetExtensions"></Reference>
+                <Reference Include="Microsoft.CSharp"></Reference>
+                <Reference Include="System.Net.Http"></Reference>
+            </ItemGroup>
+            <ItemGroup>
+                <ProjectReference Include="..\SampleLibrary\SampleLibrary.csproj"></ProjectReference>
+            </ItemGroup>
+    </Project></p>
+
+<p>The tool did quite a bit of work for us, including converting the NuGet references to PackageReference (the packages.config was also deleted), removing any source-code file references (since they will be implicitly included) and removing other extraneous properties.</p>
+
+<p>It’s not perfect, however. You will notice there are still references with hint paths to some files under the packages folder. These really should have been removed, as those entries are replaced by the PackageReference items. In addition, the explicit reference entries to things like Microsoft.CSharp are not necessary and can be removed, as can items like ProjectGuid, which as far as I know serves no useful purpose.</p>
+
+<p>However, once you recognize what can be safely removed, it takes just a couple of seconds in your favorite text editor to elide the remaining cruft and be left with something quite nice, like this:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;Project Sdk="Microsoft.NET.Sdk"&gt;
+&lt;PropertyGroup&gt;
+    &lt;OutputType&gt;Exe&lt;/OutputType&gt;
+    &lt;TargetFramework&gt;net472&lt;/TargetFramework&gt;
+    &lt;AutoGenerateBindingRedirects&gt;true&lt;/AutoGenerateBindingRedirects&gt;
+    &lt;GenerateAssemblyInfo&gt;false&lt;/GenerateAssemblyInfo&gt;
+    &lt;OutputPath&gt;bin\$(Configuration)\&lt;/OutputPath&gt;
+&lt;/PropertyGroup&gt;
+&lt;PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "&gt;
+    &lt;DebugType&gt;full&lt;/DebugType&gt;
+&lt;/PropertyGroup&gt;
+&lt;PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "&gt;
+    &lt;DebugType&gt;pdbonly&lt;/DebugType&gt;
+&lt;/PropertyGroup&gt;
+&lt;ItemGroup&gt;
+    &lt;PackageReference Include="Newtonsoft.Json" Version="11.0.1" /&gt;
+    &lt;PackageReference Include="System.Buffers" Version="4.4.0" /&gt;
+    &lt;PackageReference Include="System.Memory" Version="4.5.2" /&gt;
+    &lt;PackageReference Include="System.Numerics.Vectors" Version="4.4.0" /&gt;
+    &lt;PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" /&gt;
+&lt;/ItemGroup&gt;
+&lt;ItemGroup&gt;
+    &lt;ProjectReference Include="..\SampleLibrary\SampleLibrary.csproj" /&gt;
+&lt;/ItemGroup&gt;
+&lt;/Project&gt;
+</code></pre></div></div>
+
+<p>There you have it! A traditional C# project converted to the new format.</p>
+
+<p>This was a fairly trivial example, but even on large projects with tens of thousands of lines of code and custom build targets and other complexities, my experience is that this process will get you almost all the way there, with only a few small tweaks needed to complete the process.</p>
+
+<p>Of course, actually converting to something like .NET Standard once you have switched over to the new SDK project format is an entirely different can-of-worms.</p>
+:ET
