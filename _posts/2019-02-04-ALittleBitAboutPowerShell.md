@@ -48,11 +48,11 @@ Then, along came PowerShell and I never looked back. Being one of those somewhat
 dir cert:\LocalMachine\My | %{$_.ThumbPrint} | Select-Object -Unique | ?{$_ -match "f44"}
 {% endhighlight %}
 
-<p>The above uses various PowerShell conveniences, like <code>%{}</code>for <code>ForEach-Object</code>and <code>?{}</code>for <code>Where-Object</code>. These little shorthand helpers are standing in for the more verbose version:</p>
+<p>The above uses various PowerShell conveniences, like <code>%{}</code>for <code>ForEach-Object</code>and <code>?{}</code>for <code>Where-Object</code>. These little shorthand helpers are standing in for the more verbose version:<p>
 
 {% highlight PowerShell %}
 Get-ChildItem cert:\LocalMachine\My | ForEach-Object {$_.ThumbPrint} | Select-Object -Unique 
-| Where-Object {$_ -match "f44"}</code></pre>
+| Where-Object {$_ -match "f44"}
 {% endhighlight %}
 
 <p>PowerShell is really wonderful at allowing you to write one-liners to answer all manners of questions, which I am doing constantly. Just now, multi-tasking away as I was writing this, msbuild vomited out 600+ lines of warnings due to a new code analyzer I am in the process of adding to our codebase. </p>
