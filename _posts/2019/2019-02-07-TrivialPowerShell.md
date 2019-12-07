@@ -9,23 +9,29 @@ I concluded a [previous post]({% post_url 2019/2019-02-04-ALittleBitAboutPowerSh
 
 So what's $profile? Let's see:
 
-    > $profile
-    C:\Users\mtreit\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1
+{% highlight PowerShell %}
+> $profile
+C:\Users\mtreit\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1
+{% endhighlight %}
 
 It's simply a string that points to a profile script that is automatically executed when you launch PowerShell, as long as you don't pass the -NoProfile switch. By default the script file it points to will not exist, but of course it's simple to create one:
 
-    > New-Item $profile
-    Directory: C:\Users\mtreit\Documents\WindowsPowerShell
+{% highlight PowerShell %}
+> New-Item $profile
+Directory: C:\Users\mtreit\Documents\WindowsPowerShell
 
-    Mode                LastWriteTime     Length Name
-    ----                -------------     ------ ----
-    -a----         2/5/2019   7:11 PM          0 Microsoft.PowerShell_profile.ps1
+Mode                LastWriteTime     Length Name
+----                -------------     ------ ----
+-a----         2/5/2019   7:11 PM          0 Microsoft.PowerShell_profile.ps1
+{% endhighlight %}
 
 I said the script is automatically executed when you launch PowerShell. Technically it's actually 'dot sourced', which means the context in which the script executes is the current context. Normally if you execute a PowerShell script it gets it's own context, which goes away after the script completes. This means variables, functions and other entities defined in the script do not persist. By dot sourcing, entities defined in the script will be persisted into the current context. The upshot of this is that functions defined in your $profile script will be pulled into your current PowerShell session and available for you to use.
 
 You can dot source a script at any time using, well, the 'dot' or period character:
 
-    > . $profile
+{% highlight PowerShell %}
+> . $profile
+{% endhighlight %}
 
 Of course in the example snippets above, we know our current $profile is empty so this is a no-op.
 

@@ -28,24 +28,15 @@ twitter_username: mtreit
 github_username:  treit
 
 # Build settings
-theme: jekyll-whiteglass
-plugins:
-  - jekyll-archives
-  - jekyll-paginate
-  - jekyll-sitemap
+theme: minima
 
-permalink: /:year/:month/:day/:title/
-paginate_path: /posts/:num/
-paginate: 5
-
-jekyll-archives:
-  enabled:
-    - categories
-    - tags
-  layout: category_archives
-  permalinks:
-    category: /categories/:name/
-    tag: /tags/:name/
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  input: GFM
+  syntax_highlighter_opts:
+    default_lang: text
+    css_class   : 'syntax'
 
 # Exclude from processing.
 # The following items will not be processed, by default.

@@ -21,35 +21,37 @@ I'm still bad at doing the mental conversion, though, which I often need to do m
 
 I have a function, Get-UTC, or simply 'utc', in my $profile that I use to immediately pull up a conversion table to show me local time vs UTC time for every hour of the day. It looks like this:
 
-    utc
-    Local                UTC
-    -----                ---
-    (Wed) 2/6/2019 16:00 (Thu) 2/7/2019 00:00
-    (Wed) 2/6/2019 17:00 (Thu) 2/7/2019 01:00
-    (Wed) 2/6/2019 18:00 (Thu) 2/7/2019 02:00
-    (Wed) 2/6/2019 19:00 (Thu) 2/7/2019 03:00
-    (Wed) 2/6/2019 20:00 (Thu) 2/7/2019 04:00
-    (Wed) 2/6/2019 21:00 (Thu) 2/7/2019 05:00
-    (Wed) 2/6/2019 22:00 (Thu) 2/7/2019 06:00
-    (Wed) 2/6/2019 23:00 (Thu) 2/7/2019 07:00
-    (Thu) 2/7/2019 00:00 (Thu) 2/7/2019 08:00
-    (Thu) 2/7/2019 01:00 (Thu) 2/7/2019 09:00
-    (Thu) 2/7/2019 02:00 (Thu) 2/7/2019 10:00
-    (Thu) 2/7/2019 03:00 (Thu) 2/7/2019 11:00
-    (Thu) 2/7/2019 04:00 (Thu) 2/7/2019 12:00
-    (Thu) 2/7/2019 05:00 (Thu) 2/7/2019 13:00
-    (Thu) 2/7/2019 06:00 (Thu) 2/7/2019 14:00
-    (Thu) 2/7/2019 07:00 (Thu) 2/7/2019 15:00
-    (Thu) 2/7/2019 08:00 (Thu) 2/7/2019 16:00
-    (Thu) 2/7/2019 09:00 (Thu) 2/7/2019 17:00
-    (Thu) 2/7/2019 10:00 (Thu) 2/7/2019 18:00
-    (Thu) 2/7/2019 11:00 (Thu) 2/7/2019 19:00
-    (Thu) 2/7/2019 12:00 (Thu) 2/7/2019 20:00
-    (Thu) 2/7/2019 13:00 (Thu) 2/7/2019 21:00
-    (Thu) 2/7/2019 14:00 (Thu) 2/7/2019 22:00
-    (Thu) 2/7/2019 15:00 (Thu) 2/7/2019 23:00
+{% highlight PowerShell %}
+utc
+Local                UTC
+-----                ---
+(Wed) 2/6/2019 16:00 (Thu) 2/7/2019 00:00
+(Wed) 2/6/2019 17:00 (Thu) 2/7/2019 01:00
+(Wed) 2/6/2019 18:00 (Thu) 2/7/2019 02:00
+(Wed) 2/6/2019 19:00 (Thu) 2/7/2019 03:00
+(Wed) 2/6/2019 20:00 (Thu) 2/7/2019 04:00
+(Wed) 2/6/2019 21:00 (Thu) 2/7/2019 05:00
+(Wed) 2/6/2019 22:00 (Thu) 2/7/2019 06:00
+(Wed) 2/6/2019 23:00 (Thu) 2/7/2019 07:00
+(Thu) 2/7/2019 00:00 (Thu) 2/7/2019 08:00
+(Thu) 2/7/2019 01:00 (Thu) 2/7/2019 09:00
+(Thu) 2/7/2019 02:00 (Thu) 2/7/2019 10:00
+(Thu) 2/7/2019 03:00 (Thu) 2/7/2019 11:00
+(Thu) 2/7/2019 04:00 (Thu) 2/7/2019 12:00
+(Thu) 2/7/2019 05:00 (Thu) 2/7/2019 13:00
+(Thu) 2/7/2019 06:00 (Thu) 2/7/2019 14:00
+(Thu) 2/7/2019 07:00 (Thu) 2/7/2019 15:00
+(Thu) 2/7/2019 08:00 (Thu) 2/7/2019 16:00
+(Thu) 2/7/2019 09:00 (Thu) 2/7/2019 17:00
+(Thu) 2/7/2019 10:00 (Thu) 2/7/2019 18:00
+(Thu) 2/7/2019 11:00 (Thu) 2/7/2019 19:00
+(Thu) 2/7/2019 12:00 (Thu) 2/7/2019 20:00
+(Thu) 2/7/2019 13:00 (Thu) 2/7/2019 21:00
+(Thu) 2/7/2019 14:00 (Thu) 2/7/2019 22:00
+(Thu) 2/7/2019 15:00 (Thu) 2/7/2019 23:00
+{% endhighlight %}
 
-    Current UTC: 02/08/2019 02:33:53
+Current UTC: 02/08/2019 02:33:53
 
 On the left is the local time, on the right is the corresponding UTC time. If I know the problem happened at 21:25 local time on Wednesday, I can immediately see I need to check our (UTC-based) logs for what happened around 05:25 on Thursday.
 
@@ -59,26 +61,31 @@ One other quick note about PowerShell and time values is that it has a very nice
 
 In PowerShell we can just do this and quickly get the answer:
 
-    [DateTime]"2/7/2019" - [DateTime]"10/12/2018"
+{% highlight PowerShell %}
+[DateTime]"2/7/2019" - [DateTime]"10/12/2018"
 
-    Days              : 118
-    Hours             : 0
-    Minutes           : 0
-    Seconds           : 0
-    Milliseconds      : 0
-    Ticks             : 101952000000000
-    TotalDays         : 118
-    TotalHours        : 2832
-    TotalMinutes      : 169920
-    TotalSeconds      : 10195200
-    TotalMilliseconds : 10195200000
+Days              : 118
+Hours             : 0
+Minutes           : 0
+Seconds           : 0
+Milliseconds      : 0
+Ticks             : 101952000000000
+TotalDays         : 118
+TotalHours        : 2832
+TotalMinutes      : 169920
+TotalSeconds      : 10195200
+TotalMilliseconds : 10195200000
+
+{% endhighlight %}
 
 So, 118 days ago.
 
 Similarly we can use other nice APIs to do date and time calculations. What will the date be in 100 days?
 
-    (Get-Date).AddDays(100)
-    Saturday, May 18, 2019 18:46:07
+{% highlight PowerShell %}
+(Get-Date).AddDays(100)
+Saturday, May 18, 2019 18:46:07
+{% endhighlight %}
 
 So, May 18th.
 
@@ -87,29 +94,29 @@ If you're a wizard at date calculations, congratulations, but for myself I'll ha
 For reference, here is the code for my little utc function:
 
 {% highlight PowerShell %}
-    dir Function:\Get-Utc | %{$_.Definition}
-        Param(
-            [Parameter(Mandatory=$False, Position=0, ValueFromPipeline=$True)]
-            [string[]]$Date
-        )
+dir Function:\Get-Utc | %{$_.Definition}
+    Param(
+        [Parameter(Mandatory=$False, Position=0, ValueFromPipeline=$True)]
+        [string[]]$Date
+    )
 
-        Process
+    Process
+    {
+        if (!$Date)
         {
-            if (!$Date)
-            {
-                $Date = [DateTime]::Now
-            }
+            $Date = [DateTime]::Now
+        }
 
-            $Date | %{
-                $dt = ([DateTime]$_).ToString("M/d/yyyy")
-                (0..23) | %{([DateTime] "$dt $($_):00")} | %{
-                    New-Object PSObject -Property @{
-                        UTC = $_.ToString("(ddd) M/d/yyyy HH:mm")
-                        Local = $_.ToLocalTime().ToString("(ddd) M/d/yyyy HH:mm")
-                    }
+        $Date | %{
+            $dt = ([DateTime]$_).ToString("M/d/yyyy")
+            (0..23) | %{([DateTime] "$dt $($_):00")} | %{
+                New-Object PSObject -Property @{
+                    UTC = $_.ToString("(ddd) M/d/yyyy HH:mm")
+                    Local = $_.ToLocalTime().ToString("(ddd) M/d/yyyy HH:mm")
                 }
             }
-
-            "$([Environment]::NewLine)Current UTC: $([DateTime]::UtcNow)"
         }
+
+        "$([Environment]::NewLine)Current UTC: $([DateTime]::UtcNow)"
+    }
 {% endhighlight %}

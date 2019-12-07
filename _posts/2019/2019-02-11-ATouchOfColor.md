@@ -40,15 +40,21 @@ The lighter variants look much nicer now too:
 
 The [PSColors](https://www.powershellgallery.com/packages/PSColors/1.2.1) module is our main conduit to a more pleasing and useful command line environment. If you have PSGet installed, it’s simply a matter of running:
 
-    Install-Module PSColors
+{% highlight PowerShell %}
+Install-Module PSColors
+{% endhighlight %}
 
 After the module is installed, you will want to import it. Open $profile in your favorite editor and add this line to the top:
 
-    Import-Module PSColors
+{% highlight PowerShell %}
+Import-Module PSColors
+{% endhighlight %}
 
 Save it, then dot source your profile to bring this change into your current context:
 
-    . $profile
+{% highlight PowerShell %}
+. $profile
+{% endhighlight %}
 
 Let’s try that command again:
 
@@ -60,42 +66,46 @@ Getting nicer. We have some colorization happening based on the file types: ligh
 
 While it’s nice to have colorized output, it would be even better if we can choose our own colorization rules. In fact, we can customize the PSColors module rules by editing the file here:
 
-    notepad++ "$(Split-Path $profile)\Modules\PSColors\1.2.1\PSColors.format.ps1xml"
+{% highlight PowerShell %}
+notepad++ "$(Split-Path $profile)\Modules\PSColors\1.2.1\PSColors.format.ps1xml"
+{% endhighlight %}
 
 **Note**: on my computer modules are installed for the current user by default (instead of for the entire machine), but if you don’t find PSColors.format.ps1xml in you user profile, check if it exists under $env:ProgramFiles\PowerShell\Modulesor $env:ProgramFiles\WindowsPowerShell\Modules (the latter if you are running classic PowerShell instead of pwsh.)
 
 The guts of the coloring rules in this file look something like this by default:
 
-    if($global:PSColorsUseAnsi) {
-        $regexOptions = ([System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+{% highlight PowerShell %}
+if($global:PSColorsUseAnsi) {
+    $regexOptions = ([System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
 
-        $executables = @('exe', 'bat', 'cmd', 'py', 'pl', 'ps1', 'psm1', 'vbs', 'rb', 'reg', 'fsx')
-        $compresseds = @('zip', 'tar', 'gz', '[rjw]ar', 'arj', 'tgz', 'gz')
-        $texts = @('txt', 'cfg', 'conf', 'ini', 'csv', 'log', 'xml', 'java', 'c(pp)?', 'fs', 'html?')
+    $executables = @('exe', 'bat', 'cmd', 'py', 'pl', 'ps1', 'psm1', 'vbs', 'rb', 'reg', 'fsx')
+    $compresseds = @('zip', 'tar', 'gz', '[rjw]ar', 'arj', 'tgz', 'gz')
+    $texts = @('txt', 'cfg', 'conf', 'ini', 'csv', 'log', 'xml', 'java', 'c(pp)?', 'fs', 'html?')
 
-        $executableRegex = New-Object regex("\.($([string]::Join('|', $executables)))`$", $regexOptions)
-        $compressedRegex = New-Object regex("\.($([string]::Join('|', $compresseds)))`$", $regexOptions)
-        $textRegex = New-Object regex("\.($([string]::Join('|', $texts)))`$", $regexOptions)
+    $executableRegex = New-Object regex("\.($([string]::Join('|', $executables)))`$", $regexOptions)
+    $compressedRegex = New-Object regex("\.($([string]::Join('|', $compresseds)))`$", $regexOptions)
+    $textRegex = New-Object regex("\.($([string]::Join('|', $texts)))`$", $regexOptions)
 
-        $directoryColor = "$([char](27))[34;1m"
-        $executableColor = "$([char](27))[32;1m"
-        $compressedColor = "$([char](27))[31;1m"
-        $textColor = "$([char](27))[33;1m"
-        $resetColor = "$([char](27))[0m"
+    $directoryColor = "$([char](27))[34;1m"
+    $executableColor = "$([char](27))[32;1m"
+    $compressedColor = "$([char](27))[31;1m"
+    $textColor = "$([char](27))[33;1m"
+    $resetColor = "$([char](27))[0m"
 
-        if ($_ -is [System.IO.DirectoryInfo]) {
-            $name = "$directoryColor$name/$resetColor"
-        }
-        elseif ($compressedRegex.IsMatch($_.Name)) {
-            $name = "$compressedColor$name$resetColor"
-        }
-        elseif ($executableRegex.IsMatch($_.Name)) {
-            $name = "$executableColor$name*$resetColor"
-        }
-        elseif ($textRegex.IsMatch($_.Name)) {
-            $name = "$textColor$name$resetColor"
-        }
+    if ($_ -is [System.IO.DirectoryInfo]) {
+        $name = "$directoryColor$name/$resetColor"
     }
+    elseif ($compressedRegex.IsMatch($_.Name)) {
+        $name = "$compressedColor$name$resetColor"
+    }
+    elseif ($executableRegex.IsMatch($_.Name)) {
+        $name = "$executableColor$name*$resetColor"
+    }
+    elseif ($textRegex.IsMatch($_.Name)) {
+        $name = "$textColor$name$resetColor"
+    }
+}
+{% endhighlight %}
 
 ## ANSI escape code sequences
 
@@ -107,6 +117,7 @@ In a nutshell, the ASCII character 27 (or 0x1b in hexadecimal) represents the es
 
 In the blog post above, an example is given of combining escape sequences to produce underlined-text on a blue background:
 
+
     \u001b[4m\u001b[44m Blue Background Underline \u001b[0m
 
 Here the value 4 means underline and 44 means blue background. The example above for combining them is actually slightly more complex than necessary: we can use a semicolon to separate the combined values, so the example would become
@@ -115,7 +126,9 @@ Here the value 4 means underline and 44 means blue background. The example above
 
 Or if we convert this to our PowerShell syntax, as seen in the PSColors syntax file, it would be this:
 
-    "$([char]27)[4;44m"
+{% highlight PowerShell %}
+"$([char]27)[4;44m"
+{% endhighlight %}
 
 The [Wikipedia page for ANSI escape code](https://en.wikipedia.org/wiki/ANSI_escape_code) has details on the various possible values available. Not all values will necessarily be meaningfully interpreted by the latest Windows console, but the basic color formatting ones now work quite nicely.
 
@@ -129,22 +142,30 @@ Hey, what do you know? It works great. Thanks [Windows command line team](https:
 
 Now that we know how it works, we can customize the rules in the PSColors format file to fit our day-to-day needs. Recently I have been converting many of our C# projects to the newer, more modern SDK-style project format favored by .NET core and .NET standard projects. We have hundreds of projects, so it would be useful if project files stood out. We can add a new set of extensions to look for:
 
-    $projects = @('csproj', 'nuproj')
+{% highlight PowerShell %}
+$projects = @('csproj', 'nuproj')
+{% endhighlight %}
 
 Following the existing pattern in the file, we also need a regex:
 
-    $projRegex = New-Object regex("\.($([string]::Join('|', $projects)))`$", $regexOptions)
+{% highlight PowerShell %}
+$projRegex = New-Object regex("\.($([string]::Join('|', $projects)))`$", $regexOptions)
+{% endhighlight %}
 
 …and a color:
 
-    $projcolor = "$([char](27))[42;1m"
+{% highlight PowerShell %}
+$projcolor = "$([char](27))[42;1m"
+{% endhighlight %}
 
 We’ll splice another condition into the logic used to choose which color sequence to return, and we’re done!
 
-    elseif($projRegex.IsMatch($_.Name))
-    {
-        $name = "$projcolor$name$resetcolor"
-    }
+{% highlight PowerShell %}
+elseif($projRegex.IsMatch($_.Name))
+{
+    $name = "$projcolor$name$resetcolor"
+}
+{% endhighlight %}
 
 In this case, [42;1m is going to give us a green background. We can explore all of the possible values and choose which ones we like by again using colortool.exe. We can view, for our current scheme, all of the possible combinations as follows: `colortool.exe --current`
 
@@ -157,54 +178,55 @@ Here you can use the row and column header values as a kind of lookup to find th
 So, choose the colors you like and customize the rules in PSColors to suit your needs and you should find your day-to-day PowerShell a much more pleasant experience!
 
 After a few more tweaks to highlight log files differently, my final edits ended up looking something like this:
+```
+index 3073f5a..d22d2b5 100644
+--- a/PSColors.format.ps1xml
++++ b/PSColors.format.ps1xml
+@@ -90,27 +90,40 @@
+                <ScriptBlock>
+                    $name = $_.Name
 
-    index 3073f5a..d22d2b5 100644
-    --- a/PSColors.format.ps1xml
-    +++ b/PSColors.format.ps1xml
-    @@ -90,27 +90,40 @@
-                    <ScriptBlock>
-                        $name = $_.Name
+-
+                    if($global:PSColorsUseAnsi) {
+                        $regexOptions = ([System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
 
-    -
-                        if($global:PSColorsUseAnsi) {
-                            $regexOptions = ([System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+                        $executables = @('exe', 'bat', 'cmd', 'py', 'pl', 'ps1', 'psm1', 'vbs', 'rb', 'reg', 'fsx')
+                        $compresseds = @('zip', 'tar', 'gz', '[rjw]ar', 'arj', 'tgz', 'gz')
+-                        $texts = @('txt', 'cfg', 'conf', 'ini', 'csv', 'log', 'xml', 'java', 'c(pp)?', 'fs', 'html?')
++                        $texts = @('txt', 'cfg', 'config', 'conf', 'ini', 'csv', 'cs', 'csproj', 'xml', 'java', 'c(pp)?', 'fs', 'html?')
++                        $projects = @('csproj', 'nuproj')
++                        $logs = @('log', 'svclog', 'tsv')
 
-                            $executables = @('exe', 'bat', 'cmd', 'py', 'pl', 'ps1', 'psm1', 'vbs', 'rb', 'reg', 'fsx')
-                            $compresseds = @('zip', 'tar', 'gz', '[rjw]ar', 'arj', 'tgz', 'gz')
-    -                        $texts = @('txt', 'cfg', 'conf', 'ini', 'csv', 'log', 'xml', 'java', 'c(pp)?', 'fs', 'html?')
-    +                        $texts = @('txt', 'cfg', 'config', 'conf', 'ini', 'csv', 'cs', 'csproj', 'xml', 'java', 'c(pp)?', 'fs', 'html?')
-    +                        $projects = @('csproj', 'nuproj')
-    +                        $logs = @('log', 'svclog', 'tsv')
+                        $executableRegex = New-Object regex("\.($([string]::Join('|', $executables)))`$", $regexOptions)
+                        $compressedRegex = New-Object regex("\.($([string]::Join('|', $compresseds)))`$", $regexOptions)
+                        $textRegex = New-Object regex("\.($([string]::Join('|', $texts)))`$", $regexOptions)
++                        $projRegex = New-Object regex("\.($([string]::Join('|', $projects)))`$", $regexOptions)
++                        $logsRegex = New-Object regex("\.($([string]::Join('|', $logs)))`$", $regexOptions)
 
-                            $executableRegex = New-Object regex("\.($([string]::Join('|', $executables)))`$", $regexOptions)
-                            $compressedRegex = New-Object regex("\.($([string]::Join('|', $compresseds)))`$", $regexOptions)
-                            $textRegex = New-Object regex("\.($([string]::Join('|', $texts)))`$", $regexOptions)
-    +                        $projRegex = New-Object regex("\.($([string]::Join('|', $projects)))`$", $regexOptions)
-    +                        $logsRegex = New-Object regex("\.($([string]::Join('|', $logs)))`$", $regexOptions)
+-                        $directoryColor = "$([char](27))[34;1m"
++                        $directoryColor = "$([char](27))[36;1m"
+                        $executableColor = "$([char](27))[32;1m"
+                        $compressedColor = "$([char](27))[31;1m"
+                        $textColor = "$([char](27))[33;1m"
+                        $resetColor = "$([char](27))[0m"
++                        $projcolor = "$([char](27))[42;1m"
++                        $logscolor = "$([char](27))[44;1m"
 
-    -                        $directoryColor = "$([char](27))[34;1m"
-    +                        $directoryColor = "$([char](27))[36;1m"
-                            $executableColor = "$([char](27))[32;1m"
-                            $compressedColor = "$([char](27))[31;1m"
-                            $textColor = "$([char](27))[33;1m"
-                            $resetColor = "$([char](27))[0m"
-    +                        $projcolor = "$([char](27))[42;1m"
-    +                        $logscolor = "$([char](27))[44;1m"
-
-                            if ($_ -is [System.IO.DirectoryInfo]) {
-                                $name = "$directoryColor$name/$resetColor"
-                            }
-    +                        elseif($projRegex.IsMatch($_.Name))
-    +                        {
-    +                            $name = "$projcolor$name$resetcolor"
-    +                        }
-    +                        elseif($logsRegex.IsMatch($_.Name))
-    +                        {
-    +                            $name = "$logscolor$name$resetcolor"
-    +                        }
-                            elseif ($compressedRegex.IsMatch($_.Name)) {
-                                $name = "$compressedColor$name$resetColor"
-                            }
+                        if ($_ -is [System.IO.DirectoryInfo]) {
+                            $name = "$directoryColor$name/$resetColor"
+                        }
++                        elseif($projRegex.IsMatch($_.Name))
++                        {
++                            $name = "$projcolor$name$resetcolor"
++                        }
++                        elseif($logsRegex.IsMatch($_.Name))
++                        {
++                            $name = "$logscolor$name$resetcolor"
++                        }
+                        elseif ($compressedRegex.IsMatch($_.Name)) {
+                            $name = "$compressedColor$name$resetColor"
+                        }
+```
 
 Wrapping up, we can compare the before and after of out-of-the-box pwsh and the modified look after taking advantage of PSColors and a little knowledge of how to customize the ANSI escape sequences:
 
