@@ -1,8 +1,9 @@
 ---
 layout: page
-title: About
-image: '/images/backpack1.jpg'
+title: About Me
 ---
+
+<img src="/images/backpack1.jpg">
 
 I am a developer at Microsoft. Prior to getting into programming I was a software tester.
 
