@@ -14,7 +14,6 @@ categories: PowerShell, Programming
   font-family: "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
   font-size: 0.9em;
   color: #000;
-  background: #bcd0e4 url("widget-table-bg.jpg") top left repeat-x;
 }
 
 .pretty-table caption
