@@ -41,12 +41,11 @@ categories: PowerShell, Programming
 }	
 </style>
 
-Getting comfortable with binary data (with help from PowerShell)
 "How does the computer store the data?" I’m asked.
 
 "Is it in hexadecimal? Or just ones and zeroes? Or what?"
 
-This relates to my previously discussed experience (see here and here) that a lot of newer programmers are just not comfortable with the basic manipulation of ‘binary’ data.
+This relates to my previously discussed experience (see [here]({% post_url /2019/2019-03-11-BitAndBytesPart1 %}) and [here]({% post_url /2019/2019-03-11-BitAndBytesPart2 %})) that a lot of newer programmers are just not comfortable with the basic manipulation of ‘binary’ data.
 
 If you are not comfortable working with binary data, perhaps having only ever written Python or Javascript or some other relatively high-level language that rarely requires you to interact with ‘bytes’ directly, here are a few simple thoughts to get you on the right track…
 
