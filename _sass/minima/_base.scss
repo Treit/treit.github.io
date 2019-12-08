@@ -1,3 +1,12 @@
+@font-face {
+    font-family: 'Cascadia Mono';
+    src: url('/assets/fonts/CascadiaMono.ttf') format('truetype');
+  }
+  
+  @font-face {
+    font-family: 'Cascadia Code';
+    src: url('/assets/fonts/Cascadia.ttf') format('truetype');
+  }
 /**
  * Reset some basic elements
  */
@@ -147,14 +156,15 @@ blockquote {
  * Code formatting
  */
  
- pre,
+pre,
 code {
   @include relative-font-size(0.8);
   border: 1px solid $grey-color-light;
-  border-radius: 3px;
+  border-radius: 1px;
   }
 
 code {
+  font-family:Cascadia Mono, Consolas, monospace;
   padding: 1px 5px;
 }
 
