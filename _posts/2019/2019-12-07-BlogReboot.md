@@ -6,7 +6,7 @@ categories: Misc, Blogging
 ---
 Welcome to the new location of my blog, which is now hosted using [GitHub Pages](https://pages.github.com/)!
 
-I've been meaning to do some more blog posts for a while, but with a project at work keeping me really busy for the most of the year, I didn't find time. There was another reason, however, and that was my growing distaste for the blogging platform I had started using.
+I've been meaning to do some more blog posts for a while, but with a project at work keeping me really busy for most of the year, I didn't find time. There was another reason, however, and that was my growing distaste for the blogging platform I had started using.
 
 I was originally hosting my blog as a [WordPress site using BlueHost](https://www.bluehost.com/wordpress/wordpress-hosting). The experience was not great. The web interface for crafting posts was abominably slow and the plugin-mania that comes with WordPress results in an unseemly level of bloat.
 
