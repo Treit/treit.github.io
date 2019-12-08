@@ -163,6 +163,8 @@ In any event, given a regex to match a GUID, we can then compose that into a reg
 
 {% highlight PowerShell %}
 cat c:\temp\data.txt | ?{$_ -match "($re), ($re)"} | %{$matches[1]; $matches[2]} | Select-Object -Unique
+{% endhighlight %}
+{% highlight Text %}
 5717517a-fc75-4fd4-9550-fe429f01e63c
 6256f564-3bed-47bf-8a8d-b48fc2f2b9c9
 591736ac-cec4-4fc0-9db9-7c736e4540ae
@@ -205,6 +207,8 @@ As an aside, I’ve noticed some people are unaware of this technique to produce
 
 {% highlight PowerShell %}
 (1..5) | %{$_; $_ * $_; $_ * $_ * $_; "-----"}
+{% endhighlight %}
+{% highlight Text %}
 1
 1
 1
