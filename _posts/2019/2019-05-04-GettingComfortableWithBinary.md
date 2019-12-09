@@ -59,7 +59,7 @@ We all know that computers work with "ones and zeroes", also known as binary dig
 
 It is possible to manipulate the indivdiual bits within a given byte (through shifts and similar bitwise operations), but you would not, for instance, ask the computer to go fetch 3 bits from some arbitrary memory location, or to write exactly 5 bits to a file on disk. Reads and writes will always be at the granularity of one or more bytes.
 
-An individual byte consists of 8 bits. That means we can store 28 individual values in a single byte. 28 is equal to 256, so the maximum value is 255. This is because the first value is zero, not one. So a single byte can represent a numeric value from 0-255.
+An individual byte consists of 8 bits. That means we can store 2^8 individual values in a single byte. 2^8 is equal to 256, so the maximum value is 255. This is because the first value is zero, not one. So a single byte can represent a numeric value from 0-255.
 
 To represent values greater than 255, we can string bytes together. Groups of bytes are known as ‘words’, and the number of bits in each word is usually used to distinguish different word lengths. So, you will see references to ’16-bit words’ (two bytes), ’32-bit words’ (4 bytes) and ’64-bit words’ (8 bytes).
 
@@ -289,7 +289,7 @@ As an aside, "Implement [atoi](http://www.cplusplus.com/reference/cstdlib/atoi/)
 
 For the file where we stored the value as the 8 raw bytes that actually make up the numeric value, there is *no conversion needed at all*! We already have the actual bytes, we can just read them into memory and treat them as the actual 64-bit word that we started with.
 
-**Note**: I am ignoring endianness conversion issues, which in the real world you would want to account for if your code runs on multiple platforms. If you aren’t familiar with big endian and little endian, I highly recommend reading the original article in which the term was borrowed from Gulliver’s Travels to apply to computing. It is both interesting and entertaining.
+**Note**: I am ignoring endianness conversion issues, which in the real world you would want to account for if your code runs on multiple platforms. If you aren’t familiar with big endian and little endian, I highly recommend reading the [original article](https://www.ietf.org/rfc/ien/ien137.txt) in which the term was borrowed from Gulliver’s Travels to apply to computing. It is both interesting and entertaining.
 
 Anyway, thinking only in terms of the textual representation of numbers is where many of the interview candidates I see get lost: they assume all files are text files, because they have rarely been asked to work with data that is not text! The entire concept of working directly with the bytes that comprise numeric values like integers or floating point quantities seems to have hardly occured to them. This is why they want to know if the files are in hexadecimal or binary or whatnot; as we have seen, if we are storing the raw byte values instead of text, that question really doesn’t make any sense. It’s all just bytes, values between 0 and 255, in a sequence.
 

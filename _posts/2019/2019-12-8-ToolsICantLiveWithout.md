@@ -21,7 +21,7 @@ There are a few top-priority items that I am going to install immediately.
 ### *The latest Windows 10 Insider Build*
 <img src="/images/Nijna-Cat-T-Rex-Final-V1.png" style="width:50%; height:50%;float:right"/>
 
-I have always been an aggressive self-hoster of new Windows builds ever since I started as a membere of the 'Windows NT 5' team, as it was known at the time. (One of the rare Windows development releases that [did not have a codename](https://en.wikipedia.org/wiki/List_of_Microsoft_codenames).)
+I have always been an aggressive self-hoster of new Windows builds ever since I started as a member of the 'Windows NT 5' team, as it was known at the time. (One of the rare Windows development releases that [did not have a codename](https://en.wikipedia.org/wiki/List_of_Microsoft_codenames).)
 
 These days, the [Windows Insider Program](https://insider.windows.com/en-us/) is the best way to stay on top of all the great new changes that are making Windows 10 better all the time.
 
