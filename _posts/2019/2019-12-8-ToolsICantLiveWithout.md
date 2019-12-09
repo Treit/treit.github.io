@@ -71,6 +71,6 @@ Highly recommended if you aren't already a die-hard Vim or Emacs user.
 <br/>
 I think that wraps up the initial 'must have' list for my new development workstation.
 
-We're just getting started, though. Once I have the above installed there will still be a lot more work to be done before I will truly able to code with joy.
+We're just getting started, though. Once I have the above installed there will still be a lot more work to be done before I will truly be able to code with joy.
 
 We'll cover some of the remaining tools in an upcoming post.
