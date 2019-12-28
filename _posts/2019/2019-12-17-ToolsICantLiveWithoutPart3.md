@@ -182,7 +182,7 @@ This will take a while, but once it completes we will have a working Ubuntu envi
 ### Installing the .NET Core SDK on WSL
 We want to be able to install things like PowerShell Core and potentially build .NET applications in our WSL environment, so we will start by installing the .NET Core SDK into our Ubuntu WSL environment.
 
-We are going to fllow the instructions from [here](https://docs.microsoft.com/en-us/dotnet/core/install/linux-package-manager-ubuntu-1804).
+We are going to follow the instructions from [here](https://docs.microsoft.com/en-us/dotnet/core/install/linux-package-manager-ubuntu-1804).
 
 {% highlight bash %}
 wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
