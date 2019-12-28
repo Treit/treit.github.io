@@ -193,7 +193,7 @@ sudo apt-get install apt-transport-https
 sudo apt-get update
 {% endhighlight %}
 
-This ensure we have the Microsoft key registered and dependencies installed.
+This ensures we have the Microsoft key registered and dependencies installed.
 
 Then we can simply install the SDK:
 
