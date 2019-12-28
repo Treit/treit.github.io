@@ -62,8 +62,6 @@ Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 Set-ExecutionPolicy Unrestricted
 {% endhighlight %}
 
-I didn't include all of the output from those commands, but if you execute them in the above order they should complete without any errors.
-
 We can now install the PSColors module:
 
 {% highlight PowerShell %}
