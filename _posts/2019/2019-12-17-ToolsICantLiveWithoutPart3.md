@@ -64,6 +64,13 @@ Set-ExecutionPolicy Unrestricted
 
 I didn't include all of the output from those commands, but if you execute them in the above order they should complete without any errors.
 
+We can now install the PSColors module:
+
+{% highlight PowerShell %}
+Install-Module PSColors -Scope CurrentUser -AllowClobber
+{% endhighlight %}
+
+
 Now we will add importing the module into our session by updating our $profile script. First we open $profile in our editor:
 
 {% highlight PowerShell %}
