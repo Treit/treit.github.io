@@ -103,7 +103,7 @@ Now when we want to write blog posts we can simply open the Windows Terminal pro
 ![menu1](/images/2020-01-09/blog_menu1.png)
 
 #### Customzing our terminal color scheme for blogging
-We set the 'colorScheme' setting to the popular 'Campbell' setting that comes with Windows Terminal, but there are endless possibilities for customizing the color scheme to match our own aesthetic tasts. I like my blogging environment to stand out from my other coding environments, so let's come up with a different scheme.
+We set the 'colorScheme' setting to the popular 'Campbell' setting that comes with Windows Terminal, but there are endless possibilities for customizing the color scheme to match our own aesthetic tastes. I like my blogging environment to stand out from my other coding environments, so let's come up with a different scheme.
 
 We could write out own, but luckily there exists a huge assortment of existing, popular terminal color schemes available on github. These can be found at the [iTerm2-Color-Schemes repo](https://github.com/mbadolato/iTerm2-Color-Schemes). **Warning**: visiting this site could lead to many hours of wasted productivity as you try out scheme after scheme in your terminal!
 
