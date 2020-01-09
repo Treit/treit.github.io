@@ -40,7 +40,7 @@ So far we have:
 ## Installing the Rust toolchain on Windows
 <img src="/images/2019-12-19/rust_logo1.png" style="width:25%; height:25%;float:right;margin:20px;"/>
 
-The [Rust](https://www.rust-lang.org/) programming language is fascinating. I've heard about it for a few years but really had no idea what it was all about. Then I happened across the highly entertaining video [Is It Time to Rewrite the Operating System in Rust?](https://www.youtube.com/watch?v=HgtRAbE1nBM) and my curiosity was strongly piqued. A language that provdies both memory-safety and native-code levels of performance? With modern language features like exhaustive pattern matching and iterators? This sounds like the kind of programming language I've dreamed about.
+The [Rust](https://www.rust-lang.org/) programming language is fascinating. I've heard about it for a few years but really had no idea what it was all about. Then I happened across the highly entertaining video [Is It Time to Rewrite the Operating System in Rust?](https://www.youtube.com/watch?v=HgtRAbE1nBM) and my curiosity was strongly piqued. A language that provides both memory-safety and native-code levels of performance? With modern language features like exhaustive pattern matching and iterators? This sounds like the kind of programming language I've dreamed about.
 
 In fairness I have yet to do any real programming in Rust, but it's high on my to-do list. As part of researching the language, however, I came across a few extremely neat tools that happened to be written in Rust.
 
