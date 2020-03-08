@@ -78,7 +78,7 @@ The F# program I decided to port to Rust can take several types of input. One po
 
 This is not a sophisticated problem, but it is rather typical of the sort of pragmatic problem we have to solve all of the time. This was the problem I was working on solving in Rust, as a first-step to porting my F# program over.
 
-To test any candidate solution, I created ten million GUIDs and wrote them to disk, separating them with commas and random whitespace, including newlines. Why so many? Because trivial amounts of data are just so...uninteresting. You find useful insights when you push your data into the millions, such as bad algorithmic choices that are way too slow, or stack overflows because you assumed memory is boundless, or other interesting issues that my former professional-software-tester self stills loves to find.
+To test any candidate solution, I created ten million GUIDs and wrote them to disk, separating them with commas and random whitespace, including newlines. Why so many? Because trivial amounts of data are just so...uninteresting. You find useful insights when you push your data into the millions, such as bad algorithmic choices that are way too slow, or stack overflows because you assumed memory is boundless, or other interesting issues that my former professional-software-tester self still loves to find.
 
 I know we just wasted ten million GUIDs, [a precious resource that we need to worry about running out of (#SaveTheGuids)](http://www.technofattie.com/2013/04/15/but-what-if-we-run-out-of-guids.html), I hope you can get past my wanton waste.
 
