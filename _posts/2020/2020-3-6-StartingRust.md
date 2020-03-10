@@ -125,6 +125,7 @@ static List<string> ExtractIds(string input)
         }
         else
         {
+            result = null;
             break;
         }
     }
