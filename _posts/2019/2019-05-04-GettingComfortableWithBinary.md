@@ -192,8 +192,8 @@ The value of each byte is written to the pipeline in turn. Note that we had to a
 
 {% highlight PowerShell %}
 Get-Content .\fibs.bin
-
-"7Yé
+
+"7Yé
 {% endhighlight %}
 
 We can see a few recognizable characters in there like ‘7’ and ‘Y’ and the quotation mark character because the standardized numeric values of those characters happen to correspond to values in our fibonacci sequence. The value 34 (0x22) is the [ASCII code](https://en.wikipedia.org/wiki/ASCII#Printable_characters) for the quotation mark character, the value 55 (0x37) is the code for ‘7’ and 89 (0x59) is the code for the uppercase ‘Y’ character.
