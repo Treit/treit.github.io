@@ -11,8 +11,10 @@ You decide to inspect the file contents:
 
 ``` text
 > cat .\nums.bin
-S)I�"�a�:Z�W�x
 ```
+... and you see something like this get spit back at you on the command-line:
+
+![garbled](/images/garbled1.png)
 
 Hmm. Not too helpful. So...what now? If you've been programming for a while, you're probably going to rub your hands together, fire up your favorite hex editor / viewer and verify what we're actually dealing with here. Then you will probably start coding a solution.
 
