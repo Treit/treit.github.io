@@ -67,7 +67,7 @@ To say Rust is a fascinating language would be an understatement. It represents 
 
 Around a year ago, I had no idea what Rust was. I'm sure I had seen references to it, as I read a lot of programming forums and blogs, but with no context I remained unaware of it. It's like when you learn a new word and start hearing it everywhere; it was always there, but your brain just filtered it out.
 
-Then by chance I stumbled across the video [Is It Time to Rewrite the Operating System in Rust?](https://youtu.be/HgtRAbE1nBM), featuring Bryan Cantrill. I'm a sucker for computing history and this video just had everything to engage my attention: an entertaining speaker, history lessons on systems programming, funny anecdotes and, not least, the intriguing promise of this new programming languages called Rust.
+Then by chance I stumbled across the video [Is It Time to Rewrite the Operating System in Rust?](https://youtu.be/HgtRAbE1nBM), featuring Bryan Cantrill. I'm a sucker for computing history and this video just had everything to engage my attention: an entertaining speaker, history lessons on systems programming, funny anecdotes and, not least, the intriguing promise of this new programming language called Rust.
 
 So, I got interested...and here we are a year late on a stormy night, cozy in our office and wrestling with Rust.
 
