@@ -76,7 +76,7 @@ Generic type parameters here work the same as in C# code. The type parameter is 
 #### Falling in love with the Option type
 So, what's an [`Option<T>`](https://doc.rust-lang.org/std/option/)?
 
-Option types are one solution to [the billion dollar mistake](https://www.linkedin.com/pulse/20141126171912-7082046-tony-hoare-invention-of-the-null-reference-a-billion-dollar-mistake/), the ability to have null references. They are, for me, one of the best ideas from the world of functional programming languages. The Option type provides a an explicit way to encapsulate the idea that an operation either produced a value, or it produced nothing. What's more, programming languages like Rust require your code to account for both possibilites; if you do not, the code will not compile! For seasoned C# programmers this is a concept that takes a bit of getting used to...imagine a world where you never have to check arguments for null, you never have to worry about accessing a null reference,  the null coalescing and null conditional operators don't exist...
+Option types are one solution to [the billion dollar mistake](https://www.linkedin.com/pulse/20141126171912-7082046-tony-hoare-invention-of-the-null-reference-a-billion-dollar-mistake/), the ability to have null references. They are, for me, one of the best ideas from the world of functional programming languages. The Option type provides an explicit way to encapsulate the idea that an operation either produced a value, or it produced nothing. What's more, programming languages like Rust require your code to account for both possibilites; if you do not, the code will not compile! For seasoned C# programmers this is a concept that takes a bit of getting used to...imagine a world where you never have to check arguments for null, you never have to worry about accessing a null reference,  the null coalescing and null conditional operators don't exist...
 
 An Option is a form of discriminated union, meaning it can contain exactly one of the possible choices for that union. For Option, we either have Some(T) (meaning, we have produced a value of type T) or None. Those are the two possibilities.
 
@@ -221,7 +221,7 @@ Let's look at where the pointer is...pointing.
 000001d6`26adf0b4  61 39 39 34 64 37 35 61-37 33 34 2c 20 20 20 20  a994d75a734,    
 {% endhighlight %}
 
-Clearly, it appears to be pointing into our original string, since we can see the expected whitespace and newlines following this. We can look a little bit behind this string and confrim that the original four spaces are there.
+Clearly, it appears to be pointing into our original string, since we can see the expected whitespace and newlines following this. We can look a little bit behind this string and confirm that the original four spaces are there.
 
 {% highlight text %}
 0:000> db 000001d6`26adf044-4
@@ -251,7 +251,7 @@ I find it extremely encouraging to work through these sorts of small examples an
 
 As I think I made clear in my previous post, I am kind of blown away that you can write what feels like very high-level code in Rust, yet get efficiency and performance that is right up there with hand-optimized, native code.
 
-The brilliant use of things like slices in conjunction with lazily evaluated iterators, as we just saw, steers you into doing things in an efficient way, without imposing cognitive overhead or requiring the use of subtle tricks to squeeze out performance. 'It just works' is kind of a cliche in programming circles, but at least in this case...Rust makes it true.
+The brilliant use of things like slices in conjunction with lazily evaluated iterators, as we just saw, steers you into doing things in an efficient way, without imposing cognitive overhead or requiring the use of subtle tricks to squeeze out performance. 'It just works' is kind of a cliché in programming circles, but at least in this case...Rust makes it true.
 
 Next time, we will finally unravel this line of code from our example program:
 
