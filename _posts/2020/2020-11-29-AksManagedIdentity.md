@@ -1,14 +1,12 @@
 ---
 layout: post
 title:  "Untangling AKS, Managed Identity and Key Vault"
-date:   2020-11-25 13:02:00
+date:   2020-11-29 16:19:00
 categories: C#, Azure, Kubernetes, KeyVault
 ---
-<img src="/images/2020-11-25/tangle2.png" style="width:100%; height:100%;float:top"/>
+<img src="/images/2020-11-29/tangle2.png" style="width:100%; height:100%;float:top"/>
 
-This one is a bit of a saga.
-
-I collapsed into bed on a recent evening feeling mentally exhausted. Hours had been spent reading online help. Perusing blog posts. Watching videos on YouTube. All of that, yet I didn't seem any closer to solving my problem.
+I collapsed into bed on a recent gloomy November evening feeling mentally exhausted. Hours had been spent reading online help. Perusing blog posts. Watching videos on YouTube. All of that, yet I didn't seem any closer to solving my problem.
 
 The scenario was at least conceptually simple:
 
@@ -26,15 +24,15 @@ Exasperatingly, that was not my experience. While there is plentiful information
 
 Before finally retiring for the night, I took one last stab at finding an answer: a Twitter search.
 
-I type into the Twitter search box on my phone: *AKS Managed Identity Key Vault*
+I typed into the Twitter search box on my phone: *AKS Managed Identity Key Vault*
 
-I find an [interesting looking result](https://twitter.com/AzureSupport/status/1327219664427028481), posted by [Azure Support](https://twitter.com/AzureSupport):
+This resulted in one [interesting looking result](https://twitter.com/AzureSupport/status/1327219664427028481), posted by [Azure Support](https://twitter.com/AzureSupport):
 
-<img src="/images/2020-11-25/tweet1.png" style="width:50%; height:50%;float:top"/>
+<img src="/images/2020-11-29/tweet1.png" style="width:50%; height:50%;float:top"/>
 
-...but when I navigate to their handy [guide](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal), I discover it shows nothing related to configuring Managed Identity! Hopes dashed, I somewhat grumpily reply to their tweet before drifting off to sleep:
+...but when I navigated to their [guide](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal), I discovered it has nothing related to configuring Managed Identity! Hopes dashed, I somewhat grumpily replied to their tweet before drifting off to sleep:
 
-<img src="/images/2020-11-25/tweet2.png" style="width:50%; height:50%;float:top"/>
+<img src="/images/2020-11-29/tweet2.png" style="width:50%; height:50%;float:top"/>
 
 ## Spoiler alert - I did eventually get it working
 You can read the [Twitter thread](https://twitter.com/MikeTreit/status/1330048812119977989), but ultimately the extremely helpful [Chad Kittel (@ckittel)](https://twitter.com/ckittel) came to my rescue and pointed me to a critical step I had been missing.
@@ -42,7 +40,7 @@ You can read the [Twitter thread](https://twitter.com/MikeTreit/status/133004881
 I had been following something called the [Standard Walkthrough](https://azure.github.io/aad-pod-identity/docs/demo/standard_walkthrough/) on setting up AAD Pod Identity, a critical piece required to get Managed Identity working with an AKS cluster. My mistake was thinking that the instructions in that walkthrough were complete; they were not, and the linked document on [Role Assignment](https://azure.github.io/aad-pod-identity/docs/getting-started/role-assignment/), which the walkthrough mentions as a kind of aside, turned out to showcase a critical step. Chad pointed this out and that lead me to a successful solution.
 
 ## Learning amid overwhelming complexity
-Containers, Kubernetes, AKS, Managed Identity. All of this stuff is new to me. A lot of it is complex.
+Containers, Kubernetes, AKS, Managed Identity. All of this stuff is new to me. A lot of it is rather complex.
 
 How do we tackle learning these systems when they can seem overwhelmingly full of features and settings? Their flexibility and power are amazing, but that comes at a cost of cognitive overload when you are trying to dip your toe into the water and test things out for the first time.
 
@@ -50,21 +48,15 @@ I think [Scott Hanselman](https://www.hanselman.com/) did a fantastic job discus
 
 Scott shows a rather hilariously dense poster showing all of the various Azure services and components and, well, overwhelming is a good way to describe it.
 
-<img src="/images/2020-11-25/azure1.jpg" style="width:80%; height:80%;float:top"/>
+<img src="/images/2020-11-29/azure1.jpg" style="width:80%; height:80%;float:top"/>
 
 This is, incidentally, one of the fundamental tasks of a software developer: managing complexity. What techniques can we employ to keep our sanity?
 
 Scott has some great advice (watch the video!) along the lines of going back to basics and starting simple, building up a deeper understanding from the ground up, piece by piece.
 
-A book that was influential to me when I was first starting my career was [The Most Complex Machine](https://www.amazon.com/Most-Complex-Machine-Computers-Computing/dp/1568810547). A central theme of the book is working through how we can manage going from the very simple (transistors, say) to the insanely complex (a modern computer), and not be completely overwhelmed. The 'black box' technique, where we abstract away the internal complexity of an individual component or system by treating it as an opaque box that takes inputs and produces outputs, is extremely useful here. Sometimes we need to crack open the box and see what's inside, but often we can stay at a level of abstraction where we don't need to know exactly how it works; we just need to understand how it behaves.
+A book that was influential to me when I was first starting my career was [The Most Complex Machine](https://www.amazon.com/Most-Complex-Machine-Computers-Computing/dp/1568810547). A central theme of that book is complexity and how to deal with it. For someone self-taught who found computers to be unfathomably complicated beasts, it was enlightening to see how the 'bottoms up' approach to solving complex problems can be such a critical tool to understanding. The 'black box' technique, where we abstract away the internal complexity of an individual component or system by treating it as an opaque box that takes inputs and produces outputs, is extremely useful here. Sometimes we need to crack open the box and see what's inside, but often we can stay at a level of abstraction where we don't need to know exactly how it works; we just need to understand how it behaves. Solving complex problems is a matter of starting with simpler pieces and continually going through a process of composition, working upward to build something of greater complexity step-by-step.
 
-Incidentally, [Charles Petzold's](http://charlespetzold.com/) wonderful book [Code](https://www.amazon.com/gp/product/0735611319) covers similar material in an eminently entertaining fashion and cannot be recommended highly enough.
-
-A criticism we can make of the various guides and walkthroughs that I tried to use to implement my Managed Identity solution is that they often start 'in the middle'; they assume a base level of knowledge that you may not posess, yet often do not make it obvious how to acquire that fundamental, missing knowledge.
-
-In fact, in many ways there is *too much* information available. The analogy of drinking from a firehose is not inapt when we think of researching a topic on the Internet. It doesn't help that often what is written is simply wrong!
-
-This is one reason I still turn to old-fashioned books from reputable publishers when learning most topics. At least then I can usually trust the information has been reasonably curated.
+The bottom line is that we can avoid being overwhelmed by dividing our overall problem into smaller problems that we can understand and solve individually. The final, more complex working result emerges from composing these solutions together. This is an inherently iterative process: a complete solution does not spring into existence in one fell swoop, but is instead built piece-by-piece, one small solution at a time.
 
 ## The primer I wished I had found on AKS and Managed Identity
 Back to our task: getting code running in AKS to talk successfully to an Azure Key Vault, using Managed Identity.
@@ -182,7 +174,7 @@ az group create -g $env:RESOURCE_GROUP --location $env:RESOURCE_LOCATION
 {% endhighlight %}
 
 ### Create a Key Vault and add a secret to it
-Our scenario is going to attempt to access secrets stored in Key Vault, so let's create one:
+Our scenario is going to attempt to access secrets stored in Key Vault, so let's create one and add our secret data to it.
 
 {% highlight PowerShell %}
 $env:KEYVAULT_NAME="$($env:RESOURCE_GROUP)-vault"
@@ -191,11 +183,13 @@ az keyvault secret set --vault-name $env:KEYVAULT_NAME --name AksDemoSecret --va
 {% endhighlight %}
 
 ### Create an application to read the KeyVault secret
-We have our Azure resource that we want our AKS application to be able to access. 
+At this point we have a resource group containing a Key Vault and that Key Vault contains a secret we want out application to be able to access.
 
-Let's first write a simple .NET 5 application in C# that can access that resource.
+The goal is to be able to access that secret when our code is running in Kubernetes, in an AKS cluster, without us having to know any secrets up front.
 
-This will create a new background worker service project and add the necessary NuGet package references we will need:
+The next step will be to write our application code. This will be a simple .NET 5 application in C# that can access that resource.
+
+Perform the following steps to create a new background worker service project and add the necessary NuGet package references we will need.
 
 {% highlight PowerShell %}
 dotnet new worker --name SecretFetcher
@@ -413,6 +407,10 @@ For Key Vault we will give explicit permissions to the managed identity principa
 az keyvault set-policy --secret-permissions get list --name $env:KEYVAULT_NAME --object-id $env:IDENTITY_PRINCIPAL_ID
 {% endhighlight %}
 
+Note that both the `get` and `list` permissions are needed for our application to successfully retrieve the secret from Key Vault.
+
+At this point we have created the managed identity that we want our application to use to access our Key Vault. We have granted that managed identity `get` and `list` permissions on secrets in that vault. Now we will need to find a way to apply that managed identity to our application when it is running in Azure.
+
 ### Create a container registry
 Since our goal is to run a containerized application in Azure, we will create an Azure Container Registry to push our container images to.
 
@@ -433,6 +431,8 @@ docker tag secretfetcher:latest "$($env:CONTAINER_REGISTRY).azurecr.io/secretfet
 docker push "$($env:CONTAINER_REGISTRY).azurecr.io/secretfetcher:latest"
 {% endhighlight %}
 
+Our image is now available to be deployed to Kubernetes.
+
 ## Kubernetes
 Now we will move on to creating and configuring the Azure Kubernetes Service (AKS) cluster we intend to set up for use with managed identity.
 
@@ -450,7 +450,7 @@ When you create an AKS cluster, the cluster provisioning process will create an 
 We can compose the name of that group and verify that it exists after running `az aks create`.
 
 {% highlight PowerShell %}
-$env:CLUSTER_RESOURCE_GROUP="MC_$($env:RESOURCE_GROUP)_$($env:CLUSTER_NAME)_$($env:CLUSTER_LOCATION)"
+$env:CLUSTER_RESOURCE_GROUP="MC_$($env:RESOURCE_GROUP)_$($env:CLUSTER_NAME)_$($env:RESOURCE_LOCATION)"
 az group show --name $env:CLUSTER_RESOURCE_GROUP
 {% endhighlight %}
 
@@ -464,6 +464,7 @@ az aks get-credentials -g $env:RESOURCE_GROUP --name $env:CLUSTER_NAME --overwri
 We have two managed identities in play at this point. The first is the one that we explicitly created. We granted that identity permission to read secrets from our Key Vault. That managed identity represents our application and is managed by us.
 
 The second managed identity is the identity of the AKS cluster itself, which was created because we specified the `--enable-managed-identity` switch when we ran `az aks create`. The managed identity of the cluster can be found by inspecting the `identityProfile.kubeletidentity.clientId` property of the cluster. Let's extract that identifier, as we will need it shortly. 
+
 {% highlight PowerShell %}
 $clientIdPath = "identityProfile.kubeletidentity.clientId"
 $env:CLUSTER_MANAGED_ID = az aks show -g $env:RESOURCE_GROUP --name $env:CLUSTER_NAME --query $clientIdPath -otsv
@@ -556,7 +557,7 @@ When we deploy our application, we need to add the special label that the MIC wi
 
 The value of the `aadpodidbinding` must match that of the `selector` in the binding we created previously. Note that this value does not have to be the name of the managed identity (although that's as good a value to use as any), it can be any string value. The important part is that they match.
 
-<img src="/images/2020-11-25/diagram1.png" style="width:50; height:50%;float:top"/>
+<img src="/images/2020-11-29/diagram1.png" style="width:50; height:50%;float:top"/>
 
 Let's create the appropriate YAML for our test application, including the critical `aadpodidbinding` label, and deploy the application into our AKS cluster.
 
@@ -604,7 +605,9 @@ $cmd | kubectl apply -f -
 
 {% endhighlight %}
 
-At this point we can check which pods are running. We will see the pods created by AAD Pod Identity for both the MIC and NMI services, as well as our own pod for the SecretFetcher application:
+At this point we can check which pods are running. We will see the pods created by AAD Pod Identity for both the MIC and NMI services, as well as our own pod for the SecretFetcher application.
+
+Here is one way to get the status of the pods running in our cluster:
 
 {% highlight PowerShell %}
 kubectl get pods
@@ -617,6 +620,10 @@ aad-pod-identity-nmi-kx5c6              1/1     Running   0          34s
 aad-pod-identity-nmi-wf59l              1/1     Running   0          34s
 secretfetcher-67dc7dbd59-fphcb          1/1     Running   2          43s
 {% endhighlight %}
+
+While we can get this information from kubectl easily enough, I highly recommend using the very useful [k9s](https://k9scli.io/) tool. I run this tool in a separate pane in my terminal so that all changes I make to my cluster can be seen immediately. The tool allows drilling in to individual containers to get logs, spawning a remote shell, killing running pods and so on - all in a simple to use, terminal-based interface.
+
+<img src="/images/2020-11-29/k9s2.png" style="width:100%; height:100%;float:top"/>
 
 If everything has been configured properly (and if you followed the steps above carefully, it should be), we can now check our logs and see that we are able to successfully access KeyVault using managed identity:
 
@@ -643,6 +650,8 @@ info: SecretFetcher.Worker[0]
 info: SecretFetcher.Worker[0]
       Fetched the following value for 'AksDemoSecret': 'Sensitive Data!'
 {% endhighlight %}
+
+Success! We have started from scratch and properly configured our Azure environment so that we can successfully deploy and run a containerized application in AKS and use Managed Identity to seamlessly connect to our Key Vault.
 
 It might be instructive to see what happens when AAD Pod Identity is not deployed. Let's stop our existing application:
 
@@ -676,8 +685,10 @@ Re-installing AAD Pod Identity should immediately fix the problem. Note that we 
 helm install aad-pod-identity aad-pod-identity/aad-pod-identity --set nmi.allowNetworkPluginKubenet='true'
 {% endhighlight %}
 
+If you are running k9s, you should see the application flip from the red 'failed' state to successfully running fairly quickly after re-installing AAD Pod Identity.
+
 ## Cleaning up
-We are all done with this walkthrouigh, so we can clean up all of the resources we created and get back to a clean state in our subscription. This will ensure we don't pay for resources that we will not be using going forward.
+We are all done with this walkthrough, so we can clean up all of the resources we created and get back to a clean state in our subscription. This will ensure we don't pay for resources that we will not be using going forward.
 
 {% highlight PowerShell %}
 az group delete --resource-group $env:RESOURCE_GROUP --yes
@@ -694,4 +705,8 @@ az keyvault purge --name env:KEYVAULT_NAME
 {% endhighlight %}
 
 ## Conclusion
-In the end, getting this end-to-end scenario working was not especially difficult, but we needed to understand all of the pieces in play and how they fit together. In particular, we needed to understand the importance of assigning the `Virtual Machine Contributor` and `Managed Identity Operator` roles to the identity associated with our AKS cluster _before_ installing AAD Pod Identity. We also needed to create the correct identity binding in the cluster so that the components of AAD Pod Identity can apply the correct managed identity to our application.
+ Moving one step at a time from a clean starting state, we built up all of the necessary infrastructure and pieces to achieve our end goal.
+
+In the end, getting this end-to-end scenario working was not really all that difficult. We simply needed to understand all of the pieces in play and how they fit together. In particular, we needed to understand the importance of assigning the `Virtual Machine Contributor` and `Managed Identity Operator` roles to the identity associated with our AKS cluster _before_ installing AAD Pod Identity. We also needed to create the correct identity binding in the cluster so that the components of AAD Pod Identity can apply the correct managed identity to our application.
+
+I certainly learned quite a bit going through this process. I hope you found it instructive too.
