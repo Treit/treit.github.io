@@ -23,4 +23,4 @@ title: Windows Terminal Settings Issue
     Trying out the new Windows Terminal Settings dialog
 </p>
 
-<img src="/images/s1.gif" style="width:80%; height:80%;float:top"/>
+<img src="/images/s1.gif" />
