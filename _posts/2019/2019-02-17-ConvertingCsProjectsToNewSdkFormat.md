@@ -34,7 +34,7 @@ As you can see, the new format is quite minimal and clean. Source code files are
 
 This is great if you are starting fresh and creating new projects from scratch, but what do you do if you are trying to, say, move a large existing codebase to .NET Standard and have many large, existing C# projects in the legacy format?
 
-Luckily, Hans van Bakel has provided a nifty little tool to help with the process, and after using it to convert a few hundred projects I can attest that it really works great! I originally found out about it when a colleague pointed me to Scott Hanselman’s always-excellent blog post on the subject.
+Luckily, Hans van Bakel has provided a nifty little tool to help with the process, and after using it to convert a few hundred projects I can attest that it really works great! I originally found out about it when a colleague pointed me to Scott Hanselman’s always-excellent [blog post on the subject](https://www.hanselman.com/blog/upgrading-an-existing-net-project-files-to-the-lean-new-csproj-format-from-net-core).
 
 The tool can be installed as follows:
 
