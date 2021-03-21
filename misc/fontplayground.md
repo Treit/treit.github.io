@@ -16,6 +16,11 @@ title: Font Playground
   font-family: 'Cascadia Code';
   src: url('/assets/fonts/Cascadia.ttf') format('truetype');
 }
+
+@font-face {
+  font-family: 'FiraCode-Regular';
+  src: url('/assets/fonts/FiraCode-Regular.ttf') format('truetype');
+}
 </style>
 
 <p>
@@ -80,7 +85,7 @@ title: Font Playground
 
 #### Code sample - Fira Code
 <pre style="padding:0.5em">
-<code class="lang-fsharp"  style="font-family:Fira Code;">let extractDimensionKeyValuePairs (dim : string) =
+<code class="lang-fsharp"  style="font-family:FiraCode-Regular;">let extractDimensionKeyValuePairs (dim : string) =
     let tokens = dim.Split([| ',' |])
     tokens
     |> Array.map (fun x -> 
