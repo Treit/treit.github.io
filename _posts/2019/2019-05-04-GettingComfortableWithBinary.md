@@ -117,12 +117,14 @@ $bytes = [byte]0xFF
 Set-Content -Path c:\temp\test.bin -Value $bytes -Encoding Byte
 {% endhighlight %}
 
+(Note: in [PowerShell Core](https://docs.microsoft.com/en-us/shows/it-ops-talk/how-to-install-powershell-7) you would use -AsByteStream instead of -Encoding Byte.)
+
 This creates a file containing a single byte, 0xFF.
 
 If we had wanted to write a sequence of bytes, we could just add more bytes to our initial array. Let’s say we wanted to store the members of the fibonacci sequence that can fit in a single byte (i.e., are less than 255):
 
 {% highlight PowerShell %}
-[byte[]](1,1,2,3,5,8,13,21,34,55,89,144,233) | Set-Content -Path .\fibs.bin -Encoding byte
+[byte[]](1,1,2,3,5,8,13,21,34,55,89,144,233) | Set-Content -Path .\fibs.bin -Encoding Byte
 {% endhighlight %}
 
 This writes the series of values to the file, one after the other.
