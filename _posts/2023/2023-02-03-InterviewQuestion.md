@@ -38,7 +38,7 @@ Here is the syntax to use for azcopy:
 
 `azcopy cp "<url>" <destinationFile>`
 
-Providing a program to generate the files was also an option, but since my scenario invovles actual pre-existing files, I wanted to make it real.
+Providing a program to generate the files was also an option, but since my scenario involves actual pre-existing files, I wanted to make it real.
 
 If you want to take a stab at solving this problem, feel free to try to produce the third file. Remember that duplicates should be removed from the output, as we want the distinct set of shared values.
 
