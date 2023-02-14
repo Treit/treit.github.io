@@ -12,7 +12,7 @@ Here is a variation of my favorite go-to interview question:
 >
 >Your task is to produce a third file containing the distinct set of integers that are shared between the two input files. For example, if the value 100 happens to be in the first file but not the second file, it should not be included in the output file. If it happens to exist in both files, then it should be included in the output file. 
 >
->I need the result file by the end of the day. Other than that, I do not care at all how you produce it. Tell me how, if you were given this problem in the real world, you would *acctually* create the result file.
+>I need the result file by the end of the day. Other than that, I do not care at all how you produce it. Tell me how, if you were given this problem in the real world, you would *actually* create the result file.
 
 Now, there are many ways to approach this problem, which is one of the reasons I like this question.
 
