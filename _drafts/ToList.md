@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "The tragedy of ToList"
+title:  "The tragedy of ToList()"
 date:   2024-07-30 10:00:00
 categories: Programming, .NET
 ---
@@ -59,7 +59,7 @@ ToList().ForEach(/* ... */)
 
 Nothing could be further from the truth. The tragedy of `ToList` is that it seems so small, so innocent, a little flourish in the middle of a chain of calls to get us to the next item in the chain.
 
-The issue, of course, is not about calling `ToList()` in and of itself. There are many reasons to take a sequence of things and turn them into a concrete list. Perhaps we want to perform a binary search, so we need the ability to access specific elements by index. Perhaps we need to make defensive copies before handing those copies to other threads, to avoid thread-safety issues. Perhaps we have a method that only accepts an `IList<T>` so we need to accomodate it. Or, perhaps we have an expensive [LINQ](https://learn.microsoft.com/en-us/dotnet/standard/linq/) query that we want to ensure only executes exactly once. These and many more possible scenarios are completely acceptable reasons to turn our sequence into a List.
+The issue, of course, is not about calling `ToList()` in and of itself. There are many reasons to take a sequence of things and turn them into a concrete list. Perhaps we want to perform a binary search, so we need the ability to access specific elements by index. Perhaps we need to make defensive copies before handing those copies to other threads, to avoid thread-safety issues. Perhaps we have a method that only accepts an `IList<T>` so we need to accommodate it. Or, perhaps we have an expensive [LINQ](https://learn.microsoft.com/en-us/dotnet/standard/linq/) query that we want to ensure only executes exactly once. These and many more possible scenarios are completely acceptable reasons to turn our sequence into a List.
 
 However, that is not what we have in that code snippet.
 
@@ -174,8 +174,52 @@ return groupedItemsDictionary.ToList().Select(x => new ItemView { Id = x.Key, Da
 
 Did the sensible programmer in you immediately recoil, or did this code look normal to you?
 
+`ToList().Select().ToList()` is an anti-pattern. Any such use should immediately jump out as wrong.
+
+Here are some more clear anti-patterns found in actual production code, and an example of how they could be re-written to be less offensive.
+
+Bad 😔
+```cs
+var result = items.Select(d => d.Key).ToList().Contains(p.Id)).ToArray();
+```
+
+Better 😎
+```cs
+var result = items.Select(d => d.Key).Contains(p.Id)).ToArray();
+```
+
+Again, don't inject `ToList` in the middle of a method chain for no reason. What purpose does it serve other than to create garbage?
+
+Bad 😔
+```cs
+if (items?.Where(_ => _ != null && _.Id == indexId).ToArray().Length > 0)
+```
+
+Better 😎
+```cs
+if (items?.Where(x => x != null && x.Id == indexId).Any())
+```
+
+The original code for this last one really is quite terrible. Any time you see either `ToList().Length > 0` or `ToArray().Length > 0` or `someEnumerable.Count() > 0` you immediately have to wonder why the `Any()` method was not used instead. `Any` requires only looking if there are any elements at all. The others require traversing the entire list.
+
+(As a minor style point, using the discard character `_` for an actual variable name is also a rather awful choice for readability.)
+
+You may see variants of this anti-pattern, like this one:
+
+```cs
+if (items?.Where(x => x != null && x.Id == indexId).Count() > 0)
+```
+
+Just on the off chance you were not yet convinced that this kind of code should be terminated with extreme prejudice, [here is a benchmark](https://github.com/Treit/MiscBenchmarks/tree/main/ToArrayVsAny) of the above scenario.
+
+The results speak for themselves:
+
+![Any](/images/2024-07-30/Any.png)
+
+Again, not just in terms of potentially much higher latency (47,000 times slower for the large list!) but also in terms of memory usage (again, in this case, 47,000 times more memory for the GC to have to eventually clean up).
+
 ### Case study - select the first five keys and return them as a list
-Here is another concrete example of a call that this regex flagged, once again in some code I was working in not that long ago:
+Let's examine another concrete example of a call that my "find bad code" regex flagged, once again in some code I was working in not that long ago:
 
 ```cs
 List<KeyValuePair<string, int>> topicsList = topics.ToList();
@@ -242,15 +286,11 @@ return result;
 (Not a one-liner! 👀)
 
 #### Results
-![bencmark results 2](/images/2024-07-30/bench2.png)
-
-Let's remove a few of the less-interesting columns from the [BenchmarkDotNet](https://benchmarkdotnet.org/) output so we can see the most important differences:
-
 ![bencmark results 3](/images/2024-07-30/bench3.png)
 
 I would say that tells the tale.
 
-The original answer our hypothetical developer defended in their code review is almost unfathomably bad compared to the alternatives. The execution time is exponentially worse and has similarly terrible allocation numbers, meaning once again that choosing the wrong approach can easily create a massive amount of extra work for the GC.
+The original answer our hypothetical developer defended in their code review is unfathomably bad compared to the alternatives. The execution time is exponentially worse and has similarly terrible allocation numbers, meaning once again that choosing the wrong approach can easily create a massive amount of extra work for the GC.
 
 Looking at these results and putting just a little bit of thought into them, it's not hard to understand why the original code is so bad. Calling `ToList()` immediately materializes the *entire list* into memory. So even though we have a lazily evaluated LINQ statement (the `Select`), that does us no good if the next call is to `ToList()`, which will copy the entire sequence into a new list in memory.
 
@@ -260,7 +300,7 @@ The LINQ variants naturally benefit from lazy evaluation / deferred execution. T
 
 If you're paying attention you might ask: why is approach #2 allocating so much more memory than approaches #3, #4 and #5? Ask yourself: how many lists does that approach allocate? How many do the others allocate?
 
-This is the kind of thing you need to condition yourself to think about when writing any kind of code that calls `ToList` or similar methods. Consider what is going on behind the scenes, and ask yourself if this might lead to excessive memory allocations or other performance issues.
+This is the kind of thing you need to condition yourself to think about when writing any kind of code that calls `ToList` or similar methods. Consider what is going on behind the scenes and ask yourself if this might lead to excessive memory allocations or other performance issues.
 
 Finally, we get to see that sometimes the old ways are the best ways; even though it might not be a sleek one-liner, writing a plain old-fashioned for-loop is still 3 to 5 times faster than even the best LINQ version, and allocates 2 to 3 times less memory.
 
@@ -370,15 +410,15 @@ Lesson learned: even code that seems obviously wrong at first glance may be subj
 
 As programmers in the modern world, we are awash in a glut of computer memory. Many of us hardly consider the implications of the code we write. The magic garbage collector takes care of everything and all we have to do is focus on solving the business problems at hand. You actually think saving memory, squeezing space, is a thing? Ok Grandpa, let's get you to bed.
 
-There was a time when computer memory was at a premium. When stepping back and thinking carefully about things like time / space tradeoffs was a critcal part of the creative process of programming. When peeling back the curtain and trying, at least a little bit, to understand the implications of what is happening behind the scenes was a highly-valued skill.
+There was a time when computer memory was at a premium. When stepping back and thinking carefully about things like time / space tradeoffs was a critical part of the creative process of programming. When peeling back the curtain and trying, at least a little bit, to understand the implications of what is happening behind the scenes was a highly-valued skill.
 
-In the rather hyperbolic title of this post, I called this the tragedy of `ToList`. The real tragedy, however, is the loss of awareness about these kinds of issues. Of seeing page after page of code, written by well-intentioned programmers, infested with completely unnecessary performance pitfalls due to a basic lack of critical thinking about what happens when you type those simple nine characters: `.ToList()`.
+In the hyperbolic title of this post, I called this the tragedy of `ToList`. The real tragedy, however, is the loss of awareness about these kinds of issues. Of seeing page after page of code, written by well-intentioned programmers, infested with completely unnecessary performance pitfalls due to a basic lack of critical thinking about what happens when you type those simple nine characters: `.ToList()`.
 
 I just finished a book recently. It's called [The Secret Life of Programs: Understand Computers - Craft Better Code](https://www.amazon.com/Secret-Life-Programs-Understand-Computers/dp/1593279701)
 
-![SecretLifeOfPrograms](/images/2024-07-30/SecretLifeOfPrograms.png)
+<img src="/images/2024-07-30/SecretLifeOfPrograms.png" style="width:75%; height:75%;"/>
 
-It's an excellent book. The author is a curmudgeon in the best sense of the word, and his goal is to get newer programmers to understand not just the code they write, but how the computers that execute that code actually work. Armed with this knowledge, the indvidual can inform their act of writing code and create much better programs as a result.
+It is an excellent book. The author is a curmudgeon in the best sense of the word, and his goal is to get newer programmers to understand not just the code they write, but how the computers that execute that code actually work. Armed with this knowledge, the individual can inform their act of writing code and create much better programs as a result.
 
 This post is something of a small attempt to achieve the same thing. To encourage stepping back and really *thinking* about the code we write. Even if it is just a small and simple call to `ToList()` embedded in a much longer, more complex piece of code.
 
