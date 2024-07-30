@@ -180,12 +180,12 @@ Here are some more clear anti-patterns found in actual production code, and an e
 
 Bad 😔
 ```cs
-var result = items.Select(d => d.Key).ToList().Contains(p.Id)).ToArray();
+var result = items.Select(d => d.Key).ToList().Contains(p.Id);
 ```
 
 Better 😎
 ```cs
-var result = items.Select(d => d.Key).Contains(p.Id)).ToArray();
+var result = items.Select(d => d.Key).Contains(p.Id);
 ```
 
 Again, don't inject `ToList` in the middle of a method chain for no reason. What purpose does it serve other than to create garbage?
