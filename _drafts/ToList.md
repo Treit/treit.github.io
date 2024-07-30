@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "The tragedy of ToList()"
-date:   2024-07-30 10:00:00
+date:   2024-07-30 14:00:00
 categories: Programming, .NET
 ---
 What do you see when you come across code like this?
