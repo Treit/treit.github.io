@@ -2,7 +2,7 @@
     font-family: 'Cascadia Mono';
     src: url('/assets/fonts/CascadiaMono.ttf') format('truetype');
   }
-  
+
   @font-face {
     font-family: 'Cascadia Code';
     src: url('/assets/fonts/Cascadia.ttf') format('truetype');
@@ -138,8 +138,8 @@ a {
  * Blockquotes
  */
 blockquote {
-  color: $grey-color;
-  border-left: 4px solid $grey-color-light;
+  color: $grey-color-dark;
+  border-left: 4px solid $grey-color;
   padding-left: $spacing-unit / 2;
   @include relative-font-size(1.125);
   letter-spacing: -1px;
@@ -155,7 +155,7 @@ blockquote {
 /**
  * Code formatting
  */
- 
+
 pre,
 code {
   @include relative-font-size(0.9);
