@@ -37,8 +37,6 @@ body {
   flex-direction: column;
 }
 
-
-
 /**
  * Set `margin-bottom` to maintain vertical rhythm
  */
@@ -139,7 +137,7 @@ a {
  */
 blockquote {
   color: $grey-color-dark;
-  border-left: 4px solid $grey-color;
+  border-left: 4px solid rgb(23, 23, 174);
   padding-left: $spacing-unit / 2;
   @include relative-font-size(1.125);
   letter-spacing: -1px;
