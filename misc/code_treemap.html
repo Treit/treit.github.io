@@ -10,20 +10,21 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: #1a1a1a;
         }
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background-color: white;
+            background-color: #2d2d2d;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
         h1 {
             text-align: center;
-            color: #333;
+            color: #ffffff;
             margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
         .controls {
             margin-bottom: 20px;
@@ -37,67 +38,99 @@
         }
         #search {
             padding: 8px;
-            border: 1px solid #ddd;
+            border: 1px solid #444;
             border-radius: 4px;
             width: 250px;
             margin-right: 10px;
+            background-color: #333;
+            color: #fff;
+        }
+        #search::placeholder {
+            color: #888;
         }
         .sort-container {
             display: flex;
             align-items: center;
+            color: #fff;
         }
         select {
             padding: 8px;
-            border: 1px solid #ddd;
+            border: 1px solid #444;
             border-radius: 4px;
-            background-color: white;
+            background-color: #333;
+            color: #fff;
         }
         .tooltip {
             position: absolute;
-            padding: 10px;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
+            padding: 12px;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: #fff;
             border-radius: 4px;
             pointer-events: none;
             font-size: 14px;
             z-index: 10;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .cell {
-            stroke: #fff;
+            stroke: #2d2d2d;
             stroke-width: 1px;
-            transition: opacity 0.3s;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
         .cell:hover {
-            stroke: #333;
+            stroke: #fff;
             stroke-width: 2px;
+            filter: brightness(1.2);
         }
         .legend {
             display: flex;
             justify-content: center;
             margin-top: 20px;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 4px;
         }
         .legend-item {
             display: flex;
             align-items: center;
             margin-right: 20px;
+            color: #fff;
         }
         .legend-color {
             width: 20px;
             height: 20px;
             margin-right: 5px;
+            border-radius: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         .stats {
             text-align: center;
             margin-top: 20px;
             font-size: 14px;
-            color: #666;
+            color: #fff;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 4px;
         }
         .no-results {
             text-align: center;
             margin-top: 50px;
-            color: #666;
+            color: #fff;
             font-size: 18px;
             display: none;
+        }
+        button {
+            background-color: #444;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #555;
         }
     </style>
 </head>
@@ -121,19 +154,19 @@
         <div id="no-results" class="no-results">No projects match your search criteria.</div>
         <div class="legend">
             <div class="legend-item">
-                <div class="legend-color" style="background-color: #d1e5f0;"></div>
+                <div class="legend-color" style="background-color: #FF6B6B;"></div>
                 <span>Small</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background-color: #92c5de;"></div>
+                <div class="legend-color" style="background-color: #4ECDC4;"></div>
                 <span>Medium</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background-color: #4393c3;"></div>
+                <div class="legend-color" style="background-color: #45B7D1;"></div>
                 <span>Large</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background-color: #2166ac;"></div>
+                <div class="legend-color" style="background-color: #96CEB4;"></div>
                 <span>Very Large</span>
             </div>
         </div>
@@ -1239,7 +1272,6 @@
         }
     ];
 
-
         // Initialize the visualization with the data
         createTreemap();
 
@@ -1274,13 +1306,18 @@
             // Create treemap layout
             const treemap = d3.treemap()
                 .size([width, height])
-                .padding(1)
+                .padding(2)  // Increased padding for better visual separation
                 .round(true);
 
-            // Create color scale
+            // Create color scale with more vibrant colors
             const colorScale = d3.scaleQuantile()
                 .domain([0, d3.max(projectData, d => d.LinesOfCode)])
-                .range(["#d1e5f0", "#92c5de", "#4393c3", "#2166ac"]);
+                .range([
+                    "#FF6B6B",  // Coral red for small
+                    "#4ECDC4",  // Turquoise for medium
+                    "#45B7D1",  // Sky blue for large
+                    "#96CEB4"   // Sage green for very large
+                ]);
 
             // Function to update the visualization
             function updateVisualization(data, sortBy) {
@@ -1317,15 +1354,18 @@
                     .append("g")
                     .attr("transform", d => `translate(${d.x0},${d.y0})`);
 
-                // Add rectangles
-                cell.append("rect")
+                // Add rectangles with click handler
+                cell.append("a")
+                    .attr("href", d => `https://github.com/treit/MiscBenchmarks/tree/main/${d.data.ProjectName}`)
+                    .attr("target", "_blank")
+                    .append("rect")
                     .attr("class", "cell")
                     .attr("width", d => d.x1 - d.x0)
                     .attr("height", d => d.y1 - d.y0)
                     .attr("fill", d => colorScale(d.data.LinesOfCode))
                     .on("mouseover", function(event, d) {
                         d3.select(this)
-                            .attr("stroke", "#333")
+                            .attr("stroke", "#fff")
                             .attr("stroke-width", 2);
 
                         tooltip.transition()
@@ -1335,14 +1375,15 @@
                         tooltip.html(`
                             <strong>${d.data.ProjectName}</strong><br>
                             Lines of Code: ${d.data.LinesOfCode.toLocaleString()}<br>
-                            ${(d.data.LinesOfCode / totalLOC * 100).toFixed(2)}% of total
+                            ${(d.data.LinesOfCode / totalLOC * 100).toFixed(2)}% of total<br>
+                            Click to view code
                         `)
                             .style("left", (event.pageX + 10) + "px")
                             .style("top", (event.pageY - 28) + "px");
                     })
                     .on("mouseout", function() {
                         d3.select(this)
-                            .attr("stroke", "#fff")
+                            .attr("stroke", "#2d2d2d")
                             .attr("stroke-width", 1);
 
                         tooltip.transition()
@@ -1354,7 +1395,7 @@
                 cell.append("text")
                     .attr("x", 4)
                     .attr("y", 14)
-                    .attr("fill", d => d.data.LinesOfCode > d3.max(data, d => d.LinesOfCode) / 4 ? "black" : "black")
+                    .attr("fill", "#fff")  // Always white text for better contrast
                     .text(d => {
                         const width = d.x1 - d.x0;
                         const name = d.data.ProjectName;
@@ -1362,7 +1403,7 @@
                         return width > name.length * 6 ? name : "";
                     })
                     .style("font-size", "12px")
-                    .style("color", "red")
+                    .style("font-weight", "500")  // Slightly bolder text
                     .style("pointer-events", "none");
             }
 
