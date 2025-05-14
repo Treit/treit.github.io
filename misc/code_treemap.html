@@ -132,11 +132,27 @@
         button:hover {
             background-color: #555;
         }
+        .hacker-link {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .hacker-link a {
+            color: #45B7D1;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        .hacker-link a:hover {
+            color: #4ECDC4;
+            text-decoration: underline;
+        }
     </style>
 </head>
-<body>
-    <div class="container">
+<body>    <div class="container">
         <h1>Source Code Projects Treemap</h1>
+        <div class="hacker-link">
+            <a href="https://treit.github.io/misc/code_treemap_hacker.html" target="_blank">View Hacker Edition</a>
+        </div>
         <div class="controls">
             <div class="search-container">
                 <input type="text" id="search" placeholder="Search projects...">
@@ -169,8 +185,7 @@
                 <div class="legend-color" style="background-color: #96CEB4;"></div>
                 <span>Very Large</span>
             </div>
-        </div>
-        <div class="stats">
+        </div>        <div class="stats">
             <p>Total Projects: <span id="total-projects">0</span> | Total Lines of Code: <span id="total-loc">0</span></p>
         </div>
     </div>
@@ -1233,10 +1248,6 @@
         {
             "ProjectName":  "UnnecessaryToListVsPatternMatching",
             "LinesOfCode":  74
-        },
-        {
-            "ProjectName":  "VarVsExplicit",
-            "LinesOfCode":  164123
         },
         {
             "ProjectName":  "WaitAllVsWhenAll",
