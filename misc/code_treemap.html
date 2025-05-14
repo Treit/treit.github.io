@@ -44,21 +44,8 @@
             margin-right: 10px;
             background-color: #333;
             color: #fff;
-        }
-        #search::placeholder {
+        }        #search::placeholder {
             color: #888;
-        }
-        .sort-container {
-            display: flex;
-            align-items: center;
-            color: #fff;
-        }
-        select {
-            padding: 8px;
-            border: 1px solid #444;
-            border-radius: 4px;
-            background-color: #333;
-            color: #fff;
         }
         .tooltip {
             position: absolute;
@@ -152,18 +139,10 @@
         <h1>Source Code Projects Treemap</h1>
         <div class="hacker-link">
             <a href="https://treit.github.io/misc/code_treemap_hacker.html" target="_blank">View Hacker Edition</a>
-        </div>
-        <div class="controls">
+        </div>        <div class="controls">
             <div class="search-container">
                 <input type="text" id="search" placeholder="Search projects...">
                 <button id="clear-search">Clear</button>
-            </div>
-            <div class="sort-container">
-                <label for="sort">Sort by: </label>
-                <select id="sort">
-                    <option value="name">Name</option>
-                    <option value="size" selected>Size (Lines of Code)</option>
-                </select>
             </div>
         </div>
         <div id="treemap"></div>
@@ -1328,19 +1307,13 @@
                     "#4ECDC4",  // Turquoise for medium
                     "#45B7D1",  // Sky blue for large
                     "#96CEB4"   // Sage green for very large
-                ]);
-
-            // Function to update the visualization
-            function updateVisualization(data, sortBy) {
+                ]);            // Function to update the visualization
+            function updateVisualization(data) {
                 // Clear previous visualization
                 svg.selectAll("*").remove();
 
-                // Sort data
-                if (sortBy === "name") {
-                    data.sort((a, b) => a.ProjectName.localeCompare(b.ProjectName));
-                } else {
-                    data.sort((a, b) => b.LinesOfCode - a.LinesOfCode);
-                }
+                // Sort data by size (largest first)
+                data.sort((a, b) => b.LinesOfCode - a.LinesOfCode);
 
                 // Check if there are any results
                 if (data.length === 0) {
@@ -1415,11 +1388,10 @@
                     })
                     .style("font-size", "12px")
                     .style("font-weight", "500")  // Slightly bolder text
-                    .style("pointer-events", "none");
-            }
+                    .style("pointer-events", "none");            }
 
             // Initial visualization
-            updateVisualization(projectData, "size");
+            updateVisualization(projectData);
 
             // Handle search
             document.getElementById("search").addEventListener("input", function() {
@@ -1427,22 +1399,13 @@
                 const filteredData = projectData.filter(project =>
                     project.ProjectName.toLowerCase().includes(searchTerm)
                 );
-                updateVisualization(filteredData, document.getElementById("sort").value);
+                updateVisualization(filteredData);
             });
 
             // Handle clear search
             document.getElementById("clear-search").addEventListener("click", function() {
                 document.getElementById("search").value = "";
-                updateVisualization(projectData, document.getElementById("sort").value);
-            });
-
-            // Handle sort change
-            document.getElementById("sort").addEventListener("change", function() {
-                const searchTerm = document.getElementById("search").value.toLowerCase();
-                const filteredData = searchTerm ?
-                    projectData.filter(project => project.ProjectName.toLowerCase().includes(searchTerm)) :
-                    projectData;
-                updateVisualization(filteredData, this.value);
+                updateVisualization(projectData);
             });
         }
     </script>

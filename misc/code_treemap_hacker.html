@@ -167,26 +167,11 @@
             color: #00ff00;
             font-family: 'Share Tech Mono', monospace;
             caret-color: #00ff00;
-        }
-
-        #search::placeholder {
+        }        #search::placeholder {
             color: #00aa00;
         }
 
-        .sort-container {
-            display: flex;
-            align-items: center;
-            color: #00ff00;
-        }
-
-        select {
-            padding: 8px;
-            border: 1px solid #00aa00;
-            border-radius: 0;
-            background-color: #001500;
-            color: #00ff00;
-            font-family: 'Share Tech Mono', monospace;
-        }        .tooltip {
+        .tooltip {
             position: absolute;
             padding: 12px;
             background-color: rgba(0, 30, 0, 0.95);
@@ -289,18 +274,10 @@
         <div class="system-info">
             <div class="blinking-cursor">></div>
             <span class="system-status">SYSTEM: ONLINE | STATUS: ANALYZING | PROJECTS: <span id="project-count">0</span></span>
-        </div>
-        <div class="controls">
+        </div>        <div class="controls">
             <div class="search-container">
                 <input type="text" id="search" placeholder="Search projects...">
                 <button id="clear-search">Clear</button>
-            </div>
-            <div class="sort-container">
-                <label for="sort">Sort by: </label>
-                <select id="sort">
-                    <option value="name">Name</option>
-                    <option value="size" selected>Size (Lines of Code)</option>
-                </select>
             </div>
         </div>
         <div id="treemap"></div>
@@ -1466,19 +1443,10 @@
                 "#006600",  // Medium green for medium
                 "#00aa00",  // Bright green for large
                 "#00ff00"   // Neon green for very large
-                ]);
-
-            // Function to update the visualization
-            function updateVisualization(data, sortBy) {
+                ]);            // Function to update the visualization
+            function updateVisualization(data) {
                 // Clear previous visualization
                 svg.selectAll("*").remove();
-
-                // Sort data
-                if (sortBy === "name") {
-                    data.sort((a, b) => a.ProjectName.localeCompare(b.ProjectName));
-                } else {
-                    data.sort((a, b) => b.LinesOfCode - a.LinesOfCode);
-                }
 
                 // Check if there are any results
                 if (data.length === 0) {
@@ -1553,34 +1521,20 @@
                     .style("font-size", "12px")
                     .style("font-weight", "500")  // Slightly bolder text
                     .style("pointer-events", "none");
-            }
-
-            // Initial visualization
-            updateVisualization(projectData, "size");
-
-            // Handle search
+            }            // Initial visualization
+            updateVisualization(projectData);            // Handle search
             document.getElementById("search").addEventListener("input", function() {
                 const searchTerm = this.value.toLowerCase();
                 const filteredData = projectData.filter(project =>
                     project.ProjectName.toLowerCase().includes(searchTerm)
                 );
-                updateVisualization(filteredData, document.getElementById("sort").value);
+                updateVisualization(filteredData);
             });
 
             // Handle clear search
             document.getElementById("clear-search").addEventListener("click", function() {
                 document.getElementById("search").value = "";
-                updateVisualization(projectData, document.getElementById("sort").value);
-            });
-
-            // Handle sort change
-            document.getElementById("sort").addEventListener("change", function() {
-                const searchTerm = document.getElementById("search").value.toLowerCase();
-                const filteredData = searchTerm ?
-                    projectData.filter(project => project.ProjectName.toLowerCase().includes(searchTerm)) :
-                    projectData;
-                updateVisualization(filteredData, this.value);
-            });
+                updateVisualization(projectData);            });
         }
     </script>
 </body>
