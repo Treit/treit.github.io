@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Minecraft Code Mine Analysis 🎮</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Creepster&display=swap">
+    <style>
+        @keyframes blockFloat {
+            0% { transform: translateY(0px) rotateX(0deg); }
+            50% { transform: translateY(-10px) rotateX(10deg); }
+            100% { transform: translateY(0px) rotateX(0deg); }
+        }        @keyframes pixelGlow {
+            0% { box-shadow: 0 0 5px rgba(0, 255, 0, 0.3); }
+            50% { box-shadow: 0 0 10px rgba(0, 255, 0, 0.5), 0 0 15px rgba(0, 255, 0, 0.2); }
+            100% { box-shadow: 0 0 5px rgba(0, 255, 0, 0.3); }
+        }
+
+        @keyframes creeper {
+            0% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1) rotate(10deg); }
+            100% { opacity: 0; transform: scale(0) rotate(-10deg); }
+        }
+
+        @keyframes sparkle {
+            0% { opacity: 0; transform: translateY(0) scale(0); }
+            50% { opacity: 1; transform: translateY(-30px) scale(1); }
+            100% { opacity: 0; transform: translateY(-60px) scale(0); }
+        }
+
+        body {
+            font-family: 'Press Start 2P', cursive;
+            margin: 0;
+            padding: 20px;
+            background-color: #0f0f23; /* Deep cave darkness */
+            color: #00ff00; /* Matrix green text */
+            position: relative;
+            overflow-x: hidden;
+            background-image:
+                linear-gradient(90deg, rgba(0,255,0,0.1) 1px, transparent 1px),
+                linear-gradient(rgba(0,255,0,0.1) 1px, transparent 1px);
+            background-size: 16px 16px; /* Minecraft pixel grid */
+            background-position: 0 0, 0 0;
+        }
+
+        /* Floating Minecraft block */
+        .minecraft-block {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 64px;
+            height: 64px;
+            background:
+                linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
+            border: 4px solid #654321;
+            box-shadow:
+                inset 4px 4px 0px rgba(160, 82, 45, 0.8),
+                inset -4px -4px 0px rgba(101, 67, 33, 0.8),
+                0 0 20px rgba(139, 69, 19, 0.5);
+            z-index: 100;
+            animation: blockFloat 3s ease-in-out infinite;
+            image-rendering: pixelated;
+        }
+
+        /* Add pixelated texture */
+        .minecraft-block:before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(160, 82, 45, 0.3) 0px,
+                    rgba(160, 82, 45, 0.3) 4px,
+                    transparent 4px,
+                    transparent 8px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    rgba(101, 67, 33, 0.3) 0px,
+                    rgba(101, 67, 33, 0.3) 4px,
+                    transparent 4px,
+                    transparent 8px
+                );
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+            padding: 20px;
+            border-radius: 0; /* Sharp minecraft edges */
+            border: 4px solid #00ff00; /* Matrix green border */            box-shadow:
+                0 0 15px rgba(0, 255, 0, 0.2),
+                inset 0 0 15px rgba(0, 255, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+            image-rendering: pixelated;
+        }
+
+        .container::before {
+            content: "🎮 WAKE UP! THEY'RE USING MINECRAFT TO PROGRAM US! 🎮";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, #ff0000, #ff6600, #ffff00, #00ff00, #0066ff, #6600ff, #ff0066);
+            padding: 5px 15px;
+            border-radius: 0;
+            font-size: 8px;
+            color: #000;
+            font-weight: bold;
+            animation: pixelGlow 2s ease-in-out infinite;
+            border: 2px solid #00ff00;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00ff41; /* Matrix bright green */
+            margin-bottom: 30px;
+            font-family: 'Creepster', cursive;
+            font-size: 2em;
+            text-shadow:
+                0 0 10px rgba(0, 255, 65, 0.8),
+                0 0 20px rgba(0, 255, 65, 0.5),
+                2px 2px 0px #003300;
+            animation: pixelGlow 3s ease-in-out infinite;
+            background: linear-gradient(45deg, #00ff41, #00aa00, #00ff41);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .stat {
+            background: linear-gradient(135deg, #2d4a2d, #1a2e1a);
+            padding: 15px;
+            border-radius: 0;
+            border: 3px solid #00ff00;
+            box-shadow:
+                0 0 15px rgba(0, 255, 0, 0.3),
+                inset 0 0 10px rgba(0, 255, 0, 0.1);
+            min-width: 120px;
+            image-rendering: pixelated;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #66ff66;
+            margin-bottom: 5px;
+            text-shadow: 0 0 5px rgba(102, 255, 102, 0.8);
+        }
+
+        .stat-value {
+            font-size: 16px;
+            color: #00ff41;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.8);
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 3px solid #00ff00;
+            border-radius: 0;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+        }
+
+        .search-container {
+            position: relative;
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        #search {
+            padding: 10px 15px;
+            font-size: 12px;
+            border: 3px solid #00ff00;
+            border-radius: 0;
+            background: #000011;
+            color: #00ff00;
+            font-family: 'Press Start 2P', cursive;
+            box-shadow:
+                0 0 10px rgba(0, 255, 0, 0.3),
+                inset 0 0 5px rgba(0, 255, 0, 0.1);
+            image-rendering: pixelated;
+        }
+
+        #search:focus {
+            outline: none;
+            box-shadow:
+                0 0 20px rgba(0, 255, 0, 0.6),
+                inset 0 0 10px rgba(0, 255, 0, 0.2);
+            animation: pixelGlow 1s ease-in-out infinite;
+        }
+
+        #search::placeholder {
+            color: #006600;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            font-size: 10px;
+            background: linear-gradient(135deg, #cc0000, #990000);
+            color: #ffffff;
+            border: 3px solid #ff0000;
+            border-radius: 0;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            text-shadow: 1px 1px 0px #660000;
+            box-shadow:
+                0 0 10px rgba(255, 0, 0, 0.3),
+                inset 0 0 5px rgba(255, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            image-rendering: pixelated;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            box-shadow:
+                0 0 20px rgba(255, 0, 0, 0.6),
+                inset 0 0 10px rgba(255, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }        #treemap {
+            border: 4px solid #00ff00;
+            border-radius: 0;
+            background: #000011;
+            box-shadow:
+                0 0 20px rgba(0, 255, 0, 0.2),
+                inset 0 0 15px rgba(0, 255, 0, 0.05);
+            position: relative;
+            image-rendering: pixelated;
+        }
+
+        .cell {
+            stroke: #00ff00;
+            stroke-width: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            image-rendering: pixelated;
+        }        .cell:hover {
+            stroke: #ffff00;
+            stroke-width: 4px;
+            filter: brightness(1.2) drop-shadow(0 0 5px rgba(255, 255, 0, 0.5));
+        }
+
+        .tooltip {
+            position: absolute;
+            text-align: left;
+            padding: 12px;
+            font-size: 10px;
+            background: linear-gradient(135deg, #001100, #003300);
+            color: #00ff00;
+            border: 3px solid #00ff00;
+            border-radius: 0;
+            pointer-events: none;            box-shadow:
+                0 0 15px rgba(0, 255, 0, 0.3),
+                inset 0 0 8px rgba(0, 255, 0, 0.05);
+            font-family: 'Press Start 2P', cursive;
+            z-index: 1000;
+            text-shadow: 0 0 3px rgba(0, 255, 0, 0.6);
+            image-rendering: pixelated;
+        }
+
+        #no-results {
+            text-align: center;
+            padding: 50px;
+            color: #ff6600;
+            font-size: 14px;
+            background: linear-gradient(135deg, #2d1a1a, #1a0f0f);
+            border: 3px solid #ff6600;
+            border-radius: 0;
+            margin-top: 20px;            box-shadow: 0 0 15px rgba(255, 102, 0, 0.2);
+            display: none;
+            text-shadow: 0 0 5px rgba(255, 102, 0, 0.6);
+        }
+
+        /* Minecraft block types for different sizes */
+        .diamond-block { background: linear-gradient(135deg, #5DADE2, #3498DB, #2E86AB); }
+        .emerald-block { background: linear-gradient(135deg, #58D68D, #27AE60, #1E8449); }
+        .gold-block { background: linear-gradient(135deg, #F4D03F, #F1C40F, #D4AC0D); }
+        .iron-block { background: linear-gradient(135deg, #AEB6BF, #85929E, #5D6D7E); }
+        .coal-block { background: linear-gradient(135deg, #2C3E50, #1C2833, #17202A); }
+        .redstone-block { background: linear-gradient(135deg, #E74C3C, #C0392B, #A93226); }
+
+        .sparkle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ffff00;
+            border-radius: 0;
+            animation: sparkle 2s ease-in-out infinite;
+            pointer-events: none;
+        }        /* Add conspiracy text overlay */
+        .conspiracy-overlay {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            color: #ff3333;
+            font-size: 8px;
+            opacity: 0.7;
+            text-shadow: 0 0 3px rgba(255, 51, 51, 0.6);
+            z-index: 1000;
+            animation: pixelGlow 4s ease-in-out infinite;
+        }
+
+        /* The truth about children and mining */
+        .children-mines-overlay {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            color: #ffaa00;
+            font-size: 10px;
+            opacity: 0.8;
+            text-shadow: 0 0 5px rgba(255, 170, 0, 0.7);
+            z-index: 1001;
+            font-family: 'Press Start 2P', cursive;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 8px 12px;
+            border: 2px solid #ffaa00;
+            border-radius: 0;
+        }
+    </style>
+</head>
+<body>    <div class="minecraft-block"></div>
+    <div class="conspiracy-overlay">
+        🚨 THEY'RE WATCHING! MINECRAFT = MIND CONTROL! 🚨<br>
+        📊 THE BLOCKS REVEAL THE TRUTH! 📊<br>
+        💎 WAKE UP, SHEEPLE! 💎
+    </div>
+    <div class="children-mines-overlay">
+        ⛏️ The children yearn for the mines ⛏️
+    </div>
+
+    <div class="container">
+        <h1>🎮⛏️ MINECRAFT CODE MINE ANALYSIS ⛏️🎮</h1>
+        <p style="text-align: center; color: #ff6600; font-size: 10px; margin-bottom: 20px; text-shadow: 0 0 5px rgba(255, 102, 0, 0.8);">
+            🚨 CLASSIFIED: Block-by-block breakdown of THEIR coding operations! 🚨<br>
+            📊 Each block represents lines of code - THE BIGGER THE BLOCK, THE DEEPER THE CONSPIRACY! 📊
+        </p>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">🎮 TOTAL PROJECTS</div>
+                <div class="stat-value" id="project-count">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">💎 CODE MINES</div>
+                <div class="stat-value" id="total-projects">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">⛏️ LINES MINED</div>
+                <div class="stat-value" id="total-loc">0</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-container">
+                <input type="text" id="search" placeholder="🔍 Search the mines...">
+            </div>
+            <button id="clear-search" class="btn">🧨 CLEAR SEARCH</button>
+        </div>
+
+        <div id="treemap"></div>
+
+        <div id="no-results">
+            🚫 NO BLOCKS FOUND! THEY'VE HIDDEN THE EVIDENCE! 🚫<br>
+            💎 Try searching for different keywords to uncover the truth! 💎
+        </div>
+    </div>
+
+    <script>
+        // 🚨 CLASSIFIED PROJECT DATA - WHAT THEY DON'T WANT YOU TO SEE! 🚨
+        const projectData = [
+        {
+            "ProjectName":  "ArrayInitialization",
+            "LinesOfCode":  86
+        },
+        {
+            "ProjectName":  "ArraySum",
+            "LinesOfCode":  91
+        },
+        {
+            "ProjectName":  "ArrayTest",
+            "LinesOfCode":  60
+        },
+        {
+            "ProjectName":  "Base64Benchmark",
+            "LinesOfCode":  76
+        },
+        {
+            "ProjectName":  "CollectionIteration",
+            "LinesOfCode":  166
+        },
+        {
+            "ProjectName":  "ColorSorting",
+            "LinesOfCode":  183
+        },
+        {
+            "ProjectName":  "CreateFiles",
+            "LinesOfCode":  62
+        },
+        {
+            "ProjectName":  "DateParsing",
+            "LinesOfCode":  113
+        },
+        {
+            "ProjectName":  "DateTimeParsing",
+            "LinesOfCode":  115
+        },
+        {
+            "ProjectName":  "DictionaryKeyLookupComparison",
+            "LinesOfCode":  109
+        },
+        {
+            "ProjectName":  "DictionaryTest",
+            "LinesOfCode":  88
+        },
+        {
+            "ProjectName":  "DirectorySize",
+            "LinesOfCode":  68
+        },
+        {
+            "ProjectName":  "DivisionAndModulo",
+            "LinesOfCode":  62
+        },
+        {
+            "ProjectName":  "EndOfLineBenchmark",
+            "LinesOfCode":  95
+        },
+        {
+            "ProjectName":  "EnumConversion",
+            "LinesOfCode":  102
+        },
+        {
+            "ProjectName":  "FileCount",
+            "LinesOfCode":  115
+        },
+        {
+            "ProjectName":  "FormatComparison",
+            "LinesOfCode":  108
+        },
+        {
+            "ProjectName":  "HashComparison",
+            "LinesOfCode":  130
+        },
+        {
+            "ProjectName":  "HashSetTest",
+            "LinesOfCode":  85
+        },
+        {
+            "ProjectName":  "IntegerTryParse",
+            "LinesOfCode":  81
+        },
+        {
+            "ProjectName":  "IntList",
+            "LinesOfCode":  72
+        },
+        {
+            "ProjectName":  "JsonBenchmark",
+            "LinesOfCode":  131
+        },
+        {
+            "ProjectName":  "LinqBenchmark",
+            "LinesOfCode":  161
+        },
+        {
+            "ProjectName":  "LoopComparison",
+            "LinesOfCode":  109
+        },
+        {
+            "ProjectName":  "NumericConversions",
+            "LinesOfCode":  150
+        },
+        {
+            "ProjectName":  "NumberParsing",
+            "LinesOfCode":  122
+        },
+        {
+            "ProjectName":  "ParallelForComparison",
+            "LinesOfCode":  85
+        },
+        {
+            "ProjectName":  "PassByValueReference",
+            "LinesOfCode":  139
+        },
+        {
+            "ProjectName":  "ReadFileLines",
+            "LinesOfCode":  115
+        },
+        {
+            "ProjectName":  "RegularExpressions",
+            "LinesOfCode":  142
+        },
+        {
+            "ProjectName":  "SearchBenchmark",
+            "LinesOfCode":  135
+        },
+        {
+            "ProjectName":  "SmallCollections",
+            "LinesOfCode":  90
+        },
+        {
+            "ProjectName":  "SortComparison",
+            "LinesOfCode":  96
+        },
+        {
+            "ProjectName":  "SpanVsArrayBenchmark",
+            "LinesOfCode":  154
+        },
+        {
+            "ProjectName":  "StackAllocation",
+            "LinesOfCode":  98
+        },
+        {
+            "ProjectName":  "StringBuilderComparison",
+            "LinesOfCode":  97
+        },
+        {
+            "ProjectName":  "StringComparison",
+            "LinesOfCode":  130
+        },
+        {
+            "ProjectName":  "StringComparison2",
+            "LinesOfCode":  79
+        },
+        {
+            "ProjectName":  "StringDuplication",
+            "LinesOfCode":  84
+        },
+        {
+            "ProjectName":  "StringInterpolation",
+            "LinesOfCode":  90
+        },
+        {
+            "ProjectName":  "StringParsing",
+            "LinesOfCode":  93
+        },
+        {
+            "ProjectName":  "StringSearchComparison",
+            "LinesOfCode":  109
+        },
+        {
+            "ProjectName":  "StringSplitComparison",
+            "LinesOfCode":  96
+        },
+        {
+            "ProjectName":  "ThreadSafeCollectionComparison",
+            "LinesOfCode":  138
+        },
+        {
+            "ProjectName":  "TryFinallyComparison",
+            "LinesOfCode":  75
+        },
+        {
+            "ProjectName":  "TypeCheckComparison",
+            "LinesOfCode":  140
+        },
+        {
+            "ProjectName":  "UnsafeIteration",
+            "LinesOfCode":  125
+        },
+        {
+            "ProjectName":  "UrlDecoding",
+            "LinesOfCode":  109
+        }
+    ];
+
+        // 💎 ADD SPARKLING EFFECTS TO EXPOSE THE TRUTH! 💎
+        function addSparkles() {
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const sparkle = document.createElement('div');
+                    sparkle.className = 'sparkle';
+                    sparkle.style.left = Math.random() * window.innerWidth + 'px';
+                    sparkle.style.top = Math.random() * window.innerHeight + 'px';
+                    sparkle.style.animationDelay = Math.random() * 2 + 's';
+                    document.body.appendChild(sparkle);
+
+                    setTimeout(() => {
+                        sparkle.remove();
+                    }, 2000);
+                }, i * 300);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            addSparkles();
+            setInterval(addSparkles, 5000); // 🚨 CONTINUOUS SPARKLE EXPOSURE! 🚨
+
+            // 📊 CALCULATE THEIR TOTAL OPERATIONS! 📊
+            const totalProjects = projectData.length;
+            const totalLoc = projectData.reduce((sum, project) => sum + project.LinesOfCode, 0);
+
+            document.getElementById('project-count').textContent = totalProjects;
+            document.getElementById('total-projects').textContent = totalProjects;
+            document.getElementById('total-loc').textContent = totalLoc.toLocaleString();
+
+            // 🎮 CREATE THE MINECRAFT TREEMAP - EXPOSE THEIR BLOCK PATTERNS! 🎮
+            const width = document.getElementById('treemap').clientWidth;
+            const height = 700;
+
+            const treemap = d3.treemap()
+                .size([width, height])
+                .padding(3) // More padding for minecraft block effect
+                .round(true);
+
+            const svg = d3.select("#treemap")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+            const tooltip = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
+
+            // 💎 MINECRAFT BLOCK COLOR FUNCTION - REVEALS THE TRUTH! 💎
+            function getMinecraftBlockColor(linesOfCode) {
+                if (linesOfCode < 70) return "#2C3E50"; // Coal block - smallest
+                if (linesOfCode < 100) return "#85929E"; // Iron block
+                if (linesOfCode < 130) return "#E74C3C"; // Redstone block
+                if (linesOfCode < 150) return "#F1C40F"; // Gold block
+                if (linesOfCode < 170) return "#27AE60"; // Emerald block
+                return "#3498DB"; // Diamond block - largest!
+            }
+
+            // 🚨 FUNCTION TO UPDATE THE MINECRAFT VISUALIZATION! 🚨
+            function updateVisualization(data) {
+                // Clear previous evidence
+                svg.selectAll("*").remove();
+
+                // Check if THEY'VE hidden the results
+                if (data.length === 0) {
+                    document.getElementById("no-results").style.display = "block";
+                    return;
+                } else {
+                    document.getElementById("no-results").style.display = "none";
+                }
+
+                // 📊 Prepare data for minecraft block layout
+                const root = d3.hierarchy({children: data})
+                    .sum(d => d.LinesOfCode)
+                    .sort((a, b) => b.value - a.value);
+
+                // Apply minecraft treemap layout
+                treemap(root);
+
+                // 🎮 Create minecraft blocks (cells)
+                const cell = svg.selectAll("g")
+                    .data(root.leaves())
+                    .enter().append("g")
+                    .attr("transform", d => `translate(${d.x0},${d.y0})`);
+
+                // 💎 Add minecraft block rectangles with GitHub navigation
+                cell.append("a")
+                    .attr("href", d => `https://github.com/treit/MiscBenchmarks/tree/main/${d.data.ProjectName}`)
+                    .attr("target", "_blank")
+                    .append("rect")
+                    .attr("class", "cell")
+                    .attr("width", d => d.x1 - d.x0)
+                    .attr("height", d => d.y1 - d.y0)
+                    .attr("fill", d => getMinecraftBlockColor(d.data.LinesOfCode))
+                    .attr("rx", 0) // Sharp minecraft edges
+                    .attr("ry", 0)
+                    .style("image-rendering", "pixelated")
+                    .on("mouseover", function(event, d) {
+                        // 🚨 EXPOSE THE BLOCK'S SECRETS! 🚨
+                        tooltip.transition()
+                            .duration(200)
+                            .style("opacity", .9);
+
+                        let blockType = "Coal";
+                        if (d.data.LinesOfCode >= 170) blockType = "💎 DIAMOND";
+                        else if (d.data.LinesOfCode >= 150) blockType = "💚 EMERALD";
+                        else if (d.data.LinesOfCode >= 130) blockType = "🏆 GOLD";
+                        else if (d.data.LinesOfCode >= 100) blockType = "🔴 REDSTONE";
+                        else if (d.data.LinesOfCode >= 70) blockType = "⚙️ IRON";
+
+                        tooltip.html(`
+                            <strong>🎮 ${d.data.ProjectName} 🎮</strong><br>
+                            <span style="color:#ffff00;">⛏️ BLOCK TYPE:</span> ${blockType}<br>
+                            <span style="color:#ffff00;">📊 LINES MINED:</span> ${d.data.LinesOfCode.toLocaleString()}<br>
+                            <span style="color:#ffff00;">📈 PERCENTAGE:</span> ${(d.data.LinesOfCode / totalLoc * 100).toFixed(2)}%<br>
+                            <span style="color:#ff6600;">🚨 [CLICK TO EXPOSE SOURCE] 🚨</span>
+                        `)
+                            .style("left", (event.pageX + 10) + "px")
+                            .style("top", (event.pageY - 28) + "px");
+
+                        d3.select(this)
+                            .style("stroke", "#ffff00")
+                            .style("stroke-width", "4px")
+                            .style("filter", "brightness(1.3) drop-shadow(0 0 10px rgba(255, 255, 0, 0.8))");
+                    })
+                    .on("mouseout", function() {
+                        tooltip.transition()
+                            .duration(500)
+                            .style("opacity", 0);
+                        d3.select(this)
+                            .style("stroke", "#00ff00")
+                            .style("stroke-width", "2px")
+                            .style("filter", "none");
+                    });
+
+                // 🎮 Add project names with minecraft font styling
+                cell.append("text")
+                    .attr("x", 6)
+                    .attr("y", 16)
+                    .attr("font-size", "8px")
+                    .attr("fill", "#ffffff")
+                    .style("text-shadow", "1px 1px 2px rgba(0,0,0,0.9)")
+                    .style("font-family", "'Press Start 2P', cursive")
+                    .style("image-rendering", "pixelated")
+                    .text(d => d.data.ProjectName.length > (d.x1 - d.x0) / 6 ?
+                          d.data.ProjectName.slice(0, (d.x1 - d.x0) / 6) + "..." :
+                          d.data.ProjectName);
+            }
+
+            // 🚨 INITIAL EXPOSURE OF THEIR OPERATIONS! 🚨
+            updateVisualization(projectData);
+
+            // 🔍 Handle search functionality to find hidden patterns
+            const searchInput = document.getElementById('search');
+            const clearSearchButton = document.getElementById('clear-search');
+
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const filteredData = projectData.filter(project =>
+                    project.ProjectName.toLowerCase().includes(searchTerm)
+                );
+                updateVisualization(filteredData);
+            });
+
+            clearSearchButton.addEventListener('click', function() {
+                searchInput.value = '';
+                updateVisualization(projectData);
+            });
+        });
+    </script>
+</body>
+</html>
