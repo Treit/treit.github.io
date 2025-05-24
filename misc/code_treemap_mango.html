@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mango Cupcake Code Analysis</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Pacifico&display=swap">
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #FFF8E1; /* Light mango cream */
+            color: #5D4037; /* Brown text like chocolate sprinkles */
+            position: relative;
+            overflow-x: hidden;
+            background-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffcc80' fill-opacity='0.4'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .cupcake-top {
+            position: fixed;
+            top: -80px;
+            left: 20px;
+            width: 100px;
+            height: 100px;
+            background-color: #FFB74D; /* Mango frosting */
+            border-radius: 50% 50% 10px 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 100;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .cupcake-top:before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 40px;
+            width: 20px;
+            height: 20px;
+            background-color: #FF8A65; /* Cherry on top */
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #FFECB3; /* Light mango color */
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #FFD54F; /* Mango border */
+            box-shadow: 0 10px 30px rgba(255, 167, 38, 0.2), inset 0 0 10px rgba(255, 167, 38, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            height: 15px;
+            background-color: #FFD54F; /* Mango frosting drip */
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 167, 38, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #FF9800; /* Mango orange */
+            margin-bottom: 30px;
+            font-family: 'Pacifico', cursive;
+            font-size: 2.5em;
+            text-shadow: 1px 1px 2px #FFA000;
+            position: relative;
+        }
+
+        h1::after {
+            content: "🧁";
+            font-size: 0.6em;
+            position: absolute;
+            margin-left: 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .cupcake-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background-color: #FFE0B2; /* Lighter mango */
+            border: 2px solid #FFCC80; /* Medium mango */
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .cupcake-title {
+            color: #F57C00; /* Dark mango */
+            font-family: 'Quicksand', sans-serif;
+            font-weight: bold;
+        }
+
+        .cupcake-controls {
+            display: flex;
+        }
+
+        .cupcake-control {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-left: 8px;
+            border: 2px solid #FFE0B2;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cupcake-control:nth-child(1) {
+            background-color: #EF5350; /* Red sprinkle */
+        }
+
+        .cupcake-control:nth-child(2) {
+            background-color: #42A5F5; /* Blue sprinkle */
+        }
+
+        .cupcake-control:nth-child(3) {
+            background-color: #66BB6A; /* Green sprinkle */
+        }
+
+        .cupcake-control::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.3), rgba(255,255,255,0));
+            transform: skewX(-20deg);
+            animation: shimmer 3s infinite;
+        }
+
+        .system-info {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background-color: #FFF3E0; /* Cream color */
+            border: 2px solid #FFCC80; /* Medium mango */
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-family: 'Quicksand', sans-serif;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .system-status {
+            color: #F57C00; /* Dark mango */
+        }
+
+        .blinking-cursor {
+            color: #FF9800; /* Mango orange */
+            animation: blink 1s step-end infinite;
+            margin-right: 10px;
+        }
+
+        .blinking {
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        #no-results {
+            border: 2px solid #FFCC80;
+            padding: 15px;
+            background-color: #FFF3E0;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid #FFCC80;
+            padding: 15px;
+            background-color: #FFF3E0;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+        }
+
+        #search {
+            padding: 10px;
+            border: 2px solid #FFCC80;
+            border-radius: 15px;
+            width: 250px;
+            margin-right: 10px;
+            background-color: #FFFFFF;
+            color: #5D4037;
+            font-family: 'Quicksand', sans-serif;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        #search::placeholder {
+            color: #FFCC80;
+        }
+
+        .tooltip {
+            position: absolute;
+            padding: 15px;
+            background-color: #FFF8E0;
+            color: #5D4037;
+            border-radius: 15px;
+            pointer-events: none;
+            font-size: 14px;
+            z-index: 10;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 2px solid #FFD54F;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        .cell {
+            stroke: #FFF8E1;
+            stroke-width: 2px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .cell:hover {
+            stroke: #FF9800;
+            stroke-width: 3px;
+            filter: brightness(1.1);
+            box-shadow: 0 0 10px #FF9800;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            background-color: #FFE0B2;
+            padding: 15px;
+            border: 2px solid #FFCC80;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 0 15px 10px 0;
+            color: #5D4037;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            border: 2px solid #FFCC80;
+            border-radius: 5px;
+        }
+
+        .stats {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 16px;
+            color: #5D4037;
+            background-color: #FFE0B2;
+            padding: 15px;
+            border: 2px solid #FFCC80;
+            border-radius: 15px;
+            font-family: 'Quicksand', sans-serif;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .no-results {
+            text-align: center;
+            margin-top: 50px;
+            color: #F57C00;
+            font-size: 18px;
+            display: none;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        button {
+            background-color: #FFB74D;
+            color: white;
+            border: 2px solid #FFA726;
+            padding: 10px 18px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        button:hover {
+            background-color: #FFA726;
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Sprinkle decorations */
+        .sprinkle {
+            position: absolute;
+            width: 8px;
+            height: 2px;
+            border-radius: 20px;
+            z-index: 0;
+        }
+
+        .sprinkle:nth-child(odd) {
+            background-color: #FF8A65;
+        }
+
+        .sprinkle:nth-child(even) {
+            background-color: #FFD54F;
+        }
+
+        #treemap {
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating cupcake decoration -->
+    <div class="cupcake-top"></div>
+
+    <div class="container">
+        <div class="cupcake-header">
+            <span class="cupcake-title">Mango~$ ./analyze_projects.sh</span>
+            <div class="cupcake-controls">
+                <span class="cupcake-control"></span>
+                <span class="cupcake-control"></span>
+                <span class="cupcake-control"></span>
+            </div>
+        </div>
+
+        <h1>Mango Cupcake Code Analysis</h1>
+
+        <div class="system-info">
+            <div class="blinking-cursor">▶</div>
+            <span class="system-status">ANALYSIS MODE: ACTIVE | PROJECTS: <span id="project-count">0</span> | FLAVOR: MANGO</span>
+        </div>
+
+        <div class="controls">
+            <div class="search-container">
+                <input type="text" id="search" placeholder="Search projects...">
+                <button id="clear-search">Clear</button>
+            </div>
+        </div>
+
+        <!-- Add some sprinkles -->
+        <div id="sprinkles"></div>
+
+        <div id="treemap"></div>
+        <div id="no-results" class="no-results">No projects match your search criteria.</div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #FFCC80;"></div>
+                <span>SMALL</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #FFB74D;"></div>
+                <span>MEDIUM</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #FFA726;"></div>
+                <span>LARGE</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #FF9800;"></div>
+                <span>VERY LARGE</span>
+            </div>
+        </div>
+        <div class="stats">
+            <p>🧁 PROJECTS: <span id="total-projects">0</span> | LINES OF CODE: <span id="total-loc">0</span> | <span class="blinking">_</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Add sprinkles randomly to the page
+        function addSprinkles() {
+            const sprinklesContainer = document.getElementById('sprinkles');
+            const container = document.querySelector('.container');
+            const containerRect = container.getBoundingClientRect();
+
+            for (let i = 0; i < 50; i++) {
+                const sprinkle = document.createElement('div');
+                sprinkle.className = 'sprinkle';
+                sprinkle.style.left = Math.random() * containerRect.width + 'px';
+                sprinkle.style.top = Math.random() * containerRect.height + 'px';
+                sprinkle.style.transform = `rotate(${Math.random() * 360}deg)`;
+                sprinklesContainer.appendChild(sprinkle);
+            }
+        }
+
+        // Project data from the original file
+        const projectData = [
+        {
+            "ProjectName":  "AnyNonNullVsJustEnumerating",
+            "LinesOfCode":  86
+        },
+        {
+            "ProjectName":  "ArrayBoundsChecks",
+            "LinesOfCode":  158
+        },
+        {
+            "ProjectName":  "ArrayForVsForeach",
+            "LinesOfCode":  89
+        },
+        {
+            "ProjectName":  "ArrayInitialization",
+            "LinesOfCode":  106
+        },
+        {
+            "ProjectName":  "ArrayListVsList",
+            "LinesOfCode":  153
+        },
+        {
+            "ProjectName":  "ArrayPoolVsStackAlloc",
+            "LinesOfCode":  136
+        },
+        {
+            "ProjectName":  "ArrayRotate",
+            "LinesOfCode":  162
+        },
+        {
+            "ProjectName":  "ArraySum",
+            "LinesOfCode":  512
+        },
+        {
+            "ProjectName":  "ArrayVsDictionaryLookup",
+            "LinesOfCode":  95
+        },
+        {
+            "ProjectName":  "AsCastVsDirectCast",
+            "LinesOfCode":  71
+        },
+        {
+            "ProjectName":  "AsParallelIteration",
+            "LinesOfCode":  145
+        },
+        {
+            "ProjectName":  "AspNetRouteLookups",
+            "LinesOfCode":  149
+        },
+        {
+            "ProjectName":  "AsyncReadTest",
+            "LinesOfCode":  279
+        },
+        {
+            "ProjectName":  "AsyncSignaledEvents",
+            "LinesOfCode":  153
+        },
+        {
+            "ProjectName":  "AsyncVsNonAsyncMemoryStreamRead",
+            "LinesOfCode":  103
+        },
+        {
+            "ProjectName":  "AsyncVsSyncFileIO",
+            "LinesOfCode":  121
+        },
+        {
+            "ProjectName":  "AtLeastOneCommonElementWithHashSet",
+            "LinesOfCode":  130
+        },
+        {
+            "ProjectName":  "Base64DecodeAfterFirstChar",
+            "LinesOfCode":  130
+        },
+        {
+            "ProjectName":  "BinarySearch",
+            "LinesOfCode":  179
+        },
+        {
+            "ProjectName":  "BitArrayVsHashSet",
+            "LinesOfCode":  78
+        },
+        {
+            "ProjectName":  "Bitset",
+            "LinesOfCode":  235
+        },
+        {
+            "ProjectName":  "BlockCopyVsArrayCopyFloats",
+            "LinesOfCode":  72
+        },
+        {
+            "ProjectName":  "BlockingCollectionVsChannel",
+            "LinesOfCode":  286
+        },
+        {
+            "ProjectName":  "Boxing",
+            "LinesOfCode":  62
+        },
+        {
+            "ProjectName":  "BubbleSort",
+            "LinesOfCode":  110
+        },
+        {
+            "ProjectName":  "BuildLogIdSplitVsSpan",
+            "LinesOfCode":  191
+        },
+        {
+            "ProjectName":  "BytesToLong",
+            "LinesOfCode":  93
+        },
+        {
+            "ProjectName":  "CaseInsensitiveStringComparison",
+            "LinesOfCode":  216
+        },
+        {
+            "ProjectName":  "CheckFiveValues",
+            "LinesOfCode":  190
+        },
+        {
+            "ProjectName":  "CheckIsBool",
+            "LinesOfCode":  363
+        },
+        {
+            "ProjectName":  "CheckSpecialChars",
+            "LinesOfCode":  191
+        },
+        {
+            "ProjectName":  "CheckThreeValues",
+            "LinesOfCode":  95
+        },
+        {
+            "ProjectName":  "CheckTwoValues",
+            "LinesOfCode":  90
+        },
+        {
+            "ProjectName":  "ChooseBucketsWithMod",
+            "LinesOfCode":  140
+        },
+        {
+            "ProjectName":  "CollectionExpressionVsToArray",
+            "LinesOfCode":  51
+        },
+        {
+            "ProjectName":  "ComparingByteArrays",
+            "LinesOfCode":  169
+        },
+        {
+            "ProjectName":  "ConcatVsUnion",
+            "LinesOfCode":  104
+        },
+        {
+            "ProjectName":  "ConcurrentListAdd",
+            "LinesOfCode":  74
+        },
+        {
+            "ProjectName":  "ConfigureAwait",
+            "LinesOfCode":  120
+        },
+        {
+            "ProjectName":  "ContainsKey",
+            "LinesOfCode":  118
+        },
+        {
+            "ProjectName":  "ContainsVsIndexOf",
+            "LinesOfCode":  262
+        },
+        {
+            "ProjectName":  "ConvertAllVsSelectAndToList",
+            "LinesOfCode":  64
+        },
+        {
+            "ProjectName":  "ConvertToStringVsToString",
+            "LinesOfCode":  132
+        },
+        {
+            "ProjectName":  "ConvertVsParse",
+            "LinesOfCode":  92
+        },
+        {
+            "ProjectName":  "CountCharDigits",
+            "LinesOfCode":  97
+        },
+        {
+            "ProjectName":  "CountDigitsBenchmark",
+            "LinesOfCode":  527
+        },
+        {
+            "ProjectName":  "CountingStringsBenchmark",
+            "LinesOfCode":  200
+        },
+        {
+            "ProjectName":  "CountingUsingStringContains",
+            "LinesOfCode":  192
+        },
+        {
+            "ProjectName":  "CountTokens",
+            "LinesOfCode":  288
+        },
+        {
+            "ProjectName":  "DateTimeNowVsDateTimeUtcNow",
+            "LinesOfCode":  89
+        },
+        {
+            "ProjectName":  "DedupeDelimitedString",
+            "LinesOfCode":  118
+        },
+        {
+            "ProjectName":  "DeepCopy",
+            "LinesOfCode":  88
+        },
+        {
+            "ProjectName":  "DegreesToRadians",
+            "LinesOfCode":  83
+        },
+        {
+            "ProjectName":  "DelimitedStringToTokens",
+            "LinesOfCode":  136
+        },
+        {
+            "ProjectName":  "DerSnofArrayAdd",
+            "LinesOfCode":  71
+        },
+        {
+            "ProjectName":  "DetectRepeatedIntegers",
+            "LinesOfCode":  140
+        },
+        {
+            "ProjectName":  "DictionarVsLinqFirstOrDefault",
+            "LinesOfCode":  121
+        },
+        {
+            "ProjectName":  "DictionaryAdd",
+            "LinesOfCode":  174
+        },
+        {
+            "ProjectName":  "DictionaryAnyVsCount",
+            "LinesOfCode":  98
+        },
+        {
+            "ProjectName":  "DictionaryContainsKeyVsListAny",
+            "LinesOfCode":  249
+        },
+        {
+            "ProjectName":  "DictionaryIterateSortedKeys",
+            "LinesOfCode":  189
+        },
+        {
+            "ProjectName":  "DictionaryKeysAndValuesToArrayVsArrays",
+            "LinesOfCode":  165
+        },
+        {
+            "ProjectName":  "DictionaryLookups",
+            "LinesOfCode":  221
+        },
+        {
+            "ProjectName":  "DictionaryLookupsCaseComparison",
+            "LinesOfCode":  134
+        },
+        {
+            "ProjectName":  "DictionaryPopulate",
+            "LinesOfCode":  242
+        },
+        {
+            "ProjectName":  "DictionaryTryGetValueVsContainsKey",
+            "LinesOfCode":  134
+        },
+        {
+            "ProjectName":  "DictionaryTryGetValueVsGetOrAdd",
+            "LinesOfCode":  242
+        },
+        {
+            "ProjectName":  "DictionaryUpdates",
+            "LinesOfCode":  88
+        },
+        {
+            "ProjectName":  "DictionaryVsFrozenDictionary",
+            "LinesOfCode":  67
+        },
+        {
+            "ProjectName":  "DictionaryVsMemoryCache",
+            "LinesOfCode":  82
+        },
+        {
+            "ProjectName":  "DictionaryVsSortedListLookup",
+            "LinesOfCode":  93
+        },
+        {
+            "ProjectName":  "Distance",
+            "LinesOfCode":  333
+        },
+        {
+            "ProjectName":  "DistinctToList",
+            "LinesOfCode":  76
+        },
+        {
+            "ProjectName":  "DistinctVsSkipping",
+            "LinesOfCode":  95
+        },
+        {
+            "ProjectName":  "Division",
+            "LinesOfCode":  92
+        },
+        {
+            "ProjectName":  "DynamicObjects",
+            "LinesOfCode":  74
+        },
+        {
+            "ProjectName":  "EfcChangeTrackingStrategies",
+            "LinesOfCode":  2022
+        },
+        {
+            "ProjectName":  "EnumerableRangeVsArray",
+            "LinesOfCode":  95
+        },
+        {
+            "ProjectName":  "EnumerableVsListIteration",
+            "LinesOfCode":  74
+        },
+        {
+            "ProjectName":  "EnumerateDictionary",
+            "LinesOfCode":  171
+        },
+        {
+            "ProjectName":  "EnumGetValues",
+            "LinesOfCode":  65
+        },
+        {
+            "ProjectName":  "EnumLookup",
+            "LinesOfCode":  726
+        },
+        {
+            "ProjectName":  "EnumSizes",
+            "LinesOfCode":  148
+        },
+        {
+            "ProjectName":  "EnumToString",
+            "LinesOfCode":  205
+        },
+        {
+            "ProjectName":  "EqualsVsReferenceEquals",
+            "LinesOfCode":  158
+        },
+        {
+            "ProjectName":  "FileStreamVsRandomAccess",
+            "LinesOfCode":  594
+        },
+        {
+            "ProjectName":  "FileSystemTraversal",
+            "LinesOfCode":  224
+        },
+        {
+            "ProjectName":  "FilterDictionaryEntries",
+            "LinesOfCode":  109
+        },
+        {
+            "ProjectName":  "FilterDictionaryEntries2",
+            "LinesOfCode":  109
+        },
+        {
+            "ProjectName":  "FlipSign",
+            "LinesOfCode":  93
+        },
+        {
+            "ProjectName":  "ForEachAsyncVsTaskWhenAll",
+            "LinesOfCode":  138
+        },
+        {
+            "ProjectName":  "ForEachVsAny",
+            "LinesOfCode":  73
+        },
+        {
+            "ProjectName":  "ForEachVsEnumerator",
+            "LinesOfCode":  387
+        },
+        {
+            "ProjectName":  "ForEachVsToListForEach",
+            "LinesOfCode":  59
+        },
+        {
+            "ProjectName":  "ForLoops",
+            "LinesOfCode":  149
+        },
+        {
+            "ProjectName":  "ForLoops2",
+            "LinesOfCode":  100
+        },
+        {
+            "ProjectName":  "GetCurrentAssembly",
+            "LinesOfCode":  44
+        },
+        {
+            "ProjectName":  "GettingLastElement",
+            "LinesOfCode":  65
+        },
+        {
+            "ProjectName":  "GetTypeVsNameOf",
+            "LinesOfCode":  52
+        },
+        {
+            "ProjectName":  "GetTypeVsTypeof",
+            "LinesOfCode":  107
+        },
+        {
+            "ProjectName":  "GetTypeVsTypeof2",
+            "LinesOfCode":  78
+        },
+        {
+            "ProjectName":  "HashCodeCombining",
+            "LinesOfCode":  87
+        },
+        {
+            "ProjectName":  "HashFunctions",
+            "LinesOfCode":  605
+        },
+        {
+            "ProjectName":  "HashSetVsC5HashSet",
+            "LinesOfCode":  70
+        },
+        {
+            "ProjectName":  "HashSetVsFrozenSet",
+            "LinesOfCode":  190
+        },
+        {
+            "ProjectName":  "HashSetVsLinqDistinct",
+            "LinesOfCode":  62
+        },
+        {
+            "ProjectName":  "HashSetVsList",
+            "LinesOfCode":  91
+        },
+        {
+            "ProjectName":  "HashSimilarity",
+            "LinesOfCode":  1431
+        },
+        {
+            "ProjectName":  "HashStringArray",
+            "LinesOfCode":  124
+        },
+        {
+            "ProjectName":  "HashTableVsDictionary",
+            "LinesOfCode":  108
+        },
+        {
+            "ProjectName":  "HexStringToBytes",
+            "LinesOfCode":  133
+        },
+        {
+            "ProjectName":  "ICollectionAsArray",
+            "LinesOfCode":  156
+        },
+        {
+            "ProjectName":  "ICollectionIterate",
+            "LinesOfCode":  203
+        },
+        {
+            "ProjectName":  "IEnumerableCountVsToListCount",
+            "LinesOfCode":  65
+        },
+        {
+            "ProjectName":  "IEnumerableIterate",
+            "LinesOfCode":  304
+        },
+        {
+            "ProjectName":  "IfVsElseIf",
+            "LinesOfCode":  131
+        },
+        {
+            "ProjectName":  "IListVsList",
+            "LinesOfCode":  101
+        },
+        {
+            "ProjectName":  "IndexingStrings",
+            "LinesOfCode":  179
+        },
+        {
+            "ProjectName":  "IndexOfItemMatchingPredicate",
+            "LinesOfCode":  82
+        },
+        {
+            "ProjectName":  "IndexOfMax",
+            "LinesOfCode":  100
+        },
+        {
+            "ProjectName":  "InterlockedExchangeVsAssignment",
+            "LinesOfCode":  59
+        },
+        {
+            "ProjectName":  "InterlockedIncrementVsLock",
+            "LinesOfCode":  125
+        },
+        {
+            "ProjectName":  "InterpolationVsToString",
+            "LinesOfCode":  159
+        },
+        {
+            "ProjectName":  "IntersectAny",
+            "LinesOfCode":  301
+        },
+        {
+            "ProjectName":  "IntParseVsIntToString",
+            "LinesOfCode":  78
+        },
+        {
+            "ProjectName":  "IntToHexChar",
+            "LinesOfCode":  112
+        },
+        {
+            "ProjectName":  "IsEven",
+            "LinesOfCode":  426
+        },
+        {
+            "ProjectName":  "IterateDistinctValues",
+            "LinesOfCode":  110
+        },
+        {
+            "ProjectName":  "IterateWithCollectionsMarshal",
+            "LinesOfCode":  83
+        },
+        {
+            "ProjectName":  "IteratingDictionaryEntries",
+            "LinesOfCode":  85
+        },
+        {
+            "ProjectName":  "IteratingListVsDictionary",
+            "LinesOfCode":  121
+        },
+        {
+            "ProjectName":  "JaggedArrayFilledWithValue",
+            "LinesOfCode":  109
+        },
+        {
+            "ProjectName":  "JsonDeserializeAsynEnumerableVsNormal",
+            "LinesOfCode":  91
+        },
+        {
+            "ProjectName":  "JsonSerialization",
+            "LinesOfCode":  159
+        },
+        {
+            "ProjectName":  "JsonSerialization2",
+            "LinesOfCode":  141
+        },
+        {
+            "ProjectName":  "KeyValuePairVsValueTuple",
+            "LinesOfCode":  89
+        },
+        {
+            "ProjectName":  "LastTwoTokens",
+            "LinesOfCode":  151
+        },
+        {
+            "ProjectName":  "Leetcode551_TitanicTony",
+            "LinesOfCode":  167
+        },
+        {
+            "ProjectName":  "LinkedListVsList",
+            "LinesOfCode":  96
+        },
+        {
+            "ProjectName":  "LinqAllVsExcept",
+            "LinesOfCode":  74
+        },
+        {
+            "ProjectName":  "LinqAny",
+            "LinesOfCode":  78
+        },
+        {
+            "ProjectName":  "LinqCountVsToListDotCount",
+            "LinesOfCode":  69
+        },
+        {
+            "ProjectName":  "LinqExceptVsSet",
+            "LinesOfCode":  77
+        },
+        {
+            "ProjectName":  "LinqUnnecessarySelect",
+            "LinesOfCode":  62
+        },
+        {
+            "ProjectName":  "ListAdd",
+            "LinesOfCode":  122
+        },
+        {
+            "ProjectName":  "ListContainsExactlyFiveSpecificValues",
+            "LinesOfCode":  307
+        },
+        {
+            "ProjectName":  "ListCopy",
+            "LinesOfCode":  71
+        },
+        {
+            "ProjectName":  "ListCountGreaterThanZeroVsAny",
+            "LinesOfCode":  106
+        },
+        {
+            "ProjectName":  "ListFirstFive",
+            "LinesOfCode":  93
+        },
+        {
+            "ProjectName":  "ListForVsForeach",
+            "LinesOfCode":  121
+        },
+        {
+            "ProjectName":  "ListGetRangeVsLinqSkipTake",
+            "LinesOfCode":  108
+        },
+        {
+            "ProjectName":  "ListIndexVsElementAt",
+            "LinesOfCode":  92
+        },
+        {
+            "ProjectName":  "ListSearch",
+            "LinesOfCode":  89
+        },
+        {
+            "ProjectName":  "ListSortVsLinqOrderBy",
+            "LinesOfCode":  108
+        },
+        {
+            "ProjectName":  "ListTruncate",
+            "LinesOfCode":  80
+        },
+        {
+            "ProjectName":  "ListTwoColumnSort",
+            "LinesOfCode":  107
+        },
+        {
+            "ProjectName":  "ListVsArray",
+            "LinesOfCode":  108
+        },
+        {
+            "ProjectName":  "ListVsC5List",
+            "LinesOfCode":  152
+        },
+        {
+            "ProjectName":  "Locking",
+            "LinesOfCode":  131
+        },
+        {
+            "ProjectName":  "LockOverhead",
+            "LinesOfCode":  81
+        },
+        {
+            "ProjectName":  "LockVsInterlockedCompareExchange",
+            "LinesOfCode":  75
+        },
+        {
+            "ProjectName":  "LookupBenchmark",
+            "LinesOfCode":  123
+        },
+        {
+            "ProjectName":  "LoopArrayVsList",
+            "LinesOfCode":  98
+        },
+        {
+            "ProjectName":  "LoopIndexOrLocalVariable",
+            "LinesOfCode":  72
+        },
+        {
+            "ProjectName":  "ManyProperties",
+            "LinesOfCode":  2184
+        },
+        {
+            "ProjectName":  "ManySmallFilesVsOneLargeFile",
+            "LinesOfCode":  82
+        },
+        {
+            "ProjectName":  "MaxByVsOrderByDescending",
+            "LinesOfCode":  85
+        },
+        {
+            "ProjectName":  "MaxFloat",
+            "LinesOfCode":  122
+        },
+        {
+            "ProjectName":  "MaxOfIntArray",
+            "LinesOfCode":  68
+        },
+        {
+            "ProjectName":  "MaxOfIntList",
+            "LinesOfCode":  68
+        },
+        {
+            "ProjectName":  "MemoryStreamDispose",
+            "LinesOfCode":  58
+        },
+        {
+            "ProjectName":  "MemoryStreamToGuid",
+            "LinesOfCode":  153
+        },
+        {
+            "ProjectName":  "MemoryStreamVsList",
+            "LinesOfCode":  88
+        },
+        {
+            "ProjectName":  "MemoryVsArraySegment",
+            "LinesOfCode":  93
+        },
+        {
+            "ProjectName":  "MergingDictionaries",
+            "LinesOfCode":  104
+        },
+        {
+            "ProjectName":  "MinMaxNumericValues",
+            "LinesOfCode":  152
+        },
+        {
+            "ProjectName":  "MoveRandomStringToFrontOfList",
+            "LinesOfCode":  121
+        },
+        {
+            "ProjectName":  "MultiDimensionalVsJaggedArray",
+            "LinesOfCode":  262
+        },
+        {
+            "ProjectName":  "NewVsActivatorCreateInstance",
+            "LinesOfCode":  96
+        },
+        {
+            "ProjectName":  "NotroParsingProblem",
+            "LinesOfCode":  182
+        },
+        {
+            "ProjectName":  "OddOrEven",
+            "LinesOfCode":  82
+        },
+        {
+            "ProjectName":  "OrdinalVsOrdinalIgnoreCase",
+            "LinesOfCode":  109
+        },
+        {
+            "ProjectName":  "ParallelForVsExplicitTasks",
+            "LinesOfCode":  99
+        },
+        {
+            "ProjectName":  "ParseUrlForToken",
+            "LinesOfCode":  179
+        },
+        {
+            "ProjectName":  "ParseVsTryParse",
+            "LinesOfCode":  92
+        },
+        {
+            "ProjectName":  "PassByRefVsPassByValue",
+            "LinesOfCode":  298
+        },
+        {
+            "ProjectName":  "PicoGym-Transformation",
+            "LinesOfCode":  107
+        },
+        {
+            "ProjectName":  "PropertyVsField",
+            "LinesOfCode":  120
+        },
+        {
+            "ProjectName":  "PropertyVsLocal",
+            "LinesOfCode":  80
+        },
+        {
+            "ProjectName":  "QueueStructVsClass",
+            "LinesOfCode":  131
+        },
+        {
+            "ProjectName":  "RandomNumbers",
+            "LinesOfCode":  210
+        },
+        {
+            "ProjectName":  "RandomStrings",
+            "LinesOfCode":  245
+        },
+        {
+            "ProjectName":  "ReadingDictionaryEntries",
+            "LinesOfCode":  114
+        },
+        {
+            "ProjectName":  "ReadingDictionaryEntriesConcurrently",
+            "LinesOfCode":  299
+        },
+        {
+            "ProjectName":  "RecordVsClass",
+            "LinesOfCode":  455
+        },
+        {
+            "ProjectName":  "RedunantToString",
+            "LinesOfCode":  140
+        },
+        {
+            "ProjectName":  "RedundantToString",
+            "LinesOfCode":  159
+        },
+        {
+            "ProjectName":  "ReflectionVsDynamic",
+            "LinesOfCode":  276
+        },
+        {
+            "ProjectName":  "Regex",
+            "LinesOfCode":  117
+        },
+        {
+            "ProjectName":  "RegexVsSplit",
+            "LinesOfCode":  220
+        },
+        {
+            "ProjectName":  "RepeatStrings",
+            "LinesOfCode":  107
+        },
+        {
+            "ProjectName":  "ReturnEmptySequence",
+            "LinesOfCode":  59
+        },
+        {
+            "ProjectName":  "ReverseString",
+            "LinesOfCode":  188
+        },
+        {
+            "ProjectName":  "RoundRobin",
+            "LinesOfCode":  215
+        },
+        {
+            "ProjectName":  "Scratch",
+            "LinesOfCode":  41
+        },
+        {
+            "ProjectName":  "SealedVsInherited",
+            "LinesOfCode":  195
+        },
+        {
+            "ProjectName":  "SearchStringListForMultipleValues",
+            "LinesOfCode":  114
+        },
+        {
+            "ProjectName":  "SequentialAwaitVsTaskWhenAll",
+            "LinesOfCode":  75
+        },
+        {
+            "ProjectName":  "SequentialAwaitVsTaskWhenAll2",
+            "LinesOfCode":  103
+        },
+        {
+            "ProjectName":  "SerializeMemoryInfo",
+            "LinesOfCode":  112
+        },
+        {
+            "ProjectName":  "SetIntersectionCount",
+            "LinesOfCode":  78
+        },
+        {
+            "ProjectName":  "SetProperty",
+            "LinesOfCode":  93
+        },
+        {
+            "ProjectName":  "SetTwoValues",
+            "LinesOfCode":  117
+        },
+        {
+            "ProjectName":  "ShallowCloneByteArray",
+            "LinesOfCode":  66
+        },
+        {
+            "ProjectName":  "ShortDayOfWeek",
+            "LinesOfCode":  180
+        },
+        {
+            "ProjectName":  "ShuffleBenchmark",
+            "LinesOfCode":  280
+        },
+        {
+            "ProjectName":  "SingleItemEnumerable",
+            "LinesOfCode":  181
+        },
+        {
+            "ProjectName":  "SliceString",
+            "LinesOfCode":  127
+        },
+        {
+            "ProjectName":  "SlowIOTaskProcessing",
+            "LinesOfCode":  120
+        },
+        {
+            "ProjectName":  "SortByMultipleProperties",
+            "LinesOfCode":  76
+        },
+        {
+            "ProjectName":  "SortedVsUnsortedIteration",
+            "LinesOfCode":  177
+        },
+        {
+            "ProjectName":  "SpreadOperatorVsAppendToList",
+            "LinesOfCode":  89
+        },
+        {
+            "ProjectName":  "SpreadOperatorVsConcat",
+            "LinesOfCode":  77
+        },
+        {
+            "ProjectName":  "SqlDataSetVsDataReader",
+            "LinesOfCode":  247
+        },
+        {
+            "ProjectName":  "SqlSyncVsAsync",
+            "LinesOfCode":  97
+        },
+        {
+            "ProjectName":  "SquaringNumbers",
+            "LinesOfCode":  88
+        },
+        {
+            "ProjectName":  "StaticClass",
+            "LinesOfCode":  90
+        },
+        {
+            "ProjectName":  "StaticFieldVsInstanceField",
+            "LinesOfCode":  102
+        },
+        {
+            "ProjectName":  "StaticHashSets",
+            "LinesOfCode":  100
+        },
+        {
+            "ProjectName":  "StaticVsNormalLambda",
+            "LinesOfCode":  84
+        },
+        {
+            "ProjectName":  "StringCompare",
+            "LinesOfCode":  123
+        },
+        {
+            "ProjectName":  "StringConcatVsInterpolation",
+            "LinesOfCode":  146
+        },
+        {
+            "ProjectName":  "StringConcatVsStringBuilder",
+            "LinesOfCode":  210
+        },
+        {
+            "ProjectName":  "StringEquals",
+            "LinesOfCode":  57
+        },
+        {
+            "ProjectName":  "StringEqualsVsHashSetLookup",
+            "LinesOfCode":  61
+        },
+        {
+            "ProjectName":  "StringEqualsVsStartsWith",
+            "LinesOfCode":  204
+        },
+        {
+            "ProjectName":  "StringReplace",
+            "LinesOfCode":  89
+        },
+        {
+            "ProjectName":  "StringSplitSeparatorInput",
+            "LinesOfCode":  95
+        },
+        {
+            "ProjectName":  "StringStartsWithVsEquals",
+            "LinesOfCode":  141
+        },
+        {
+            "ProjectName":  "StringToBytes",
+            "LinesOfCode":  138
+        },
+        {
+            "ProjectName":  "StringToCharArray",
+            "LinesOfCode":  100
+        },
+        {
+            "ProjectName":  "SumBinaryIntegersFromFile",
+            "LinesOfCode":  174
+        },
+        {
+            "ProjectName":  "SumIntegerArray",
+            "LinesOfCode":  134
+        },
+        {
+            "ProjectName":  "SwapElements",
+            "LinesOfCode":  234
+        },
+        {
+            "ProjectName":  "SwitchVsDictionaryLookup",
+            "LinesOfCode":  524
+        },
+        {
+            "LinesOfCode":  82
+        },
+        {
+            "LinesOfCode":  60
+        },
+        {
+            "LinesOfCode":  54
+        },
+        {
+            "LinesOfCode":  152
+        },
+        {
+            "LinesOfCode":  77
+        },
+        {
+            "LinesOfCode":  157
+        },
+        {
+            "LinesOfCode":  81
+        },
+        {
+            "LinesOfCode":  102
+        },
+        {
+            "LinesOfCode":  99
+        },
+        {
+            "LinesOfCode":  106
+        },
+        {
+            "LinesOfCode":  58
+        },
+        {
+            "LinesOfCode":  109
+        },
+        {
+            "LinesOfCode":  125
+        },
+        {
+            "LinesOfCode":  109
+        },
+    ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            addSprinkles();
+
+            // Calculate total projects and lines of code
+            const totalProjects = projectData.length;
+            const totalLoc = projectData.reduce((sum, project) => sum + project.LinesOfCode, 0);
+
+            document.getElementById('project-count').textContent = totalProjects;
+            document.getElementById('total-projects').textContent = totalProjects;
+            document.getElementById('total-loc').textContent = totalLoc.toLocaleString();
+
+            // Create the treemap
+            const width = document.getElementById('treemap').clientWidth;
+            const height = 700;
+
+            const color = d3.scaleThreshold()
+                .domain([80, 150, 300])
+                .range(["#FFCC80", "#FFB74D", "#FFA726", "#FF9800"]);
+
+            const treemap = d3.treemap()
+                .size([width, height])
+                .padding(2)
+                .round(true);
+
+            const root = d3.hierarchy({children: projectData})
+                .sum(d => d.LinesOfCode)
+                .sort((a, b) => b.value - a.value);
+
+            treemap(root);
+
+            const svg = d3.select("#treemap")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+            const tooltip = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
+
+            const cell = svg.selectAll("g")
+                .data(root.leaves())
+                .enter().append("g")
+                .attr("transform", d => `translate(${d.x0},${d.y0})`);
+
+            cell.append("rect")
+                .attr("class", "cell")
+                .attr("width", d => d.x1 - d.x0)
+                .attr("height", d => d.y1 - d.y0)
+                .attr("fill", d => color(d.data.LinesOfCode))
+                .attr("rx", 5)
+                .attr("ry", 5)
+                .on("mouseover", function(event, d) {
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip.html(`Project: ${d.data.ProjectName}<br>Lines of Code: ${d.data.LinesOfCode}`)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                    d3.select(this)
+                        .style("stroke", "#FF9800")
+                        .style("stroke-width", "3px");
+                })
+                .on("mouseout", function() {
+                    tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                    d3.select(this)
+                        .style("stroke", "#FFF8E1")
+                        .style("stroke-width", "2px");
+                });
+
+            cell.append("text")
+                .attr("x", 4)
+                .attr("y", 14)
+                .attr("font-size", "10px")
+                .attr("fill", "#5D4037")
+                .text(d => d.data.ProjectName.length > (d.x1 - d.x0) / 5 ?
+                      d.data.ProjectName.slice(0, (d.x1 - d.x0) / 5) + "..." :
+                      d.data.ProjectName);
+
+            // Handle search functionality
+            const searchInput = document.getElementById('search');
+            const clearSearchButton = document.getElementById('clear-search');
+            const noResults = document.getElementById('no-results');
+
+            function updateSearch() {
+                const searchTerm = searchInput.value.toLowerCase();
+                let matchFound = false;
+
+                cell.each(function(d) {
+                    const cellElement = d3.select(this);
+                    const isMatch = d.data.ProjectName.toLowerCase().includes(searchTerm);
+
+                    cellElement.style("opacity", isMatch || searchTerm === "" ? 1 : 0.2);
+                    cellElement.style("pointer-events", isMatch || searchTerm === "" ? "auto" : "none");
+
+                    if (isMatch) matchFound = true;
+                });
+
+                noResults.style.display = searchTerm !== "" && !matchFound ? "block" : "none";
+            }
+
+            searchInput.addEventListener('input', updateSearch);
+
+            clearSearchButton.addEventListener('click', function() {
+                searchInput.value = '';
+                updateSearch();
+            });
+        });
+    </script>
+</body>
+</html>
