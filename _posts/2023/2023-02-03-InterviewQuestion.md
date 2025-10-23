@@ -25,9 +25,20 @@ Sharing this problem with other programmers, I've been asked a few times to actu
 Well, ok then, let's do it.
 
 ## Update: 10/23/2025
-In the original version of this blog post I included links to the actual files hosted in the cloud. Due, however, to the length of time needed to download such files and the also not-entirely-zero egress cost I was paying, I have removed them.
+In the original version of this blog post I included links to the actual files hosted in the cloud. Each file was 50GiB in size, for a total of 100GiB of data.
+
+Due, however, to the length of time needed to download such files and the also not-entirely-zero egress cost I was paying, I have removed them.
 
 Instead, I present a small C# program to generate the files locally.
+
+The program takes three parameters: the file to generate, the size of the file in bytes to generate and a seed value.
+
+Pick two seed values at random and use the following to generate your own huge files:
+
+```
+dotnet run a.bin 53687091200 383
+dotnet run b.bin 53687091200 980
+```
 
 ### C# Program to generate the input files
 {% highlight c# %}
@@ -73,8 +84,6 @@ Console.WriteLine($"{totalWritten} bytes written.");
 
 If you want to take a stab at solving this problem, feel free to try to produce the third file. Remember that duplicates should be removed from the output, as we want the distinct set of shared values.
 
-Use (50 * 1024 * 1024 * 1024) = 53687091200 for the `size` parameter.
-
-If you drop me a line telling me the size of the result file, I can tell you if you're right 🙂.
+If you drop me a line telling me your two seeds and the size of the result file, I can tell you if you're right 🙂.
 
 Have fun!
