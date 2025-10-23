@@ -8,9 +8,9 @@ Here is a variation of my favorite go-to interview question:
 
 > I hand you a drive containing two files.
 >
->Each file is extremely simple: it consists of 32-bit integers, one after the other. So, the first four bytes is the first integer. The next four bytes is the second integer, and so on. The integers happen to be written in little-endian byte order. 
+>Each file is extremely simple: it consists of 32-bit integers, one after the other. So, the first four bytes is the first integer. The next four bytes is the second integer, and so on. The integers happen to be written in little-endian byte order.
 >
->Your task is to produce a third file containing the distinct set of integers that are shared between the two input files. For example, if the value 100 happens to be in the first file but not the second file, it should not be included in the output file. If it happens to exist in both files, then it should be included in the output file. 
+>Your task is to produce a third file containing the distinct set of integers that are shared between the two input files. For example, if the value 100 happens to be in the first file but not the second file, it should not be included in the output file. If it happens to exist in both files, then it should be included in the output file.
 >
 >I need the result file by the end of the day. Other than that, I do not care at all how you produce it. Tell me how, if you were given this problem in the real world, you would *actually* create the result file.
 
@@ -24,25 +24,10 @@ Sharing this problem with other programmers, I've been asked a few times to actu
 
 Well, ok then, let's do it.
 
-Here is the first file:
+## Update: 10/23/2025
+In the original version of this blog post I included links to the actual files hosted in the cloud. Due, however, to the length of time needed to download such files and the also not-entirely-zero egress cost I was paying, I have removed them.
 
-[1.bin](https://mtreitdata.blob.core.windows.net/test/1.bin?sp=r&st=2023-02-08T23:08:21Z&se=2030-02-09T07:08:21Z&spr=https&sv=2021-06-08&sr=b&sig=1R1DCql04bboXDsQDd%2Fz6iN15Xtv60NYoeX3HJcJh4I%3D)
-
-Here is the second file:
-
-[2.bin](https://mtreitdata.blob.core.windows.net/test/2.bin?sp=r&st=2023-02-08T23:07:28Z&se=2030-02-09T07:07:28Z&spr=https&sv=2021-06-08&sr=b&sig=4h0hLUiYSHybmVN%2Bfse4jSxh%2F04ItGCHLdTDmZ2O%2Fqo%3D)
-
-
-You can download these files directly via the URLs, but I recommend using [azcopy](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-v10) if possible for a better download experience. The files are quite large and will probably take some time to download, depending on your connection speed.
-
-Here is the syntax to use for azcopy:
-
-`azcopy cp "<url>" <destinationFile>`
-
-~~Providing a program to generate the files was also an option, but since my scenario involves actual pre-existing files, I wanted to make it real.~~
-
-## UPDATE 2/14/2023
-By popular demand due to some people having quite slow bandwidth, as well as to save myself some money, I have bit the bullet and will share a program that can be used to generate the test files instead of downloading them. However, you will need to provide a different seed input for each file and the files I generated previously did not use a seed. I will probably update this post with the two seed values to use in the future, after I re-solve the problem.
+Instead, I present a small C# program to generate the files locally.
 
 ### C# Program to generate the input files
 {% highlight c# %}
@@ -87,6 +72,8 @@ Console.WriteLine($"{totalWritten} bytes written.");
 {% endhighlight %}
 
 If you want to take a stab at solving this problem, feel free to try to produce the third file. Remember that duplicates should be removed from the output, as we want the distinct set of shared values.
+
+Use (50 * 1024 * 1024 * 1024) = 53687091200 for the `size` parameter.
 
 If you drop me a line telling me the size of the result file, I can tell you if you're right 🙂.
 
