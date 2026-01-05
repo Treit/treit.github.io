@@ -1,0 +1,69 @@
+---
+layout: post
+title:  "New Windows Machine Setup - Cheat Sheet"
+date:   2026-01-05 10:00:00
+categories: Programming, Windows
+---
+# The right tools for the job
+Being productive as a programmer starts with having the right set of tools.
+
+Here is my go-to list of tools I always install when setting up a new Windows machine.
+
+```ps
+# CLI installs
+winget install Git.Git
+winget install github.cli
+winget install Microsoft.Edit
+winget install rustup
+cargo install ripgrep -F pcre2
+cargo install fastmod
+cargo install bottom
+cargo install tokei
+cargo install hexyl
+winget install cmake
+winget install -e --id Microsoft.VisualStudio.BuildTools --override "--passive --wait --add Microsoft.VisualStudio.Workload.VCTools;includeRecommended"
+cargo install starship
+winget install -e --id OpenJS.NodeJS.LTS
+winget install vscode
+winget install Microsoft.PowerShell
+Install-Module PSReadline # From pwsh window
+cargo install zoxide
+winget install Microsoft.DotNet.SDK.9
+winget install Microsoft.DotNet.SDK.10
+winget install notepad++
+winget install python
+winget install neovim
+winget install voidtools.everything
+winget install voidtools.Everything.Cli
+winget install -e Microsoft.Sysinternals.Suite
+winget install zoomit
+winget install KirillOsenkov.MSBuildStructuredLogViewer
+winget install -e --id Microsoft.AzureCLI
+winget install ShareX.ShareX
+winget install hxd
+winget install sharkdp.bat
+winget install chocolatey
+choco install winfetch -f
+choco install cascadiafonts
+winget install Meld.Meld
+winget install Nightingale
+winget install LINQPad.LINQPad.8
+winget install zed
+winget install fzf
+winget install Microsoft.Azure.StorageExplorer
+winget install Bruno.Bruno
+npm install -g @usebruno/cli
+winget install GitHub.Copilot
+
+# Non-CLI installs
+cascadia code - https://github.com/microsoft/cascadia-code/releases
+
+# Get rid of the "modern" right-click menu:
+reg.exe add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /f /ve
+
+# Get rid of "modern" notepad
+Get-AppxPackage Microsoft.WindowsNotepad | Remove-AppxPackage
+
+# Set Microsoft.Edit (edit.exe) as the default git editor
+git config --global core.editor edit.exe
+```
