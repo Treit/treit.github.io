@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GC Demotion Reference</title>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; margin: 2rem; background: #f5f5f5; color: #222; }
+  h1 { border-bottom: 3px solid #0078d4; padding-bottom: .5rem; }
+  h2 { margin-top: 2rem; color: #0078d4; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 2rem; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  th, td { text-align: left; padding: .5rem .75rem; border: 1px solid #ddd; }
+  th { background: #0078d4; color: #fff; }
+  tr:nth-child(even) { background: #f9f9f9; }
+  code { background: #e8e8e8; padding: .1rem .3rem; border-radius: 3px; font-size: .9em; }
+  .note { font-style: italic; color: #555; margin-bottom: 1rem; }
+  summary { cursor: pointer; font-weight: 600; padding: .5rem 0; }
+  .excluded { opacity: .7; }
+  a { color: #0078d4; }
+</style>
+</head>
+<body>
+
+<h1>GC Demotion Reference Report</h1>
+<p class="note">Generated from a <code>rg -i "demot"</code> search of the dotnet/runtime repository. Items below were identified as related to .NET GC demotion.</p>
+
+<h2>Design Documents</h2>
+<table>
+<tr><th>File</th><th>Key Points</th></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/docs/design/features/PinnedHeap.md">docs/design/features/PinnedHeap.md</a></td><td>Explains GC demotion strategy for pinned objects: keeping them in gen0 so free spaces can be reused for gen0 allocations. Describes problems with long-lived pins being demoted. Motivates the Pinned Object Heap (POH) as an alternative.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/botr/garbage-collection.md">docs/design/coreclr/botr/garbage-collection.md</a></td><td>BOTR GC chapter -- mentions "decide to demote or not promote" as a fundamental GC planning decision.</td></tr>
+</table>
+
+<h2>Core GC Engine (<a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp">src/coreclr/gc/gc.cpp</a>)</h2>
+<p>The primary implementation of GC demotion logic lives in <code>gc.cpp</code>. This is by far the most important file.</p>
+<table>
+<tr><th>Line(s)</th><th>Symbol / Context</th><th>Description</th></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L116-L117">116-117</a></td><td><code>demotion_pinned_ratio_th</code></td><td>Threshold (1%) -- if pinned survival exceeds this ratio the region is NOT demoted.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L124">124</a></td><td><code>demotion_plug_len_th</code></td><td>Plug length threshold (6 MB) for demotion decisions on large plugs.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L2648-L2652">2648-2652</a></td><td><code>demotion_low</code>, <code>demotion_high</code>, <code>demote_gen1_p</code></td><td>Per-heap static fields tracking the demotion address range and gen1 demotion flag.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L7862">7862</a>, <a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L7927-L7928">7927-7928</a></td><td><code>settings.demotion</code></td><td>Initialization and recording of demotion into GC history mechanism bits.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L11995-L12000">11995-12000</a></td><td><code>is_region_demoted()</code></td><td>Checks whether an object's region has the <code>RI_DEMOTED</code> bit set.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L12092-L12106">12092-12106</a></td><td>Region plan gen assignment</td><td>Sets/clears <code>heap_segment_flags_demoted</code> and <code>RI_DEMOTED</code> when a region is assigned to a younger generation.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L12167-L12176">12167-12176</a></td><td><code>clear_region_demoted()</code></td><td>Clears the demoted flag on a region and its info-bits map entry.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L12228">12228</a></td><td>Promotion/demotion guard</td><td>Checks <code>!demotion && promotion</code> to decide whether age-based logic applies.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L23942">23942</a></td><td><code>settings.demotion = FALSE</code></td><td>Reset of demotion flag at start of new GC cycle.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L29743-L29751">29743-29751</a></td><td>Region flags consistency check</td><td>Validates that <code>RI_DEMOTED</code> bit matches <code>heap_segment_flags_demoted</code>.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L30882-L30897">30882-30897</a></td><td>Large plug demotion guard</td><td>Prevents demoting big plugs to gen0; uses <code>demotion_plug_len_th</code>.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L30989">30989</a></td><td><code>advance_pins_for_demotion()</code></td><td>Advances pinned plug queue entries for demotion processing.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L31156-L31172">31156-31172</a></td><td>Ephemeral processing demotion</td><td>Calls <code>advance_pins_for_demotion</code> and sets <code>demotion_low</code>.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L31872">31872</a></td><td><code>check_class_object_demotion()</code></td><td>Checks class objects for demotion during relocation.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L32123-L32142">32123-32142</a></td><td><code>decide_on_demotion_pin_surv()</code></td><td>Decides whether to demote a region based on pinned survival ratio.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L32274-L32379">32274-32379</a></td><td>Region demotion policy</td><td>Policy logic: regions with pinned surv below threshold are demoted to gen0; otherwise not demoted.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L33174-L33178">33174-33178</a></td><td>Demotion range init</td><td>Initializes <code>demotion_low/high</code> and sets <code>demote_gen1_p</code> based on promotion + card conditions.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L33661-L33768">33661-33768</a></td><td>End-of-plan demotion</td><td>Demotion decisions during the plan phase for old gen regions.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L34058-L34200">34058-34200</a></td><td>Post-plan demotion aggregation</td><td>Server GC: aggregates per-heap demotion ranges. Workstation: computes final <code>settings.demotion</code>.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L34420-L34570">34420-34570</a></td><td>Root scanning demotion</td><td>Calls <code>GCScan::GcDemote</code> to demote EE roots when demotion is active. Asserts demotion consistency.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L34605-L34607">34605-34607</a></td><td><code>settings.demotion = FALSE</code></td><td>Resets demotion after relocate phase (applies to segments and regions).</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L34845">34845</a></td><td>Post-relocate promotion/demotion</td><td>Promotion flag check after relocation, gated on demotion.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L35027">35027</a></td><td><code>clear_region_demoted()</code></td><td>Clears demotion flag on current region after compaction.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L35592-L35661">35592-35661</a></td><td><code>check_demotion_helper_sip()</code></td><td>SIP (sweep-in-plan) demotion helper -- handles cross-generation references in swept regions.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L36231-L36302">36231-36302</a></td><td><code>check_class_object_demotion()</code>, <code>check_class_object_demotion_internal()</code>, <code>check_demotion_helper()</code></td><td>Core demotion helpers: detect demoted objects, set cards for cross-gen references, check demotion ranges across heaps.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L36321-L36450">36321-36450</a></td><td>Relocation demotion checks</td><td>Card-setting during relocation for demoted objects.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L36529-L36533">36529-36533</a></td><td>Collectible object demotion</td><td>Unconditionally sets cards for collectible objects when demotion is active.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L43850-L43863">43850-43863</a></td><td>Ephemeral segment demotion</td><td>Demotes entire ephemeral segment (low memory / special case), sets <code>demotion_low/high</code> to full segment range.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L45232">45232</a></td><td>Region promote/demote calculation</td><td>Note about freely choosing which region to demote/promote.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L47130">47130</a></td><td><code>check_class_object_demotion()</code></td><td>Additional call site during object processing.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L50868">50868</a></td><td>ETW/diagnostic output</td><td>Logs "DM" marker when <code>gc_demotion_bit</code> is set in per-heap data.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gc.cpp#L52680-L52704">52680-52704</a></td><td>Verification</td><td>Verification pass looking for demoted or promoted objects.</td></tr>
+</table>
+
+<h2>GC Private Headers (<a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcpriv.h">src/coreclr/gc/gcpriv.h</a>)</h2>
+<table>
+<tr><th>Line(s)</th><th>Symbol</th><th>Description</th></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcpriv.h#L651">651</a>, <a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcpriv.h#L692">692</a></td><td><code>demotion</code> field</td><td>Per-GC settings flag (<code>BOOL</code> / <code>bool</code>) indicating demotion occurred.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcpriv.h#L726">726</a></td><td><code>demotion = (gm->demotion != 0)</code></td><td>Copy of demotion flag from gc_mechanisms.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcpriv.h#L1569-L1580">1569-1580</a></td><td><code>RI_DEMOTED = 0x8</code></td><td>Region info bit indicating a demoted region.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcpriv.h#L1689">1689</a></td><td><code>is_region_demoted()</code></td><td>Method declaration to check region demotion status.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcpriv.h#L1694-L1695">1694-1695</a></td><td><code>clear_region_demoted()</code>, <code>decide_on_demotion_pin_surv()</code></td><td>Method declarations.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcpriv.h#L1735">1735</a></td><td><code>check_demotion_helper_sip()</code></td><td>SIP demotion helper declaration.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcpriv.h#L2868">2868</a></td><td><code>advance_pins_for_demotion()</code></td><td>Advances pinned queue for demotion.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcpriv.h#L2986-L2989">2986-2989</a></td><td><code>check_class_object_demotion()</code>, <code>check_demotion_helper()</code></td><td>Object-level demotion check declarations.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcpriv.h#L3667-L3669">3667-3669</a></td><td><code>demotion_low</code>, <code>demotion_high</code>, <code>demote_gen1_p</code></td><td>Per-heap fields for demotion address range tracking.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcpriv.h#L6176">6176</a></td><td><code>heap_segment_flags_demoted</code></td><td>Segment flag constant (2048).</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcpriv.h#L6229">6229</a></td><td>Comment</td><td>"When setting it we update the demotion decision accordingly."</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcpriv.h#L6721-L6723">6721-6723</a></td><td><code>heap_segment_demoted_p()</code></td><td>Inline helper checking <code>heap_segment_flags_demoted</code>.</td></tr>
+</table>
+
+<h2>GC Records (<a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcrecord.h">src/coreclr/gc/gcrecord.h</a>)</h2>
+<table>
+<tr><th>Line</th><th>Symbol</th><th>Description</th></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcrecord.h#L311">311</a></td><td><code>gc_demotion_bit = 1</code></td><td>Mechanism bit indicating demotion occurred in a GC cycle.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcrecord.h#L409">409</a></td><td><code>global_demotion = 3</code></td><td>Global mechanism enum value for demotion.</td></tr>
+</table>
+
+<h2>Handle Table (<a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/handletablescan.cpp">handletablescan.cpp</a>, <a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/handletable.cpp">handletable.cpp</a>)</h2>
+<table>
+<tr><th>File</th><th>Line(s)</th><th>Description</th></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/handletablescan.cpp">handletablescan.cpp</a></td><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/handletablescan.cpp#L846-L859">846-859</a></td><td>Sets age maps for handle blocks during demotion. Notes that most handles refer to non-demoted objects and still need aging.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/handletablescan.cpp">handletablescan.cpp</a></td><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/handletablescan.cpp#L1037-L1038">1037-1038</a></td><td>Second call site for age map updates during demotion.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/handletable.cpp">handletable.cpp</a></td><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/handletable.cpp#L815">815</a></td><td>Handles objects being demoted from a higher generation during GC.</td></tr>
+</table>
+
+<h2>GC Scan Interface (<a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcscan.h">gcscan.h</a>, <a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcscan.cpp">gcscan.cpp</a>)</h2>
+<table>
+<tr><th>File</th><th>Line(s)</th><th>Description</th></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcscan.h">gcscan.h</a></td><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcscan.h#L86-L87">86-87</a></td><td><code>GcDemote()</code> declaration -- post-promotion callback when roots were demoted.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcscan.cpp">gcscan.cpp</a></td><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcscan.cpp#L237-L241">237-241</a></td><td><code>GcDemote()</code> implementation -- calls <code>SyncBlockCacheDemote</code>.</td></tr>
+</table>
+
+<h2>GC-to-EE Interface (SyncBlock Cache Demotion)</h2>
+<table>
+<tr><th>File</th><th>Line(s)</th><th>Description</th></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcinterface.ee.h">gcinterface.ee.h</a></td><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcinterface.ee.h#L246-L248">246-248</a></td><td><code>SyncBlockCacheDemote()</code> pure virtual -- tells the EE that the GC intends to demote sync block cache objects.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcenv.ee.standalone.inl">gcenv.ee.standalone.inl</a></td><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/gcenv.ee.standalone.inl#L90-L93">90-93</a></td><td>Standalone inline forwarding to <code>g_theGCToCLR->SyncBlockCacheDemote()</code>.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/env/gctoeeinterface.standalone.inl">env/gctoeeinterface.standalone.inl</a></td><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/env/gctoeeinterface.standalone.inl#L62-L64">62-64</a></td><td>Wrapper calling the global <code>SyncBlockCacheDemote</code>.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/sample/gcenv.ee.cpp">sample/gcenv.ee.cpp</a></td><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/sample/gcenv.ee.cpp#L224">224</a></td><td>Sample (no-op) implementation.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/env/gcenv.ee.h">env/gcenv.ee.h</a></td><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/gc/env/gcenv.ee.h#L46">46</a></td><td>Static declaration for sample/env.</td></tr>
+</table>
+
+<h2>VM / EE Side</h2>
+<table>
+<tr><th>File</th><th>Line(s)</th><th>Description</th></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/vm/syncblk.cpp">vm/syncblk.cpp</a></td><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/vm/syncblk.cpp#L1116-L1127">1116-1127</a></td><td><code>SyncBlockCache::GCDone(BOOL demoting, int max_gen)</code> -- processes sync block cache after GC, conditioned on demotion.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/vm/syncblk.h">vm/syncblk.h</a></td><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/vm/syncblk.h#L718">718</a></td><td>Declaration of <code>GCDone(BOOL demoting, int max_gen)</code>.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/vm/gcenv.ee.cpp">vm/gcenv.ee.cpp</a></td><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/vm/gcenv.ee.cpp#L411">411</a></td><td><code>GCToEEInterface::SyncBlockCacheDemote(int max_gen)</code> implementation in the CoreCLR VM.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/nativeaot/Runtime/gcenv.ee.cpp">nativeaot/Runtime/gcenv.ee.cpp</a></td><td><a href="https://github.com/dotnet/runtime/blob/main/src/coreclr/nativeaot/Runtime/gcenv.ee.cpp#L187">187</a></td><td>NativeAOT implementation (no-op or minimal).</td></tr>
+</table>
+
+<h2>Tests</h2>
+<table>
+<tr><th>File</th><th>Line(s)</th><th>Description</th></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/tests/GC/Stress/Tests/PlugGaps.cs">tests/GC/Stress/Tests/PlugGaps.cs</a></td><td><a href="https://github.com/dotnet/runtime/blob/main/src/tests/GC/Stress/Tests/PlugGaps.cs#L175">175</a></td><td>References <code>demotion</code> field at offset 0x018 (debug/dump inspection).</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/tests/GC/Stress/Tests/allocationwithpins.cs">tests/GC/Stress/Tests/allocationwithpins.cs</a></td><td><a href="https://github.com/dotnet/runtime/blob/main/src/tests/GC/Stress/Tests/allocationwithpins.cs#L42-L43">42-43</a></td><td>Comments about pinning influencing the demotion effect.</td></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/src/libraries/System.Runtime/tests/System.Runtime.Tests/System/GCTests.cs">System.Runtime.Tests/GCTests.cs</a></td><td><a href="https://github.com/dotnet/runtime/blob/main/src/libraries/System.Runtime/tests/System.Runtime.Tests/System/GCTests.cs#L448">448</a></td><td>Comment noting objects can get demoted or stay in the same generation.</td></tr>
+</table>
+
+<h2>Borderline / Tangentially Related</h2>
+<table>
+<tr><th>File</th><th>Line(s)</th><th>Why Listed</th></tr>
+<tr><td><a href="https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/botr/virtual-stub-dispatch.md">docs/design/coreclr/botr/virtual-stub-dispatch.md</a></td><td><a href="https://github.com/dotnet/runtime/blob/main/docs/design/coreclr/botr/virtual-stub-dispatch.md#L155">155</a></td><td>Demotion of call sites from monomorphic to polymorphic happens at GC sync points. Not object demotion, but GC-timing dependent.</td></tr>
+</table>
+
+<details>
+<summary>Excluded (Not GC Demotion)</summary>
+<table class="excluded">
+<tr><th>File</th><th>Reason</th></tr>
+<tr><td>JIT: morph.cpp, lsra.cpp, compiler.h, compiler.cpp, indirectcalltransformer.cpp</td><td>JIT inline candidate demotion and implicit byref arg demotion (compiler optimization, not GC).</td></tr>
+<tr><td>WASM: PackedSimd.cs, interp-simd-intrins.def, jiterpreter-tables.ts, jiterpreter-opcodes.ts, instrswasm.h, codegenwasm.cpp</td><td><code>f32.demote_f64</code> / <code>f32x4.demote_f64x2_zero</code> -- WebAssembly floating-point type narrowing instructions.</td></tr>
+<tr><td>Methodical_others.csproj, ehCodeMotion.cs</td><td>Filename contains "Motion" not "demotion"; unrelated JIT test.</td></tr>
+<tr><td>zlib-ng: slide_hash_c.c</td><td>Variable scope demotion in external C library.</td></tr>
+<tr><td>System.DirectoryServices: ActiveDirectorySite.cs</td><td>Active Directory server demotion (domain controller demotion).</td></tr>
+<tr><td>System.Data.Common: XmlDataDocument.cs</td><td>XML document element demotion (DOM manipulation).</td></tr>
+<tr><td>Microsoft.CSharp: AggregateSymbol.cs</td><td>Type demotion during C# runtime binder import.</td></tr>
+<tr><td>debug/ee/amd64: Amd64InstructionTableGenerator.cs, amd64InstrDecode.h</td><td><code>CLDEMOTE</code> x86 cache-line demote instruction (CPU ISA, not GC).</td></tr>
+</table>
+</details>
+
+</body>
+</html>
