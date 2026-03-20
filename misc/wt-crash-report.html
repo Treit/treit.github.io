@@ -9,19 +9,14 @@
 
   body {
     font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace;
-    max-width: 760px;
-    margin: 40px auto;
-    padding: 0 20px;
+    padding: 20px;
     font-size: 14px;
-    line-height: 1.7;
+    line-height: 1.6;
     color: #222;
   }
-  h1 { font-size: 1.6em; margin-bottom: 0.2em; }
   h2 { margin-top: 2.5em; }
   h3 { margin-top: 1.5em; }
   .subtitle { color: #666; font-size: 0.85em; margin-bottom: 2em; }
-  .card { margin-bottom: 1.5em; }
-  .card-header { margin-bottom: 0.5em; }
   .badge { font-size: 0.8em; font-weight: bold; }
   .badge-crash::before { content: '[CRASH] '; color: red; }
   .badge-hang::before  { content: '[HANG] '; color: darkorange; }
@@ -30,27 +25,14 @@
   table { border-collapse: collapse; margin: 0.5em 0; }
   th, td { text-align: left; padding: 4px 12px 4px 0; vertical-align: top; }
   th { font-size: 0.85em; color: #666; }
-  code { font-family: inherit; font-size: 0.95em; }
+  code { font-family: inherit; }
   pre { overflow-x: auto; margin: 0.8em 0; padding: 0.8em; background: #f5f5f5; }
   pre .highlight { color: #c00; font-weight: bold; }
   pre .fn { color: #004488; }
   pre .module { color: #666; }
-  .stats-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1em 2em;
-    margin: 1em 0;
-  }
-  .stat-box { text-align: left; }
-  .stat-value { font-size: 1.8em; font-weight: bold; }
-  .stat-label { font-size: 0.75em; color: #666; text-transform: uppercase; }
-  .timeline { margin: 1em 0; }
-  .timeline-event { margin-bottom: 1em; }
-  .timeline-time { font-size: 0.85em; color: #666; }
   .callchain { list-style: none; padding: 0; margin: 0.5em 0; }
   .callchain li { padding: 1px 0; }
-  .callchain li::before { content: '→ '; color: #999; }
-  .callchain li:first-child::before { content: '💥 '; }
+  .callchain li::before { content: '> '; color: #999; }
   .callchain .fault { color: #c00; font-weight: bold; }
   .verdict { border-left: 3px solid #c00; padding-left: 1em; margin: 1.5em 0; }
   .verdict h3 { color: #c00; }
@@ -61,7 +43,7 @@
 </head>
 <body>
 
-<h1>🐛 Windows Terminal Crash Analysis Report</h1>
+<h1>Windows Terminal Crash Analysis Report</h1>
 <p class="subtitle">
   Generated: March 19, 2026 &nbsp;|&nbsp;
   WT Version: 1.24.2603.3001 &nbsp;|&nbsp;
@@ -69,35 +51,9 @@
   Harness: Monkey Stress Tester
 </p>
 
-<div class="stats-grid">
-  <div class="stat-box">
-    <div class="stat-value" style="color: #c00">3</div>
-    <div class="stat-label">Unique Bugs Found</div>
-  </div>
-  <div class="stat-box">
-    <div class="stat-value" style="color: darkorange">4</div>
-    <div class="stat-label">Total Incidents</div>
-  </div>
-  <div class="stat-box">
-    <div class="stat-value">472</div>
-    <div class="stat-label">Total Actions</div>
-  </div>
-  <div class="stat-box">
-    <div class="stat-value">1</div>
-    <div class="stat-label">Crash Dumps Captured</div>
-  </div>
-  <div class="stat-box">
-    <div class="stat-value">3</div>
-    <div class="stat-label">WER AppHang Reports</div>
-  </div>
-  <div class="stat-box">
-    <div class="stat-value">394.9 MB</div>
-    <div class="stat-label">Peak Memory</div>
-  </div>
-</div>
 
 <!-- ================================================================== -->
-<h2>🔴 Bug #1 — TextBuffer::_getRow Bounds Check Failure</h2>
+<h2>Bug #1 — TextBuffer::_getRow Bounds Check Failure</h2>
 <!-- ================================================================== -->
 
 <div class="card">
@@ -165,7 +121,7 @@
 <h3>Reproduction Context</h3>
 <div class="card">
   <p>Recent actions before crash:</p>
-  <pre>resize_pane_left → clear_buffer → maximize_window → focus_pane_up → run_terminal_stress → resize_pane_left 💥</pre>
+  <pre>resize_pane_left -> clear_buffer -> maximize_window -> focus_pane_up -> run_terminal_stress -> resize_pane_left *CRASH*</pre>
   <p style="margin-top: 0.5rem; color: #666;">
     Tags active: <code>buffer</code>, <code>mouse</code>, <code>render</code>, <code>window</code>,
     <code>layout</code>, <code>input</code>, <code>navigation</code>, <code>stress</code>
@@ -173,7 +129,7 @@
 </div>
 
 <!-- ================================================================== -->
-<h2>🟡 Bug #2 — UI Thread Hang During Pane Resize (Small Window)</h2>
+<h2>Bug #2 — UI Thread Hang During Pane Resize (Small Window)</h2>
 <!-- ================================================================== -->
 
 <div class="card">
@@ -190,7 +146,7 @@
     <tr><td>Seed</td><td><code>2232252378</code> (profile: <code>default</code>)</td></tr>
     <tr><td>Exit Code</td><td><code>-805306369</code> (<code>0xCFFFFFFF</code>)</td></tr>
     <tr><td>Action Count</td><td>59 actions in 48 seconds</td></tr>
-    <tr><td>Last Actions</td><td><code>resize_window</code> → <code>resize_pane_left</code> → <code>resize_pane_down</code> 💥</td></tr>
+    <tr><td>Last Actions</td><td><code>resize_window</code> -> <code>resize_pane_left</code> -> <code>resize_pane_down</code> *HANG*</td></tr>
     <tr><td>Time</td><td>2026-03-19 16:58:22</td></tr>
   </table>
 </div>
@@ -216,7 +172,7 @@
 </div>
 
 <!-- ================================================================== -->
-<h2>🟡 Bug #3 — UI Thread Hang Under Heavy Buffer + Resize Load</h2>
+<h2>Bug #3 — UI Thread Hang Under Heavy Buffer + Resize Load</h2>
 <!-- ================================================================== -->
 
 <div class="card">
@@ -260,7 +216,7 @@
 </div>
 
 <!-- ================================================================== -->
-<h2>📊 Test Session Timeline</h2>
+<h2>Test Session Timeline</h2>
 <!-- ================================================================== -->
 
 <div class="timeline">
@@ -291,7 +247,7 @@
 </div>
 
 <!-- ================================================================== -->
-<h2>🔍 Crash Dump Deep Dive</h2>
+<h2>Crash Dump Deep Dive</h2>
 <!-- ================================================================== -->
 
 <div class="card">
@@ -325,7 +281,7 @@
 </div>
 
 <!-- ================================================================== -->
-<h2>🎯 Summary & Recommendations</h2>
+<h2>Summary & Recommendations</h2>
 <!-- ================================================================== -->
 
 <div class="verdict">
