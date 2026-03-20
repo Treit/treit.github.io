@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐒 Monkey vs Terminal: A Bug Safari</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap');
+  :root {
+    --cream: #fdf6e3;
+    --paper: #fefcf5;
+    --bark: #5c4033;
+    --leaf: #2d6a4f;
+    --leaf-light: #40916c;
+    --bug-red: #e63946;
+    --bug-orange: #f4845f;
+    --honey: #f9c74f;
+    --sky: #457b9d;
+    --dirt: #8b6f47;
+    --shadow: rgba(92, 64, 51, 0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Fredoka', 'Comic Sans MS', cursive, sans-serif;
+    background: var(--cream);
+    background-image:
+      radial-gradient(circle at 10% 20%, rgba(45,106,79,0.04) 0%, transparent 50%),
+      radial-gradient(circle at 90% 80%, rgba(249,199,79,0.06) 0%, transparent 50%);
+    color: var(--bark);
+    line-height: 1.7;
+    padding: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .hero {
+    text-align: center;
+    padding: 2rem 1rem 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .hero h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--bark);
+    margin-bottom: 0.3rem;
+  }
+  .hero .emoji-parade { font-size: 2rem; letter-spacing: 0.3rem; }
+  .hero .subtitle {
+    color: var(--dirt);
+    font-size: 1rem;
+    font-weight: 400;
+    margin-top: 0.5rem;
+  }
+  h2 {
+    font-size: 1.5rem;
+    color: var(--leaf);
+    margin: 2.5rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  h2 .icon { font-size: 1.8rem; }
+  h3 { color: var(--bark); font-size: 1.1rem; margin: 1.2rem 0 0.5rem; }
+  .trophy-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .trophy {
+    background: var(--paper);
+    border: 2px dashed var(--honey);
+    border-radius: 16px;
+    padding: 1.2rem;
+    text-align: center;
+    box-shadow: 0 4px 12px var(--shadow);
+    transition: transform 0.15s;
+  }
+  .trophy:hover { transform: translateY(-3px) rotate(-1deg); }
+  .trophy .big { font-size: 2.4rem; }
+  .trophy .num { font-size: 2rem; font-weight: 700; color: var(--leaf); }
+  .trophy .label { font-size: 0.8rem; color: var(--dirt); text-transform: uppercase; letter-spacing: 0.05em; }
+  .specimen {
+    background: var(--paper);
+    border: 2px solid var(--leaf-light);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 16px var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .specimen::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 80px;
+    height: 80px;
+    background: var(--honey);
+    opacity: 0.15;
+    border-radius: 50%;
+  }
+  .specimen-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .specimen-title { font-size: 1.15rem; font-weight: 600; }
+  .tag {
+    display: inline-block;
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .tag-crash { background: #fde2e4; color: var(--bug-red); border: 1.5px solid var(--bug-red); }
+  .tag-hang { background: #fff3cd; color: #b8860b; border: 1.5px solid var(--honey); }
+  .tag-dump { background: #e8daef; color: #7d3c98; border: 1.5px solid #7d3c98; }
+  table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; }
+  th, td { text-align: left; padding: 0.45rem 0.7rem; }
+  th { color: var(--leaf); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 2px dotted var(--honey); }
+  td { font-size: 0.88rem; border-bottom: 1px dotted #e0d8c8; }
+  code {
+    background: #f0ead6;
+    padding: 0.12rem 0.4rem;
+    border-radius: 5px;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.82rem;
+    color: var(--bark);
+  }
+  pre {
+    background: #2b2b2b;
+    color: #d4d4d4;
+    border-radius: 12px;
+    padding: 1rem;
+    overflow-x: auto;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    margin: 0.5rem 0;
+    border: 2px solid var(--bark);
+  }
+  pre .boom { color: #ff6b6b; font-weight: bold; }
+  pre .fn { color: #69db7c; }
+  pre .mod { color: #ffd43b; }
+  pre .dim { color: #868e96; }
+  .story {
+    background: linear-gradient(135deg, #f0ead6 0%, #fdf6e3 100%);
+    border-left: 4px solid var(--leaf);
+    border-radius: 0 12px 12px 0;
+    padding: 1rem 1.2rem;
+    margin: 0.8rem 0;
+    font-size: 0.92rem;
+  }
+  .story p + p { margin-top: 0.6rem; }
+  .story em { color: var(--leaf); font-style: normal; font-weight: 600; }
+  .adventure {
+    position: relative;
+    padding-left: 2.5rem;
+    margin: 1.5rem 0;
+  }
+  .adventure::before {
+    content: '';
+    position: absolute;
+    left: 1rem;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: repeating-linear-gradient(to bottom, var(--leaf-light) 0px, var(--leaf-light) 8px, transparent 8px, transparent 14px);
+    border-radius: 2px;
+  }
+  .stop {
+    position: relative;
+    margin-bottom: 1.5rem;
+    padding: 0.8rem 1rem;
+    background: var(--paper);
+    border-radius: 12px;
+    border: 1px solid #e0d8c8;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+  .stop::before {
+    content: '';
+    position: absolute;
+    left: -1.85rem;
+    top: 1rem;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 3px solid var(--paper);
+  }
+  .stop.boom-stop::before { background: var(--bug-red); }
+  .stop.hang-stop::before { background: var(--honey); }
+  .stop.go-stop::before { background: var(--leaf); }
+  .stop-time { color: var(--dirt); font-size: 0.8rem; font-weight: 600; }
+  .stop-body { font-size: 0.88rem; margin-top: 0.2rem; }
+  .callchain { list-style: none; padding: 0; margin: 0.5rem 0; }
+  .callchain li {
+    padding: 0.25rem 0 0.25rem 1.5rem;
+    font-size: 0.82rem;
+    font-family: 'Fira Code', monospace;
+    position: relative;
+  }
+  .callchain li::before {
+    content: '↓';
+    position: absolute;
+    left: 0.3rem;
+    color: var(--leaf-light);
+  }
+  .callchain li:first-child::before { content: '💥'; left: 0; }
+  .callchain li.fault { color: var(--bug-red); font-weight: 600; }
+  .evidence {
+    background: var(--paper);
+    border: 2px solid var(--sky);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    box-shadow: 0 4px 16px var(--shadow);
+  }
+  .evidence h3 { color: var(--sky); }
+  .field-notes {
+    background: #e8f5e9;
+    border: 2px solid var(--leaf-light);
+    border-radius: 16px;
+    padding: 1.2rem;
+    margin: 0.8rem 0;
+  }
+  .field-notes h3 { color: var(--leaf); margin-top: 0; }
+  footer {
+    text-align: center;
+    color: var(--dirt);
+    font-size: 0.82rem;
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 2px dashed var(--honey);
+  }
+  footer a { color: var(--leaf); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="emoji-parade">🐒 🔍 🐛 🪲 🦗</div>
+  <h1>Monkey vs. Terminal</h1>
+  <h1 style="font-size: 1.6rem; color: var(--leaf);">A Bug Safari 🌿</h1>
+  <p class="subtitle">
+    One monkey. One terminal. Three bugs. Zero regrets.<br>
+    March 19, 2026 · Windows Terminal v1.24.2603.3001 · Windows 11 22H2
+  </p>
+</div>
+
+<div class="trophy-row">
+  <div class="trophy">
+    <div class="big">🐛</div>
+    <div class="num">3</div>
+    <div class="label">Bugs Collected</div>
+  </div>
+  <div class="trophy">
+    <div class="big">💥</div>
+    <div class="num">4</div>
+    <div class="label">Total Incidents</div>
+  </div>
+  <div class="trophy">
+    <div class="big">🐒</div>
+    <div class="num">472</div>
+    <div class="label">Monkey Actions</div>
+  </div>
+  <div class="trophy">
+    <div class="big">🧠</div>
+    <div class="num">598 MB</div>
+    <div class="label">Biggest Dump</div>
+  </div>
+  <div class="trophy">
+    <div class="big">📈</div>
+    <div class="num">395 MB</div>
+    <div class="label">Peak Memory</div>
+  </div>
+  <div class="trophy">
+    <div class="big">⏱️</div>
+    <div class="num">~7 min</div>
+    <div class="label">Time to First Bug</div>
+  </div>
+</div>
+
+<h2><span class="icon">🪲</span> Specimen #1 — The Buffer Overflow Bug</h2>
+
+<div class="specimen">
+  <div class="specimen-header">
+    <span class="specimen-title">🔬 TextBuffer::_getRow goes out of bounds during resize</span>
+    <div>
+      <span class="tag tag-crash">CRASH</span>
+      <span class="tag tag-dump">DUMP CAPTURED</span>
+    </div>
+  </div>
+
+  <div class="story">
+    <p>
+      🐒 Our monkey was happily resizing panes and clearing buffers when suddenly — <em>snap!</em> —
+      the terminal's text buffer tried to access a row that doesn't exist. Deep inside
+      <code>TextBuffer::Reflow</code>, a <code>gsl::narrow_cast</code> caught an integer overflow and
+      hit the emergency brake. The process froze, and our monkey gleefully captured a 598MB crash dump
+      before putting it out of its misery. 🪦
+    </p>
+  </div>
+
+  <table>
+    <tr><th>🏷️ Detail</th><th>📋 Value</th></tr>
+    <tr><td>Module</td><td><code>Microsoft.Terminal.Control.dll</code></td></tr>
+    <tr><td>Crime Scene</td><td><code>TextBuffer::_getRow + 0x2a</code> (<code>textBuffer.cpp:206</code>)</td></tr>
+    <tr><td>Exception</td><td><code>0x80000003</code> — BREAKPOINT (fail-fast from bounds check)</td></tr>
+    <tr><td>Failure Hash</td><td><code>{84f4c155-ef01-0ce9-c7d7-ff1f44142ac0}</code></td></tr>
+    <tr><td>Dump</td><td><code>WindowsTerminal_44548_20260319_174004.dmp</code> (597.7 MB)</td></tr>
+    <tr><td>Victim PID</td><td>44548 (seed: <code>11112222</code>, profile: <code>buffer-chaos</code>)</td></tr>
+    <tr><td>Actions Before Death</td><td>128 actions in 142 seconds</td></tr>
+    <tr><td>Last Words</td><td><code>resize_pane_left</code> → 💀</td></tr>
+    <tr><td>Memory</td><td>324 MB RSS (grew +256 MB during session)</td></tr>
+  </table>
+
+  <h3>🔬 The Autopsy (Call Stack)</h3>
+  <pre>
+<span class="boom">💥 Microsoft_Terminal_Control!gsl::narrow_cast</span>              [inlined]
+<span class="boom">   Microsoft_Terminal_Control!TextBuffer::_getRow+0x2a</span>      ← textBuffer.cpp:206
+<span class="fn">   Microsoft_Terminal_Control!TextBuffer::GetMutableRowByOffset+0x12</span>
+<span class="fn">   Microsoft_Terminal_Control!TextBuffer::Reflow+0x5e9ad</span>
+<span class="fn">   Microsoft_Terminal_Control!Terminal::UserResize+0x1bc</span>
+<span class="fn">   Microsoft_Terminal_Control!ControlCore::_refreshSizeUnderLock+0x14f</span>
+<span class="fn">   Microsoft_Terminal_Control!ControlCore::SizeOrScaleChanged+0x94</span>
+<span class="fn">   Microsoft_Terminal_Control!ControlCore::SizeChanged+0x1a</span>
+<span class="mod">   Windows_UI_Xaml!FrameworkElement::OnSizeChanged</span>
+<span class="mod">   Windows_UI_Xaml!CLayoutManager::RaiseSizeChangedEvents</span>
+<span class="mod">   Windows_UI_Xaml!CLayoutManager::UpdateLayout</span>
+<span class="dim">   Windows_UI_Xaml!CCoreServices::NWDrawTree</span>
+<span class="dim">   Windows_UI_Xaml!CXcpBrowserHost::OnTick</span>
+<span class="dim">   ...</span>
+<span class="dim">   WindowsTerminal!WindowEmperor::HandleCommandlineArgs+0xd78</span>
+  </pre>
+
+  <h3>🧩 What Went Wrong</h3>
+  <div class="story">
+    <p>
+      When you resize a pane, the XAML layout engine fires <code>SizeChanged</code> events. Each one tells
+      the terminal core "hey, you're a different shape now!" The core dutifully calls <em>TextBuffer::Reflow</em>
+      to rewrap all the text for the new dimensions.
+    </p>
+    <p>
+      The problem? Our monkey was <em>rapidly</em> resizing panes with <code>Alt+Shift+Arrow</code> while
+      TerminalStress was flooding the buffer with emoji. Multiple <code>SizeChanged</code> events piled up
+      faster than <code>Reflow</code> could finish. The buffer dimensions and row storage fell out of sync,
+      and <code>_getRow()</code> tried to access a row index that overflowed a 32-bit integer. The
+      <code>gsl::narrow_cast</code> safety net caught it and triggered a fail-fast breakpoint. 💣
+    </p>
+  </div>
+
+  <h3>🐾 The Monkey's Footprints</h3>
+  <pre>
+<span class="fn">resize_pane_left</span> → <span class="fn">clear_buffer</span> → <span class="fn">maximize_window</span> → <span class="fn">focus_pane_up</span> → <span class="fn">run_terminal_stress</span> → <span class="boom">resize_pane_left 💥</span>
+
+Tags active: buffer, mouse, render, window, layout, input, navigation, stress
+  </pre>
+</div>
+
+<h2><span class="icon">🦗</span> Specimen #2 — The Tiny Window Freeze</h2>
+
+<div class="specimen">
+  <div class="specimen-header">
+    <span class="specimen-title">🥶 Terminal freezes solid when panes are squeezed too small</span>
+    <span class="tag tag-hang">HANG</span>
+  </div>
+
+  <div class="story">
+    <p>
+      🐒 Our monkey resized the terminal window down to a cozy little rectangle, then started
+      enthusiastically resizing panes with <code>Alt+Shift+Arrow</code>. The terminal went quiet.
+      <em>Too</em> quiet. It stopped responding to everything — clicks, keyboard, even Windows' polite
+      "are you still there?" messages. Windows eventually declared it dead and filed an <code>MoAppHang</code>
+      report. The monkey waited. The terminal never came back. 🪦
+    </p>
+  </div>
+
+  <table>
+    <tr><th>🏷️ Detail</th><th>📋 Value</th></tr>
+    <tr><td>Type</td><td><code>MoAppHang</code> — "stopped interacting with Windows"</td></tr>
+    <tr><td>WER Bucket</td><td><code>a40af3d92bfbb84eed2bd8ff05e81c4c</code></td></tr>
+    <tr><td>Victim PID</td><td>55004 (seed: <code>2232252378</code>)</td></tr>
+    <tr><td>Exit Code</td><td><code>-805306369</code> (<code>0xCFFFFFFF</code>)</td></tr>
+    <tr><td>Actions</td><td>59 actions in 48 seconds</td></tr>
+    <tr><td>Fatal Sequence</td><td><code>resize_window</code> (small!) → <code>resize_pane_left</code> → <code>resize_pane_down</code> → 🧊</td></tr>
+    <tr><td>Known Relative</td><td><a href="https://github.com/microsoft/terminal/issues/19996" style="color: var(--leaf);">GitHub #19996</a></td></tr>
+  </table>
+
+  <h3>🧩 What Went Wrong</h3>
+  <div class="story">
+    <p>
+      When panes are squeezed to near-zero dimensions in a small window, the XAML layout manager enters a
+      <em>feedback loop</em>. Each resize triggers a <code>SizeChanged</code> event, which recalculates
+      pane sizes, which triggers more <code>SizeChanged</code> events... The UI thread gets trapped in
+      an infinite recalculation cycle and never gets a chance to process user input. 🔄♾️
+    </p>
+    <p>
+      The monkey already has a mitigation for this (<code>max_pane_resize_repeats=5</code>) to avoid
+      the known issue #19996, but certain window sizes still slip through the cracks.
+    </p>
+  </div>
+</div>
+
+<h2><span class="icon">🐜</span> Specimen #3 — The Heavy Load Lockup</h2>
+
+<div class="specimen">
+  <div class="specimen-header">
+    <span class="specimen-title">🏋️ Terminal buckles under 7 simultaneous TerminalStress processes</span>
+    <span class="tag tag-hang">HANG</span>
+  </div>
+
+  <div class="story">
+    <p>
+      🐒 The monkey went a little overboard this time. It opened a bunch of panes, launched
+      <em>seven</em> TerminalStress processes (each blasting random Unicode, emoji, and cursor chaos),
+      cranked the CPU to 400%, ballooned memory to 395 MB... and then tried to resize a pane. 🫠
+    </p>
+    <p>
+      The terminal tried heroically to reflow all those massive scrollback buffers (9,000+ rows of
+      emoji soup per pane) but the UI thread just... gave up. Windows filed a different hang report
+      than Specimen #2, confirming this is a <em>distinct</em> species of bug. 🧬
+    </p>
+  </div>
+
+  <table>
+    <tr><th>🏷️ Detail</th><th>📋 Value</th></tr>
+    <tr><td>Type</td><td><code>MoAppHang</code> — two distinct WER buckets observed</td></tr>
+    <tr><td>Victim PID</td><td>22240 (seed: <code>42424242</code>)</td></tr>
+    <tr><td>Actions</td><td>172 actions in 223 seconds</td></tr>
+    <tr><td>Peak Memory</td><td>394.9 MB (grew +327 MB from baseline 🤯)</td></tr>
+    <tr><td>Peak CPU</td><td>400% (4 cores pegged by TerminalStress children)</td></tr>
+    <tr><td>Hang Retries</td><td>4 (never recovered)</td></tr>
+    <tr><td>Last Action</td><td><code>resize_pane_down</code> → 🧊</td></tr>
+    <tr><td>Active TerminalStress Instances</td><td>7 (across multiple split panes)</td></tr>
+  </table>
+
+  <h3>🧩 How It Differs From Specimen #2</h3>
+  <div class="story">
+    <p>
+      Specimen #2 is a <em>geometric</em> problem — small window + tiny panes = layout feedback loop.
+      Specimen #3 is a <em>throughput</em> problem — enormous buffers + reflow = the UI thread drowns
+      in work. They produce <em>different WER bucket hashes</em>, live in different parts of the code,
+      and are triggered by completely different conditions. Two bugs, wearing different disguises. 🎭
+    </p>
+  </div>
+</div>
+
+<h2><span class="icon">🗺️</span> The Expedition Log</h2>
+
+<div class="adventure">
+  <div class="stop go-stop">
+    <div class="stop-time">4:56 PM — 🐒 Run 1 begins</div>
+    <div class="stop-body">Seed <code>2232252378</code>. Connected to PID 55004. The monkey starts clicking, splitting, resizing...</div>
+  </div>
+  <div class="stop boom-stop">
+    <div class="stop-time">4:58 PM — 🦗 Specimen #2 discovered!</div>
+    <div class="stop-body">Only 59 actions in! WT freezes after <code>resize_window</code> → <code>resize_pane_down</code> in a tiny window. Windows kills it (exit code <code>-805306369</code>). First blood! 🩸</div>
+  </div>
+  <div class="stop go-stop">
+    <div class="stop-time">5:00 PM — 🐒 Run 2 begins</div>
+    <div class="stop-body">Seed <code>42424242</code>. Fresh WT (PID 22240). The monkey goes HAM — opens 7 TerminalStress instances across split panes.</div>
+  </div>
+  <div class="stop hang-stop">
+    <div class="stop-time">5:04 PM — 🐜 Specimen #3 discovered!</div>
+    <div class="stop-body">172 actions, 395 MB peak, 400% CPU. WT locks up during <code>resize_pane_down</code>. Confirmed hang after 3 retries. Different WER bucket from #2! 🎉</div>
+  </div>
+  <div class="stop go-stop">
+    <div class="stop-time">5:36 PM — 🐒 Run 3 begins (with dump capture!)</div>
+    <div class="stop-body">Seed <code>11112222</code>, <code>buffer-chaos</code> profile. PID 44548. Dump capture via procdump is now enabled.</div>
+  </div>
+  <div class="stop boom-stop">
+    <div class="stop-time">5:40 PM — 🪲 Specimen #1 discovered! (The big one! 🏆)</div>
+    <div class="stop-body">128 actions in. <strong>Crash dump captured!</strong> 597.7 MB of forensic gold. <code>TextBuffer::_getRow</code> bounds check failure. Process killed, monkey reconnects to PID 31128 and keeps going. 💪</div>
+  </div>
+</div>
+
+<h2><span class="icon">🔬</span> Lab Report: The Crash Dump</h2>
+
+<div class="evidence">
+  <h3>🧪 WindowsTerminal_44548_20260319_174004.dmp</h3>
+  <p style="color: var(--dirt); margin-bottom: 0.8rem;">Dissected with WinDbg 10.0.29482.1003 · <code>!analyze -v</code></p>
+
+  <table>
+    <tr><th>🔑 Key</th><th>📎 Finding</th></tr>
+    <tr><td>Failure Bucket</td><td><code>BREAKPOINT_80000003_Microsoft.Terminal.Control.dll!TextBuffer::_getRow</code></td></tr>
+    <tr><td>Exception</td><td><code>0x80000003</code> — Breakpoint (fail-fast from <code>gsl::narrow_cast</code>)</td></tr>
+    <tr><td>Faulting Instruction</td><td><code>movsxd rbx, eax</code> at <code>0x7ffb2ba10a92</code> — sign-extending row index to 64-bit</td></tr>
+    <tr><td>Source</td><td><code>textBuffer.cpp:206</code></td></tr>
+    <tr><td>Thread</td><td><code>0x6fb8</code> (UI/main thread — where all the action happens)</td></tr>
+    <tr><td>Process Uptime</td><td>3 min 54 sec</td></tr>
+    <tr><td>WT Version</td><td>1.24.2603.3001</td></tr>
+  </table>
+
+  <h3 style="margin-top: 1rem;">🦴 The Bone Structure (Annotated Call Chain)</h3>
+  <ul class="callchain">
+    <li class="fault"><code>TextBuffer::_getRow()</code> — narrow_cast fails, row index is bogus</li>
+    <li><code>TextBuffer::GetMutableRowByOffset()</code> — trying to access a row mid-reflow</li>
+    <li><code>TextBuffer::Reflow()</code> — restructuring buffer for new dimensions</li>
+    <li><code>Terminal::UserResize()</code> — processing the resize request</li>
+    <li><code>ControlCore::_refreshSizeUnderLock()</code> — "under lock" but not locked enough</li>
+    <li><code>ControlCore::SizeOrScaleChanged()</code> — handling DPI/size change</li>
+    <li><code>ControlCore::SizeChanged()</code> — XAML size change callback</li>
+    <li style="color: var(--dirt);"><code>Windows_UI_Xaml::FrameworkElement::OnSizeChanged</code> — XAML layout engine</li>
+    <li style="color: var(--dirt);"><code>CLayoutManager::UpdateLayout</code> → <code>NWDrawTree</code> → <code>OnTick</code></li>
+  </ul>
+</div>
+
+<h2><span class="icon">🎯</span> The Common Thread</h2>
+
+<div class="specimen" style="border-color: var(--bug-red);">
+  <div class="story" style="border-left-color: var(--bug-red);">
+    <p>
+      All three bugs share a villain: <em>TextBuffer::Reflow</em>. 🦹
+    </p>
+    <p>
+      When you resize a pane, the XAML layout engine fires <code>SizeChanged</code> events that cascade into
+      buffer reflow operations. These operations rewrap every line of text for the new terminal dimensions.
+      They're expensive, they run on the UI thread, and they're <strong>not robust against re-entrant or
+      overlapping calls</strong>.
+    </p>
+    <p>
+      Our monkey found three ways to break this:
+    </p>
+    <p>
+      🪲 <strong>Specimen #1</strong>: Rapid resizes cause overlapping reflows → buffer dimensions go inconsistent → row index overflow → crash<br>
+      🦗 <strong>Specimen #2</strong>: Tiny window + resize = layout feedback loop → UI thread deadlocks on itself<br>
+      🐜 <strong>Specimen #3</strong>: Huge buffers + resize = reflow takes forever → UI thread starved of message pump time
+    </p>
+  </div>
+</div>
+
+<h2><span class="icon">📝</span> Field Notes for the Devs</h2>
+
+<div class="field-notes">
+  <h3>🐛 Note 1 — File This Upstream</h3>
+  <p>
+    Specimen #1 is a real crash with a full call stack and a 598MB dump. Ship it to
+    <a href="https://github.com/microsoft/terminal/issues" style="color: var(--leaf);">microsoft/terminal</a>
+    with reproduction seed <code>--seed 11112222 --action-profile buffer-chaos</code>.
+  </p>
+</div>
+
+<div class="field-notes">
+  <h3>🔧 Note 2 — Debounce the Reflows</h3>
+  <p>
+    The function is called <code>_refreshSizeUnderLock</code>, but the XAML layout pass can fire
+    re-entrant <code>SizeChanged</code> events before the lock is released. A coalescing resize
+    mechanism (debounce multiple events into one reflow) would fix or mitigate all three bugs.
+  </p>
+</div>
+
+<div class="field-notes">
+  <h3>🐒 Note 3 — Keep the Monkeys Running</h3>
+  <p>
+    Use <code>--action-profile novelty-hunt</code> to spread instances across different profiles.
+    Mix in shell diversity (pwsh, cmd, bash) for different rendering paths. The bugs are in the
+    resize code — keep poking at it from different angles.
+  </p>
+</div>
+
+<footer>
+  <p>
+    🐒 Report generated by the Monkey Stress Tester ·
+    <a href="https://github.com/Treit/TerminalStress">Treit/TerminalStress</a> ·
+    Debugger: WinDbg 10.0.29482.1003 ·
+    Dump tool: procdump ·
+    No terminals were permanently harmed in the making of this report. 🐒💚
+  </p>
+</footer>
+
+</body>
+</html>
