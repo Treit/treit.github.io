@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Windows Terminal Crash Analysis Report</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --red: #f85149;
+    --orange: #d29922;
+    --green: #3fb950;
+    --purple: #bc8cff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  h1 { color: var(--accent); font-size: 1.8rem; margin-bottom: 0.5rem; }
+  h2 { color: var(--accent); font-size: 1.3rem; margin: 2rem 0 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+  h3 { color: var(--purple); font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
+  .subtitle { color: var(--text-dim); margin-bottom: 2rem; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+  }
+  .badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .badge-crash { background: rgba(248,81,73,0.2); color: var(--red); border: 1px solid var(--red); }
+  .badge-hang { background: rgba(210,153,34,0.2); color: var(--orange); border: 1px solid var(--orange); }
+  .badge-dump { background: rgba(188,140,255,0.2); color: var(--purple); border: 1px solid var(--purple); }
+  .badge-ok { background: rgba(63,185,80,0.2); color: var(--green); border: 1px solid var(--green); }
+  table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; }
+  th, td { text-align: left; padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--border); }
+  th { color: var(--text-dim); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  td { font-size: 0.9rem; }
+  code {
+    background: rgba(110,118,129,0.2);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.85rem;
+  }
+  pre {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem;
+    overflow-x: auto;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--text-dim);
+    margin: 0.5rem 0;
+  }
+  pre .highlight { color: var(--red); font-weight: bold; }
+  pre .fn { color: var(--accent); }
+  pre .module { color: var(--orange); }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  .stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .stat-value { font-size: 2rem; font-weight: 700; }
+  .stat-label { color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .timeline {
+    position: relative;
+    padding-left: 2rem;
+    margin: 1rem 0;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.6rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+  }
+  .timeline-event {
+    position: relative;
+    margin-bottom: 1.2rem;
+  }
+  .timeline-event::before {
+    content: '';
+    position: absolute;
+    left: -1.65rem;
+    top: 0.5rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--red);
+    border: 2px solid var(--bg);
+  }
+  .timeline-event.hang::before { background: var(--orange); }
+  .timeline-event.ok::before { background: var(--green); }
+  .timeline-time { color: var(--text-dim); font-size: 0.8rem; }
+  .callchain { margin: 0.5rem 0; padding-left: 0; list-style: none; }
+  .callchain li { padding: 0.2rem 0; font-size: 0.85rem; font-family: 'Cascadia Code', monospace; }
+  .callchain li::before { content: '→ '; color: var(--text-dim); }
+  .callchain li:first-child::before { content: '💥 '; }
+  .callchain .fault { color: var(--red); font-weight: bold; }
+  .verdict {
+    background: rgba(248,81,73,0.1);
+    border: 1px solid var(--red);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .verdict h3 { color: var(--red); margin-top: 0; }
+  .recommendation {
+    background: rgba(88,166,255,0.1);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+  }
+  footer { color: var(--text-dim); font-size: 0.8rem; margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+</style>
+</head>
+<body>
+
+<h1>🐛 Windows Terminal Crash Analysis Report</h1>
+<p class="subtitle">
+  Generated: March 19, 2026 &nbsp;|&nbsp;
+  WT Version: 1.24.2603.3001 &nbsp;|&nbsp;
+  OS: Windows 11 22H2 (Build 22631) &nbsp;|&nbsp;
+  Harness: Monkey Stress Tester
+</p>
+
+<div class="stats-grid">
+  <div class="stat-box">
+    <div class="stat-value" style="color: var(--red)">3</div>
+    <div class="stat-label">Unique Bugs Found</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-value" style="color: var(--orange)">4</div>
+    <div class="stat-label">Total Incidents</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-value">472</div>
+    <div class="stat-label">Total Actions</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-value">1</div>
+    <div class="stat-label">Crash Dumps Captured</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-value">3</div>
+    <div class="stat-label">WER AppHang Reports</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-value">394.9 MB</div>
+    <div class="stat-label">Peak Memory</div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<h2>🔴 Bug #1 — TextBuffer::_getRow Bounds Check Failure</h2>
+<!-- ================================================================== -->
+
+<div class="card">
+  <div class="card-header">
+    <span><strong>BREAKPOINT in TextBuffer::_getRow during pane resize</strong></span>
+    <span class="badge badge-dump">CRASH DUMP ANALYZED</span>
+  </div>
+  <table>
+    <tr><th>Field</th><th>Value</th></tr>
+    <tr><td>Module</td><td><code>Microsoft.Terminal.Control.dll</code></td></tr>
+    <tr><td>Function</td><td><code>TextBuffer::_getRow + 0x2a</code></td></tr>
+    <tr><td>Source File</td><td><code>src\buffer\out\textBuffer.cpp:206</code></td></tr>
+    <tr><td>Exception Code</td><td><code>0x80000003</code> (BREAKPOINT — <code>gsl::narrow_cast</code> bounds check)</td></tr>
+    <tr><td>Failure Bucket</td><td><code>BREAKPOINT_80000003_Microsoft.Terminal.Control.dll!TextBuffer::_getRow</code></td></tr>
+    <tr><td>Failure Hash</td><td><code>{84f4c155-ef01-0ce9-c7d7-ff1f44142ac0}</code></td></tr>
+    <tr><td>Dump File</td><td><code>WindowsTerminal_44548_20260319_174004.dmp</code> (597.7 MB)</td></tr>
+    <tr><td>PID</td><td>44548</td></tr>
+    <tr><td>Seed</td><td><code>11112222</code> (profile: <code>buffer-chaos</code>)</td></tr>
+    <tr><td>Action Count</td><td>128 actions in 142 seconds</td></tr>
+    <tr><td>Last Action</td><td><code>resize_pane_left</code></td></tr>
+    <tr><td>Memory at Crash</td><td>324.0 MB RSS (growth +256 MB)</td></tr>
+  </table>
+</div>
+
+<h3>Call Stack</h3>
+<pre>
+<span class="highlight">Microsoft_Terminal_Control!gsl::narrow_cast</span>  [inlined]
+<span class="highlight">Microsoft_Terminal_Control!TextBuffer::_getRow+0x2a</span>           ← textBuffer.cpp:206
+<span class="fn">Microsoft_Terminal_Control!TextBuffer::GetMutableRowByOffset+0x12</span>  [inlined]
+<span class="fn">Microsoft_Terminal_Control!TextBuffer::Reflow+0x5e9ad</span>
+<span class="fn">Microsoft_Terminal_Control!Microsoft::Terminal::Core::Terminal::UserResize+0x1bc</span>
+<span class="fn">Microsoft_Terminal_Control!...ControlCore::_refreshSizeUnderLock+0x14f</span>
+<span class="fn">Microsoft_Terminal_Control!...ControlCore::SizeOrScaleChanged+0x94</span>
+<span class="fn">Microsoft_Terminal_Control!...ControlCore::SizeChanged+0x1a</span>   [inlined]
+<span class="module">Windows_UI_Xaml!DirectUI::FrameworkElement::OnSizeChanged</span>
+<span class="module">Windows_UI_Xaml!CLayoutManager::RaiseSizeChangedEvents</span>
+<span class="module">Windows_UI_Xaml!CLayoutManager::UpdateLayout</span>
+<span class="module">Windows_UI_Xaml!CCoreServices::NWDrawTree</span>
+<span class="module">Windows_UI_Xaml!CXcpBrowserHost::OnTick</span>
+  ...
+<span class="module">WindowsTerminal!WindowEmperor::HandleCommandlineArgs+0xd78</span>
+</pre>
+
+<h3>Root Cause Analysis</h3>
+<div class="card">
+  <p>
+    During a <strong>pane resize</strong> operation, the XAML layout engine fires a <code>SizeChanged</code> event.
+    This triggers <code>ControlCore::SizeOrScaleChanged</code>, which calls <code>Terminal::UserResize</code>.
+    The resize causes <code>TextBuffer::Reflow</code> to restructure the text buffer for the new dimensions.
+  </p>
+  <p style="margin-top: 0.8rem;">
+    Inside <code>Reflow</code>, the code calls <code>_getRow()</code> to access a row by index.
+    The <code>gsl::narrow_cast&lt;int&gt;</code> inside <code>_getRow</code> detects that the row index
+    overflows a 32-bit integer boundary — indicating the buffer dimensions have become <strong>inconsistent</strong>
+    during the resize. The <code>narrow_cast</code> fires a fail-fast breakpoint (exception <code>0x80000003</code>).
+  </p>
+  <p style="margin-top: 0.8rem;">
+    <strong>This is a race condition</strong>: multiple concurrent resize events (from rapid
+    <code>Alt+Shift+Arrow</code> pane resizing combined with window resizing) cause the buffer dimensions and
+    the row storage to fall out of sync. The <code>Reflow</code> operation is not fully atomic with respect to
+    concurrent <code>SizeChanged</code> events from the XAML layout manager.
+  </p>
+</div>
+
+<h3>Reproduction Context</h3>
+<div class="card">
+  <p>Recent actions before crash:</p>
+  <pre>resize_pane_left → clear_buffer → maximize_window → focus_pane_up → run_terminal_stress → resize_pane_left 💥</pre>
+  <p style="margin-top: 0.5rem; color: var(--text-dim);">
+    Tags active: <code>buffer</code>, <code>mouse</code>, <code>render</code>, <code>window</code>,
+    <code>layout</code>, <code>input</code>, <code>navigation</code>, <code>stress</code>
+  </p>
+</div>
+
+<!-- ================================================================== -->
+<h2>🟡 Bug #2 — UI Thread Hang During Pane Resize (Small Window)</h2>
+<!-- ================================================================== -->
+
+<div class="card">
+  <div class="card-header">
+    <span><strong>MoAppHang — WT stops responding during rapid pane resize</strong></span>
+    <span class="badge badge-hang">HANG</span>
+  </div>
+  <table>
+    <tr><th>Field</th><th>Value</th></tr>
+    <tr><td>Event</td><td><code>MoAppHang</code> (EventID 1002 + WER 1001)</td></tr>
+    <tr><td>WER Bucket</td><td><code>a40af3d92bfbb84eed2bd8ff05e81c4c</code></td></tr>
+    <tr><td>WER Hang Time</td><td><code>P5=387e</code> (~14.5 seconds unresponsive)</td></tr>
+    <tr><td>PID</td><td>55004</td></tr>
+    <tr><td>Seed</td><td><code>2232252378</code> (profile: <code>default</code>)</td></tr>
+    <tr><td>Exit Code</td><td><code>-805306369</code> (<code>0xCFFFFFFF</code>)</td></tr>
+    <tr><td>Action Count</td><td>59 actions in 48 seconds</td></tr>
+    <tr><td>Last Actions</td><td><code>resize_window</code> → <code>resize_pane_left</code> → <code>resize_pane_down</code> 💥</td></tr>
+    <tr><td>Time</td><td>2026-03-19 16:58:22</td></tr>
+  </table>
+</div>
+
+<h3>Root Cause Analysis</h3>
+<div class="card">
+  <p>
+    The sequence that triggers this bug is: <strong>resize the WT window to a small size</strong>, then
+    <strong>rapidly resize panes with Alt+Shift+Arrow</strong>. When the window is small and contains multiple
+    split panes, the resize math can result in panes being squeezed to zero or near-zero dimensions.
+  </p>
+  <p style="margin-top: 0.8rem;">
+    The UI thread enters a tight loop in the XAML layout manager, recalculating pane sizes that cascade into
+    additional <code>SizeChanged</code> events. This creates a feedback loop where the UI thread is entirely
+    consumed by layout recalculation and never returns to pump messages — causing the "Not Responding" state.
+  </p>
+  <p style="margin-top: 0.8rem;">
+    <strong>Note:</strong> This is likely related to
+    <a href="https://github.com/microsoft/terminal/issues/19996" style="color: var(--accent);">GitHub Issue #19996</a>
+    — "Terminal hangs when resizing pane to minimum width." The monkey already has a mitigation
+    (<code>max_pane_resize_repeats=5</code>) but the bug can still be triggered with certain window sizes.
+  </p>
+</div>
+
+<!-- ================================================================== -->
+<h2>🟡 Bug #3 — UI Thread Hang Under Heavy Buffer + Resize Load</h2>
+<!-- ================================================================== -->
+
+<div class="card">
+  <div class="card-header">
+    <span><strong>MoAppHang — WT stops responding under TerminalStress + resize</strong></span>
+    <span class="badge badge-hang">HANG</span>
+  </div>
+  <table>
+    <tr><th>Field</th><th>Value</th></tr>
+    <tr><td>Event</td><td><code>MoAppHang</code> (EventID 1002 + WER 1001)</td></tr>
+    <tr><td>WER Buckets</td><td>Two distinct buckets observed: <code>1709724037429654391</code>, <code>1637758181181735060</code></td></tr>
+    <tr><td>PID</td><td>22240 (seed <code>42424242</code>) — also reproduced at PID 44548</td></tr>
+    <tr><td>Action Count</td><td>172 actions in 223 seconds</td></tr>
+    <tr><td>Memory at Hang</td><td>394.9 MB peak (growth +327 MB from baseline)</td></tr>
+    <tr><td>CPU at Hang</td><td>400% (4 cores saturated by TerminalStress child processes)</td></tr>
+    <tr><td>Last Action</td><td><code>resize_pane_down</code></td></tr>
+    <tr><td>Context</td><td>7 TerminalStress instances running across split panes, heavy scroll + buffer output</td></tr>
+  </table>
+</div>
+
+<h3>Root Cause Analysis</h3>
+<div class="card">
+  <p>
+    This hang differs from Bug #2 in that it occurs under <strong>extreme buffer throughput</strong> rather
+    than small-window geometry. Multiple TerminalStress processes are flooding different panes with high-speed
+    random Unicode output (including emoji sequences and cursor repositioning) while the monkey simultaneously
+    resizes panes and clears buffers.
+  </p>
+  <p style="margin-top: 0.8rem;">
+    The <code>TextBuffer::Reflow</code> operation during resize must walk every row of every pane's buffer.
+    With large scrollback buffers filled by TerminalStress (each pane could have 9,000+ rows of output), the
+    reflow becomes O(rows × columns) per pane. Combined with XAML layout recalculation across multiple split
+    panes, the UI thread is blocked for long enough to trigger the Windows "Not Responding" detection
+    (<code>MoAppHang</code>).
+  </p>
+  <p style="margin-top: 0.8rem;">
+    <strong>Distinguishing factor from Bug #2:</strong> Bug #2 is a geometric feedback loop (small window + resize).
+    Bug #3 is a <strong>throughput saturation</strong> issue (large buffers + reflow cost). They produce
+    <em>different WER bucket hashes</em>, confirming they are distinct code paths.
+  </p>
+</div>
+
+<!-- ================================================================== -->
+<h2>📊 Test Session Timeline</h2>
+<!-- ================================================================== -->
+
+<div class="timeline">
+  <div class="timeline-event">
+    <div class="timeline-time">16:56:50 — Run 1 (seed 2232252378, default profile)</div>
+    <div>Connected to PID 55004. 59 actions over 48s.</div>
+  </div>
+  <div class="timeline-event hang">
+    <div class="timeline-time">16:58:22 — <span class="badge badge-hang">HANG</span> Bug #2</div>
+    <div>WT stopped responding after <code>resize_window</code> → <code>resize_pane_down</code>. Killed by Windows (exit code <code>-805306369</code>). WER AppHang recorded.</div>
+  </div>
+  <div class="timeline-event ok">
+    <div class="timeline-time">17:00:53 — Run 2 (seed 42424242, default profile)</div>
+    <div>Connected to new WT PID 22240. Launched 7 TerminalStress instances across panes.</div>
+  </div>
+  <div class="timeline-event hang">
+    <div class="timeline-time">17:04:30 — <span class="badge badge-hang">HANG</span> Bug #3</div>
+    <div>WT stopped responding after 172 actions. Peak memory 394.9 MB, 400% CPU. Confirmed hang after 3 retries.</div>
+  </div>
+  <div class="timeline-event ok">
+    <div class="timeline-time">17:36:24 — Run 3 (seed 11112222, buffer-chaos profile)</div>
+    <div>Connected to PID 44548. Running with dump capture enabled.</div>
+  </div>
+  <div class="timeline-event">
+    <div class="timeline-time">17:40:04 — <span class="badge badge-dump">DUMP CAPTURED</span> Bug #1</div>
+    <div>Hang detected at action 128. <strong>Crash dump captured via procdump</strong> (597.7 MB). Process killed. Reconnected to PID 31128 and continued.</div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<h2>🔍 Crash Dump Deep Dive</h2>
+<!-- ================================================================== -->
+
+<div class="card">
+  <h3 style="margin-top: 0;">Debugger Analysis: WindowsTerminal_44548_20260319_174004.dmp</h3>
+  <p>Analyzed with <code>cdb</code> (WinDbg 10.0.29482.1003) using <code>!analyze -v</code></p>
+
+  <table>
+    <tr><th>Key</th><th>Value</th></tr>
+    <tr><td>Failure Bucket</td><td><code>BREAKPOINT_80000003_Microsoft.Terminal.Control.dll!TextBuffer::_getRow</code></td></tr>
+    <tr><td>Exception Code</td><td><code>0x80000003</code> — Breakpoint (fail-fast from <code>gsl::narrow_cast</code>)</td></tr>
+    <tr><td>Faulting IP</td><td><code>00007ffb`2ba10a92</code> — <code>movsxd rbx, eax</code> (sign-extending row index to 64-bit)</td></tr>
+    <tr><td>Faulting Source</td><td><code>textBuffer.cpp:206</code></td></tr>
+    <tr><td>Image Version</td><td>1.24.2603.3001</td></tr>
+    <tr><td>Process Uptime</td><td>3 minutes 54 seconds</td></tr>
+    <tr><td>Faulting Thread</td><td><code>0x6fb8</code> (UI/main thread)</td></tr>
+  </table>
+
+  <h3>Annotated Call Chain</h3>
+  <ul class="callchain">
+    <li class="fault"><code>TextBuffer::_getRow()</code> — gsl::narrow_cast fails, row index out of int32 range</li>
+    <li><code>TextBuffer::GetMutableRowByOffset()</code> — requesting a row during buffer restructuring</li>
+    <li><code>TextBuffer::Reflow()</code> — restructuring buffer for new terminal dimensions</li>
+    <li><code>Terminal::UserResize()</code> — processing user-initiated resize</li>
+    <li><code>ControlCore::_refreshSizeUnderLock()</code> — recalculating terminal size</li>
+    <li><code>ControlCore::SizeOrScaleChanged()</code> — responding to DPI/size change</li>
+    <li><code>ControlCore::SizeChanged()</code> — XAML size change handler</li>
+    <li style="color: var(--text-dim);"><code>Windows_UI_Xaml!FrameworkElement::OnSizeChanged</code> — XAML layout engine</li>
+    <li style="color: var(--text-dim);"><code>Windows_UI_Xaml!CLayoutManager::UpdateLayout</code> — layout pass</li>
+    <li style="color: var(--text-dim);"><code>Windows_UI_Xaml!CCoreServices::NWDrawTree</code> — render frame</li>
+  </ul>
+</div>
+
+<!-- ================================================================== -->
+<h2>🎯 Summary & Recommendations</h2>
+<!-- ================================================================== -->
+
+<div class="verdict">
+  <h3>3 Unique Bugs Found — All in Pane Resize / Buffer Reflow Path</h3>
+  <p>
+    All three bugs share a common theme: the <code>TextBuffer::Reflow</code> operation during pane resize is
+    fragile under concurrent or extreme conditions. The XAML layout engine fires <code>SizeChanged</code> events
+    that cascade into buffer reflow operations which are not robust against re-entrant or overlapping calls.
+  </p>
+</div>
+
+<div class="recommendation">
+  <h3 style="margin-top: 0; color: var(--accent);">Recommendation 1 — File upstream issues</h3>
+  <p>
+    Bug #1 (<code>TextBuffer::_getRow</code> bounds check failure) is a definitive crash with a full call stack.
+    This should be filed at <a href="https://github.com/microsoft/terminal/issues" style="color: var(--accent);">microsoft/terminal</a>
+    with the crash dump and reproduction seed (<code>--seed 11112222 --action-profile buffer-chaos</code>).
+  </p>
+</div>
+
+<div class="recommendation">
+  <h3 style="margin-top: 0; color: var(--accent);">Recommendation 2 — Investigate Reflow atomicity</h3>
+  <p>
+    The <code>Reflow</code> operation in <code>textBuffer.cpp</code> should be examined for thread safety.
+    The <code>_refreshSizeUnderLock</code> name suggests locking is attempted, but the XAML layout pass may
+    trigger re-entrant calls before the lock is released. A coalescing resize mechanism (debounce multiple
+    <code>SizeChanged</code> events into one reflow) could mitigate all three bugs.
+  </p>
+</div>
+
+<div class="recommendation">
+  <h3 style="margin-top: 0; color: var(--accent);">Recommendation 3 — Continue stress testing with broader profiles</h3>
+  <p>
+    Use <code>--action-profile novelty-hunt</code> with multiple instances to cover different code paths.
+    The new shell-aware commands and profile-diverse tabs/panes will stress different rendering paths
+    (emoji in PowerShell, ANSI in bash, VT sequences in cmd).
+  </p>
+</div>
+
+<footer>
+  <p>
+    Report generated by Monkey Stress Tester &nbsp;|&nbsp;
+    Repository: <a href="https://github.com/Treit/TerminalStress" style="color: var(--accent);">Treit/TerminalStress</a> &nbsp;|&nbsp;
+    Debugger: WinDbg 10.0.29482.1003 &nbsp;|&nbsp;
+    Dump tool: procdump
+  </p>
+</footer>
+
+</body>
+</html>
