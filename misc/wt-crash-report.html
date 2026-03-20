@@ -5,37 +5,92 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Windows Terminal Crash Analysis Report</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Special+Elite&display=swap');
+
   :root {
-    --bg: #0d1117;
-    --surface: #161b22;
-    --border: #30363d;
-    --text: #e6edf3;
-    --text-dim: #8b949e;
-    --accent: #58a6ff;
-    --red: #f85149;
-    --orange: #d29922;
-    --green: #3fb950;
-    --purple: #bc8cff;
+    --bg: #f5f0e6;
+    --surface: #ece6d9;
+    --border: #c4b89e;
+    --text: #1c1916;
+    --text-dim: #6b6358;
+    --accent: #2a6496;
+    --red: #a52019;
+    --orange: #a86400;
+    --green: #2e7d32;
+    --purple: #6a1b9a;
+    --printout-bg: #faf8f3;
+    --printout-rule: #d6cfc2;
   }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace;
     background: var(--bg);
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent calc(1.7rem - 1px),
+        rgba(170, 158, 136, 0.10) calc(1.7rem - 1px),
+        rgba(170, 158, 136, 0.10) 1.7rem
+      );
     color: var(--text);
-    line-height: 1.6;
-    padding: 2rem;
+    line-height: 1.7;
+    padding: 2.5rem 2rem;
     max-width: 1200px;
     margin: 0 auto;
+    font-size: 0.88rem;
   }
-  h1 { color: var(--accent); font-size: 1.8rem; margin-bottom: 0.5rem; }
-  h2 { color: var(--accent); font-size: 1.3rem; margin: 2rem 0 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
-  h3 { color: var(--purple); font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
-  .subtitle { color: var(--text-dim); margin-bottom: 2rem; }
+
+  h1 {
+    font-family: 'Special Elite', 'Courier New', monospace;
+    color: var(--text);
+    font-size: 1.65rem;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.3rem;
+  }
+  h1::after {
+    content: '';
+    display: block;
+    margin-top: 0.4rem;
+    border-bottom: 3px double var(--border);
+  }
+
+  h2 {
+    font-family: 'Special Elite', 'Courier New', monospace;
+    color: var(--text);
+    font-size: 1.15rem;
+    margin: 2.5rem 0 1rem;
+    letter-spacing: 0.05em;
+    border-top: 3px double var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 0.6rem 0 0.4rem;
+  }
+
+  h3 {
+    color: var(--accent);
+    font-size: 0.95rem;
+    margin: 1.5rem 0 0.5rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+
+  .subtitle {
+    color: var(--text-dim);
+    margin-bottom: 2rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.015em;
+    border-bottom: 1px dotted var(--border);
+    padding-bottom: 1rem;
+  }
+
   .card {
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1.2rem;
+    border: 1px dashed var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 0;
+    padding: 1.2rem 1.2rem 1.2rem 1.5rem;
     margin-bottom: 1rem;
   }
   .card-header {
@@ -44,58 +99,93 @@
     align-items: center;
     margin-bottom: 0.8rem;
   }
+
   .badge {
     display: inline-block;
     padding: 0.15rem 0.6rem;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 600;
+    border-radius: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
   }
-  .badge-crash { background: rgba(248,81,73,0.2); color: var(--red); border: 1px solid var(--red); }
-  .badge-hang { background: rgba(210,153,34,0.2); color: var(--orange); border: 1px solid var(--orange); }
-  .badge-dump { background: rgba(188,140,255,0.2); color: var(--purple); border: 1px solid var(--purple); }
-  .badge-ok { background: rgba(63,185,80,0.2); color: var(--green); border: 1px solid var(--green); }
+  .badge-crash { background: var(--red); color: #fff; border: 1px solid var(--red); }
+  .badge-hang  { background: var(--orange); color: #fff; border: 1px solid var(--orange); }
+  .badge-dump  { background: var(--purple); color: #fff; border: 1px solid var(--purple); }
+  .badge-ok    { background: var(--green); color: #fff; border: 1px solid var(--green); }
+
   table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; }
-  th, td { text-align: left; padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--border); }
-  th { color: var(--text-dim); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
-  td { font-size: 0.9rem; }
+  th, td { text-align: left; padding: 0.45rem 0.8rem; border-bottom: 1px dotted var(--border); }
+  th { color: var(--text-dim); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  td { font-size: 0.85rem; }
+
   code {
-    background: rgba(110,118,129,0.2);
-    padding: 0.15rem 0.4rem;
-    border-radius: 4px;
-    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
-    font-size: 0.85rem;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 0.82rem;
+    color: var(--red);
   }
+
   pre {
-    background: #0d1117;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 1rem;
+    background: var(--printout-bg);
+    border: 1px solid var(--printout-rule);
+    border-left: 4px solid var(--border);
+    border-radius: 0;
+    padding: 1rem 1.2rem 1rem 2.5rem;
     overflow-x: auto;
-    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
-    font-size: 0.8rem;
-    line-height: 1.5;
-    color: var(--text-dim);
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: var(--text);
     margin: 0.5rem 0;
+    position: relative;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent calc(1.6em - 1px),
+        var(--printout-rule) calc(1.6em - 1px),
+        var(--printout-rule) 1.6em
+      );
+    background-size: 100% 1.6em;
+    background-position: 0 0.4rem;
   }
   pre .highlight { color: var(--red); font-weight: bold; }
-  pre .fn { color: var(--accent); }
-  pre .module { color: var(--orange); }
+  pre .fn { color: #2c5282; }
+  pre .module { color: var(--text-dim); }
+  pre code { background: none; color: inherit; padding: 0; }
+
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0.8rem;
     margin: 1rem 0;
   }
   .stat-box {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-bottom: 3px solid var(--border);
+    border-radius: 0;
     padding: 1rem;
     text-align: center;
   }
-  .stat-value { font-size: 2rem; font-weight: 700; }
-  .stat-label { color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    letter-spacing: -0.02em;
+  }
+  .stat-label {
+    color: var(--text-dim);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 0.2rem;
+  }
+
   .timeline {
     position: relative;
     padding-left: 2rem;
@@ -108,47 +198,72 @@
     top: 0;
     bottom: 0;
     width: 2px;
-    background: var(--border);
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--border) 0px,
+      var(--border) 4px,
+      transparent 4px,
+      transparent 8px
+    );
   }
   .timeline-event {
     position: relative;
     margin-bottom: 1.2rem;
   }
   .timeline-event::before {
-    content: '';
+    content: '▸';
     position: absolute;
-    left: -1.65rem;
-    top: 0.5rem;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--red);
-    border: 2px solid var(--bg);
+    left: -1.85rem;
+    top: 0.1rem;
+    font-size: 1rem;
+    color: var(--red);
+    background: none;
+    border: none;
+    width: auto;
+    height: auto;
+    border-radius: 0;
   }
-  .timeline-event.hang::before { background: var(--orange); }
-  .timeline-event.ok::before { background: var(--green); }
-  .timeline-time { color: var(--text-dim); font-size: 0.8rem; }
+  .timeline-event.hang::before { color: var(--orange); }
+  .timeline-event.ok::before { color: var(--green); }
+  .timeline-time { color: var(--text-dim); font-size: 0.78rem; }
+
   .callchain { margin: 0.5rem 0; padding-left: 0; list-style: none; }
-  .callchain li { padding: 0.2rem 0; font-size: 0.85rem; font-family: 'Cascadia Code', monospace; }
-  .callchain li::before { content: '→ '; color: var(--text-dim); }
-  .callchain li:first-child::before { content: '💥 '; }
+  .callchain li { padding: 0.2rem 0; font-size: 0.82rem; font-family: 'IBM Plex Mono', 'Courier New', monospace; }
+  .callchain li::before { content: '├─ '; color: var(--text-dim); }
+  .callchain li:last-child::before { content: '└─ '; color: var(--text-dim); }
+  .callchain li:first-child::before { content: '╔═ '; color: var(--red); }
   .callchain .fault { color: var(--red); font-weight: bold; }
+
   .verdict {
-    background: rgba(248,81,73,0.1);
-    border: 1px solid var(--red);
-    border-radius: 8px;
+    background: rgba(165, 32, 25, 0.06);
+    border: 2px solid var(--red);
+    border-left: 6px solid var(--red);
+    border-radius: 0;
     padding: 1.5rem;
     margin: 1.5rem 0;
   }
   .verdict h3 { color: var(--red); margin-top: 0; }
+
   .recommendation {
-    background: rgba(88,166,255,0.1);
-    border: 1px solid var(--accent);
-    border-radius: 8px;
+    background: rgba(42, 100, 150, 0.06);
+    border: 1px dashed var(--accent);
+    border-left: 4px solid var(--accent);
+    border-radius: 0;
     padding: 1rem;
     margin: 0.5rem 0;
   }
-  footer { color: var(--text-dim); font-size: 0.8rem; margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+
+  footer {
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    margin-top: 3rem;
+    border-top: 3px double var(--border);
+    padding-top: 1rem;
+    letter-spacing: 0.02em;
+  }
+
+  a { color: var(--accent); }
+  a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
