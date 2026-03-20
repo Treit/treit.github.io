@@ -17,7 +17,7 @@
   h2 { margin-top: 2.5em; }
   h3 { margin-top: 1.5em; }
   .subtitle { color: #666; font-size: 0.85em; margin-bottom: 2em; }
-  .badge { font-size: 0.8em; font-weight: bold; }
+  .badge { font-size: 0.8em; font-weight: normal; }
   .badge-crash::before { content: '[CRASH] '; color: red; }
   .badge-hang::before  { content: '[HANG] '; color: darkorange; }
   .badge-dump::before  { content: '[DUMP] '; color: purple; }
@@ -27,13 +27,13 @@
   th { font-size: 0.85em; color: #666; }
   code { font-family: inherit; }
   pre { overflow-x: auto; margin: 0.8em 0; padding: 0.8em; background: #f5f5f5; }
-  pre .highlight { color: #c00; font-weight: bold; }
+  pre .highlight { color: #c00; font-weight: normal; }
   pre .fn { color: #004488; }
   pre .module { color: #666; }
   .callchain { list-style: none; padding: 0; margin: 0.5em 0; }
   .callchain li { padding: 1px 0; }
   .callchain li::before { content: '> '; color: #999; }
-  .callchain .fault { color: #c00; font-weight: bold; }
+  .callchain .fault { color: #c00; font-weight: normal; }
   .verdict { border-left: 3px solid #c00; padding-left: 1em; margin: 1.5em 0; }
   .verdict h3 { color: #c00; }
   .recommendation { border-left: 3px solid #004488; padding-left: 1em; margin: 1em 0; }
@@ -58,7 +58,7 @@
 
 <div class="card">
   <div class="card-header">
-    <span><strong>BREAKPOINT in TextBuffer::_getRow during pane resize</strong></span>
+    <span>BREAKPOINT in TextBuffer::_getRow during pane resize</span>
     <span class="badge badge-dump">CRASH DUMP ANALYZED</span>
   </div>
   <table>
@@ -100,18 +100,18 @@
 <h3>Root Cause Analysis</h3>
 <div class="card">
   <p>
-    During a <strong>pane resize</strong> operation, the XAML layout engine fires a <code>SizeChanged</code> event.
+    During a pane resize operation, the XAML layout engine fires a <code>SizeChanged</code> event.
     This triggers <code>ControlCore::SizeOrScaleChanged</code>, which calls <code>Terminal::UserResize</code>.
     The resize causes <code>TextBuffer::Reflow</code> to restructure the text buffer for the new dimensions.
   </p>
   <p style="margin-top: 0.8rem;">
     Inside <code>Reflow</code>, the code calls <code>_getRow()</code> to access a row by index.
     The <code>gsl::narrow_cast&lt;int&gt;</code> inside <code>_getRow</code> detects that the row index
-    overflows a 32-bit integer boundary — indicating the buffer dimensions have become <strong>inconsistent</strong>
+    overflows a 32-bit integer boundary — indicating the buffer dimensions have become inconsistent
     during the resize. The <code>narrow_cast</code> fires a fail-fast breakpoint (exception <code>0x80000003</code>).
   </p>
   <p style="margin-top: 0.8rem;">
-    <strong>This is a race condition</strong>: multiple concurrent resize events (from rapid
+    This is a race condition: multiple concurrent resize events (from rapid
     <code>Alt+Shift+Arrow</code> pane resizing combined with window resizing) cause the buffer dimensions and
     the row storage to fall out of sync. The <code>Reflow</code> operation is not fully atomic with respect to
     concurrent <code>SizeChanged</code> events from the XAML layout manager.
@@ -134,7 +134,7 @@
 
 <div class="card">
   <div class="card-header">
-    <span><strong>MoAppHang — WT stops responding during rapid pane resize</strong></span>
+    <span>MoAppHang — WT stops responding during rapid pane resize</span>
     <span class="badge badge-hang">HANG</span>
   </div>
   <table>
@@ -154,8 +154,8 @@
 <h3>Root Cause Analysis</h3>
 <div class="card">
   <p>
-    The sequence that triggers this bug is: <strong>resize the WT window to a small size</strong>, then
-    <strong>rapidly resize panes with Alt+Shift+Arrow</strong>. When the window is small and contains multiple
+    The sequence that triggers this bug is: resize the WT window to a small size, then
+    rapidly resize panes with Alt+Shift+Arrow. When the window is small and contains multiple
     split panes, the resize math can result in panes being squeezed to zero or near-zero dimensions.
   </p>
   <p style="margin-top: 0.8rem;">
@@ -164,7 +164,7 @@
     consumed by layout recalculation and never returns to pump messages — causing the "Not Responding" state.
   </p>
   <p style="margin-top: 0.8rem;">
-    <strong>Note:</strong> This is likely related to
+    Note: This is likely related to
     <a href="https://github.com/microsoft/terminal/issues/19996">GitHub Issue #19996</a>
     — "Terminal hangs when resizing pane to minimum width." The monkey already has a mitigation
     (<code>max_pane_resize_repeats=5</code>) but the bug can still be triggered with certain window sizes.
@@ -177,7 +177,7 @@
 
 <div class="card">
   <div class="card-header">
-    <span><strong>MoAppHang — WT stops responding under TerminalStress + resize</strong></span>
+    <span>MoAppHang — WT stops responding under TerminalStress + resize</span>
     <span class="badge badge-hang">HANG</span>
   </div>
   <table>
@@ -196,7 +196,7 @@
 <h3>Root Cause Analysis</h3>
 <div class="card">
   <p>
-    This hang differs from Bug #2 in that it occurs under <strong>extreme buffer throughput</strong> rather
+    This hang differs from Bug #2 in that it occurs under extreme buffer throughput rather
     than small-window geometry. Multiple TerminalStress processes are flooding different panes with high-speed
     random Unicode output (including emoji sequences and cursor repositioning) while the monkey simultaneously
     resizes panes and clears buffers.
@@ -209,8 +209,8 @@
     (<code>MoAppHang</code>).
   </p>
   <p style="margin-top: 0.8rem;">
-    <strong>Distinguishing factor from Bug #2:</strong> Bug #2 is a geometric feedback loop (small window + resize).
-    Bug #3 is a <strong>throughput saturation</strong> issue (large buffers + reflow cost). They produce
+    Distinguishing factor from Bug #2: Bug #2 is a geometric feedback loop (small window + resize).
+    Bug #3 is a throughput saturation issue (large buffers + reflow cost). They produce
     <em>different WER bucket hashes</em>, confirming they are distinct code paths.
   </p>
 </div>
@@ -242,7 +242,7 @@
   </div>
   <div class="timeline-event">
     <div class="timeline-time">17:40:04 — <span class="badge badge-dump">DUMP CAPTURED</span> Bug #1</div>
-    <div>Hang detected at action 128. <strong>Crash dump captured via procdump</strong> (597.7 MB). Process killed. Reconnected to PID 31128 and continued.</div>
+    <div>Hang detected at action 128. Crash dump captured via procdump (597.7 MB). Process killed. Reconnected to PID 31128 and continued.</div>
   </div>
 </div>
 
