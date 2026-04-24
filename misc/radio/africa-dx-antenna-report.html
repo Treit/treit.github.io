@@ -43,9 +43,10 @@
     opacity: 0.32;
   }
   .page {
-    max-width: 1380px;
+    width: 100%;
+    max-width: none;
     margin: 0 auto;
-    padding: 2rem clamp(1rem, 2.2vw, 1.75rem) 3rem;
+    padding: 2rem clamp(0.9rem, 1.6vw, 1.5rem) 3rem;
     position: relative;
     z-index: 1;
   }
@@ -212,7 +213,7 @@
   }
   .diagram {
     margin: 1.25rem 0 0;
-    padding: clamp(0.75rem, 0.9vw, 1rem);
+    padding: clamp(0.75rem, 0.9vw, 1rem) clamp(0.75rem, 1vw, 1.25rem);
     background: linear-gradient(180deg, rgba(7, 14, 18, 0.8) 0%, rgba(4, 10, 13, 0.92) 100%);
     border: 1px solid var(--line);
     border-radius: 16px;
@@ -222,6 +223,7 @@
     max-width: 100%;
     height: auto;
     display: block;
+    overflow: visible;
     background: #eff5ef;
     border: 1px solid #b6c7ba;
     border-radius: 12px;
@@ -409,7 +411,7 @@
       </table>
       <h3>Recommended layout diagram</h3>
       <figure class="diagram">
-        <svg viewBox="0 0 960 620" role="img" aria-labelledby="rhombic-diagram-title rhombic-diagram-desc" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 1120 620" role="img" aria-labelledby="rhombic-diagram-title rhombic-diagram-desc" xmlns="http://www.w3.org/2000/svg">
           <title id="rhombic-diagram-title">Recommended 20 meter rhombic layout aimed about 40 degrees true from CN97av</title>
           <desc id="rhombic-diagram-desc">Plan-view diagram showing a four-leg rhombic with the feedpoint at the near end, a terminating resistor at the far end, approximate dimensions, and a northeast heading note for the favored Africa path.</desc>
           <defs>
@@ -492,7 +494,7 @@
       <h3>Illustrative modeled geometry / pattern concept</h3>
       <p class="small"><span class="caution">No solver output in this revision:</span> EZNEC was not available in the local environment used for this update, and no local NEC-capable package was found. The figure below is therefore a representative concept based on the report geometry and standard terminated-rhombic behavior, not a numerical field-solver result.</p>
       <figure class="diagram">
-        <svg viewBox="0 0 960 620" role="img" aria-labelledby="rhombic-model-title rhombic-model-desc" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 1040 620" role="img" aria-labelledby="rhombic-model-title rhombic-model-desc" xmlns="http://www.w3.org/2000/svg">
           <title id="rhombic-model-title">Illustrative modeled geometry and representative radiation pattern concept for the recommended 20 meter rhombic</title>
           <desc id="rhombic-model-desc">Two-panel illustrative SVG. The left panel shows a representative terminated rhombic geometry with approximate dimensions and support-height assumptions. The right panel shows a qualitative forward radiation pattern concept with a strong northeast lobe and reduced rear response. The graphic is explicitly labeled as illustrative rather than solver output.</desc>
           <defs>
