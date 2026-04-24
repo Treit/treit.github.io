@@ -117,6 +117,20 @@
     color: var(--warn);
     font-weight: 700;
   }
+  .diagram {
+    margin: 1.25rem 0 0;
+  }
+  .diagram svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: #f9fbfe;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .diagram figcaption {
+    margin-top: 0.75rem;
+  }
   footer {
     padding: 1rem 1.25rem;
     color: var(--muted);
@@ -281,6 +295,83 @@
           </tr>
         </tbody>
       </table>
+      <h3>Recommended layout diagram</h3>
+      <figure class="diagram">
+        <svg viewBox="0 0 900 560" role="img" aria-labelledby="rhombic-diagram-title rhombic-diagram-desc" xmlns="http://www.w3.org/2000/svg">
+          <title id="rhombic-diagram-title">Recommended 20 meter rhombic layout aimed about 40 degrees true from CN97av</title>
+          <desc id="rhombic-diagram-desc">Plan-view diagram showing a four-leg rhombic with the feedpoint at the near end, a terminating resistor at the far end, approximate dimensions, and a northeast heading note for the favored Africa path.</desc>
+          <defs>
+            <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+              <path d="M0,0 L12,6 L0,12 z" fill="#0d5cab" />
+            </marker>
+            <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+              <path d="M0,0 L12,6 L0,12 z" fill="#0f6b45" />
+            </marker>
+            <marker id="arrow-muted" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#5d6b7a" />
+            </marker>
+          </defs>
+
+          <rect x="112" y="116" width="676" height="328" rx="18" fill="none" stroke="#5d6b7a" stroke-width="2" stroke-dasharray="10 8" />
+          <text x="450" y="106" text-anchor="middle" font-size="18" fill="#5d6b7a" font-weight="700">Approximate site envelope ~130 ft × 275 ft</text>
+
+          <polygon points="185,280 388,160 715,280 388,400" fill="#e8f1fb" stroke="#0d5cab" stroke-width="4" />
+
+          <line x1="185" y1="280" x2="388" y2="160" stroke="#0d5cab" stroke-width="4" />
+          <line x1="388" y1="160" x2="715" y2="280" stroke="#0d5cab" stroke-width="4" />
+          <line x1="715" y1="280" x2="388" y2="400" stroke="#0d5cab" stroke-width="4" />
+          <line x1="388" y1="400" x2="185" y2="280" stroke="#0d5cab" stroke-width="4" />
+
+          <circle cx="185" cy="280" r="8" fill="#0d5cab" />
+          <circle cx="715" cy="280" r="8" fill="#7a4f00" />
+          <circle cx="388" cy="160" r="7" fill="#0d5cab" />
+          <circle cx="388" cy="400" r="7" fill="#0d5cab" />
+
+          <line x1="118" y1="280" x2="175" y2="280" stroke="#1b2430" stroke-width="3" marker-end="url(#arrow-muted)" />
+          <text x="68" y="258" font-size="18" fill="#1b2430" font-weight="700">Feedpoint</text>
+          <text x="45" y="282" font-size="16" fill="#5d6b7a">Balanced feed / matching network</text>
+
+          <line x1="703" y1="254" x2="726" y2="254" stroke="#7a4f00" stroke-width="4" />
+          <line x1="726" y1="244" x2="738" y2="264" stroke="#7a4f00" stroke-width="4" />
+          <line x1="738" y1="244" x2="750" y2="264" stroke="#7a4f00" stroke-width="4" />
+          <line x1="750" y1="254" x2="772" y2="254" stroke="#7a4f00" stroke-width="4" />
+          <line x1="715" y1="280" x2="772" y2="280" stroke="#7a4f00" stroke-width="3" />
+          <text x="778" y="246" font-size="18" fill="#7a4f00" font-weight="700">Termination resistor</text>
+          <text x="778" y="270" font-size="16" fill="#5d6b7a">~550–600 Ω, non-inductive</text>
+
+          <line x1="725" y1="280" x2="846" y2="280" stroke="#0f6b45" stroke-width="5" marker-end="url(#arrow-green)" />
+          <text x="760" y="322" font-size="19" fill="#0f6b45" font-weight="700">Main lobe / favored direction</text>
+          <text x="760" y="346" font-size="16" fill="#5d6b7a">Toward Africa and Europe on the NE path family</text>
+
+          <text x="252" y="205" font-size="17" fill="#0d5cab" font-weight="700">Leg 1 ~140 ft</text>
+          <text x="510" y="185" font-size="17" fill="#0d5cab" font-weight="700">Leg 2 ~140 ft</text>
+          <text x="510" y="385" font-size="17" fill="#0d5cab" font-weight="700">Leg 3 ~140 ft</text>
+          <text x="252" y="372" font-size="17" fill="#0d5cab" font-weight="700">Leg 4 ~140 ft</text>
+
+          <line x1="185" y1="435" x2="715" y2="435" stroke="#5d6b7a" stroke-width="2" marker-start="url(#arrow-muted)" marker-end="url(#arrow-muted)" />
+          <line x1="185" y1="418" x2="185" y2="452" stroke="#5d6b7a" stroke-width="2" />
+          <line x1="715" y1="418" x2="715" y2="452" stroke="#5d6b7a" stroke-width="2" />
+          <text x="450" y="428" text-anchor="middle" font-size="17" fill="#5d6b7a" font-weight="700">Long axis ~253 ft</text>
+
+          <line x1="352" y1="160" x2="352" y2="400" stroke="#5d6b7a" stroke-width="2" marker-start="url(#arrow-muted)" marker-end="url(#arrow-muted)" />
+          <line x1="338" y1="160" x2="366" y2="160" stroke="#5d6b7a" stroke-width="2" />
+          <line x1="338" y1="400" x2="366" y2="400" stroke="#5d6b7a" stroke-width="2" />
+          <text x="332" y="286" text-anchor="end" font-size="17" fill="#5d6b7a" font-weight="700">Max width ~118 ft</text>
+
+          <circle cx="166" cy="102" r="58" fill="#ffffff" stroke="#d8e0ea" stroke-width="2" />
+          <line x1="166" y1="146" x2="166" y2="62" stroke="#1b2430" stroke-width="3" marker-end="url(#arrow-muted)" />
+          <line x1="166" y1="102" x2="209" y2="102" stroke="#1b2430" stroke-width="2" />
+          <line x1="166" y1="102" x2="194" y2="69" stroke="#0d5cab" stroke-width="4" marker-end="url(#arrow-blue)" />
+          <text x="160" y="57" font-size="18" fill="#1b2430" font-weight="700">N</text>
+          <text x="214" y="107" font-size="18" fill="#1b2430" font-weight="700">E</text>
+          <text x="220" y="72" font-size="17" fill="#0d5cab" font-weight="700">~40° true</text>
+          <text x="235" y="94" font-size="15" fill="#5d6b7a">Aim rhombic centerline NE from CN97av</text>
+
+          <text x="450" y="493" text-anchor="middle" font-size="18" fill="#1b2430" font-weight="700">Plan view for the report&apos;s recommended 20 meter rhombic</text>
+          <text x="450" y="518" text-anchor="middle" font-size="15" fill="#5d6b7a">Dimensions are approximate and should be adjusted to the actual supports, wire height, and property geometry.</text>
+        </svg>
+        <figcaption class="small">Inline diagram of the recommended terminated rhombic: four roughly 140-foot legs, about 253 feet on the long axis and about 118 feet at maximum width, with a practical site envelope of roughly 130 by 275 feet. Keep the long axis centered near 40° true from CN97av for the report&apos;s northeast Africa path concept.</figcaption>
+      </figure>
       <div class="grid">
         <div>
           <h3>Feed System</h3>
