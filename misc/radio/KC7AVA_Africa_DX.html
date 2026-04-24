@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Working Africa from CN97: A Path Analysis and Antenna Strategy for KC7AVA</title>
+<style>
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    max-width: 820px;
+    margin: 2em auto;
+    padding: 0 1.5em;
+    line-height: 1.55;
+    color: #1a1a1a;
+    background: #fdfdfb;
+  }
+  h1 {
+    font-size: 1.8em;
+    border-bottom: 2px solid #444;
+    padding-bottom: 0.3em;
+    margin-bottom: 0.2em;
+  }
+  h2 {
+    font-size: 1.3em;
+    margin-top: 1.8em;
+    color: #333;
+    border-bottom: 1px solid #bbb;
+    padding-bottom: 0.15em;
+  }
+  h3 {
+    font-size: 1.08em;
+    margin-top: 1.3em;
+    color: #444;
+  }
+  .subtitle {
+    font-style: italic;
+    color: #555;
+    margin-bottom: 1.5em;
+  }
+  table {
+    border-collapse: collapse;
+    margin: 1em 0;
+    width: 100%;
+    font-size: 0.95em;
+  }
+  th, td {
+    border: 1px solid #999;
+    padding: 0.4em 0.7em;
+    text-align: left;
+  }
+  th {
+    background: #ececec;
+  }
+  code {
+    font-family: Consolas, "Courier New", monospace;
+    background: #f0f0f0;
+    padding: 0 0.25em;
+    border-radius: 3px;
+  }
+  ul, ol {
+    margin: 0.6em 0 0.8em 1.5em;
+  }
+  .note {
+    font-size: 0.9em;
+    color: #555;
+    border-left: 3px solid #aaa;
+    padding: 0.6em 1em;
+    background: #f7f7f3;
+    margin-top: 2em;
+  }
+  .signoff {
+    font-style: italic;
+    margin-top: 1.5em;
+  }
+</style>
+</head>
+<body>
+
+<h1>Working Africa from CN97: A Path Analysis and Antenna Strategy for KC7AVA</h1>
+<p class="subtitle">A practical guide to one of the most challenging DX paths from the Pacific Northwest</p>
+
+<h2>Introduction</h2>
+<p>Snohomish, Washington (grid CN97av, 47.91&nbsp;N, 122.10&nbsp;W) sits at one of the least favorable longitudes in the continental United States for working Africa. The great-circle short-path bearing from CN97 to central Africa runs 25 to 40 degrees true, threading directly through the auroral oval and across the geomagnetic pole. The long path, bearing roughly 205 to 220 degrees true, crosses the equatorial Pacific, South America, and the South Atlantic, totaling 24,000 to 26,000&nbsp;km depending on the African target. Neither path is easy, but both are workable with appropriate antenna choices and disciplined timing. This article develops a recommendation for KC7AVA based on path geometry, propagation behavior, and a realistic assessment of what can be installed at a typical suburban Pacific Northwest QTH.</p>
+
+<h2>Path Geometry</h2>
+<p>Distances and bearings from CN97av to representative African targets:</p>
+<table>
+  <thead>
+    <tr><th>Target</th><th>Short Path (km / bearing)</th><th>Long Path (km / bearing)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Morocco (CN8)</td><td>9,400 / 33</td><td>30,600 / 213</td></tr>
+    <tr><td>Senegal (6W)</td><td>11,300 / 49</td><td>28,700 / 229</td></tr>
+    <tr><td>South Africa (ZS)</td><td>16,700 / 80</td><td>23,300 / 260</td></tr>
+    <tr><td>Kenya (5Z)</td><td>14,800 / 26</td><td>25,200 / 206</td></tr>
+    <tr><td>Egypt (SU)</td><td>11,500 / 18</td><td>28,500 / 198</td></tr>
+  </tbody>
+</table>
+<p>The short path to most of Africa traverses high-latitude auroral regions. During geomagnetic disturbances (Kp greater than 4), short-path signals suffer severe absorption, polar flutter, and outright blackout. The long path to southern Africa (ZS, Z2, V5) is shorter than to North Africa and skirts the auroral zone almost entirely. This geometry makes ZS often the easier African DXCC entity to work from CN97, despite being the most physically distant.</p>
+
+<h2>Frequency and Timing</h2>
+<p>The propagation windows are narrow and depend strongly on the solar cycle. For 2026, we are descending from Solar Cycle 25 maximum (peaked late 2024 / early 2025) but smoothed sunspot numbers should remain useful for 15m and 20m DX through this year.</p>
+
+<p><strong>20m (14&nbsp;MHz) &mdash; the workhorse band for this path.</strong> The most reliable window is at CN97 local sunrise, when the long-path gray-line corridor crosses the South Atlantic. In late April 2026, sunrise in Snohomish occurs near 1300 UTC (0600 PDT). The 20m long-path window to ZS, 9J, and ZD (Tristan-area) typically opens 30 minutes before sunrise and persists 60 to 90 minutes after. Short-path 20m to North Africa (CN, 7X, SU) opens in the late afternoon local time, roughly 2300 to 0200 UTC (1600 to 1900 PDT), as the F2 layer over the Atlantic supports a single multi-hop chain.</p>
+
+<p><strong>15m (21&nbsp;MHz) &mdash; best gain when MUF cooperates.</strong> During elevated solar flux (SFI greater than 130), 15m supports both paths in the morning and afternoon windows. Long-path ZS at 1330 to 1500 UTC is a known opening on this band. 15m offers about 3&nbsp;dB more antenna gain than 20m in a comparable Yagi at the same height in wavelengths, and 15m is less crowded than 20m for fragile long-path signals.</p>
+
+<p><strong>17m (18&nbsp;MHz) &mdash; the dark horse.</strong> The WARC band sits between 20m and 15m in propagation behavior and is usually quieter. When 15m closes early or 20m is jammed, 17m frequently supports the path. No contest QRM ever.</p>
+
+<p><strong>10m (28&nbsp;MHz)</strong> can produce spectacular openings to Africa near solar maximum but is unreliable on the descending side of the cycle. Worth monitoring during disturbed conditions when lower bands close.</p>
+
+<p><strong>40m and 80m</strong> require substantial antennas (full-size verticals with extensive radials, or high dipoles) and are best attempted during gray-line windows around 1300 UTC for ZS and 0500 UTC for North Africa. Difficult but rewarding.</p>
+
+<h3>Recommended Operating Schedule (Local PDT / UTC)</h3>
+<p>For April-October 2026 from CN97av:</p>
+<table>
+  <thead>
+    <tr><th>Window</th><th>UTC</th><th>Band</th><th>Path</th><th>Targets</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Pre-sunrise</td><td>1230-1330</td><td>20m</td><td>LP</td><td>ZS, 9J, V5, Z2, 3DA</td></tr>
+    <tr><td>Morning</td><td>1400-1600</td><td>15/17m</td><td>LP</td><td>ZS, central Africa</td></tr>
+    <tr><td>Late afternoon</td><td>2300-0100</td><td>20/17m</td><td>SP</td><td>CN, EA8, 7X, SU</td></tr>
+    <tr><td>Sunset</td><td>0300-0400</td><td>40m</td><td>GL</td><td>EA8, CN (gray-line chase)</td></tr>
+  </tbody>
+</table>
+<p>Monitor the Reverse Beacon Network and DX Cluster filtered for African callsigns during these windows. WSPR beacons on 20m and 15m provide a cheap propagation indicator in real time.</p>
+
+<h2>Antenna Recommendation</h2>
+<p>A QSO with Africa from CN97 demands either a beam pointed at low elevation angle, or a clean low-noise vertical. The choice depends on real estate, restrictions, and budget.</p>
+
+<h3>Primary Recommendation: 3-Element Triband Yagi at 50-60 feet</h3>
+<p>For an operator who can erect a tower, this is the answer. A 3-element Yagi for 20m, 17m (or 15m), and 10m provides 7-8&nbsp;dBd of forward gain and roughly 20&nbsp;dB front-to-back ratio. At 50-60 feet (0.7-0.9 lambda on 20m), the takeoff angle is 12-16 degrees &mdash; exactly what is needed for the multi-hop F2 path to Africa.</p>
+
+<p><strong>Specifications for KC7AVA's installation:</strong></p>
+<ul>
+  <li><strong>Antenna:</strong> 3-element triband Yagi (20/15/10m) or 3-element 20m monobander stacked with a separate 17/15/12/10m beam if budget permits.</li>
+  <li><strong>Boom length:</strong> 14-18 feet for a triband; longer for monoband.</li>
+  <li><strong>Mast:</strong> Rohn 25G to 50 feet, guyed at one level, or an aluminum push-up mast for lighter loads. Snohomish County wind loading requires verification against the Rohn TIA-222-G chart for the specific antenna projected area.</li>
+  <li><strong>Feed line:</strong> LMR-400 from the antenna to the shack. At 14&nbsp;MHz, 100 feet of LMR-400 has 0.36&nbsp;dB matched loss. For runs over 150 feet, step up to LMR-600 (0.23&nbsp;dB / 100&nbsp;ft).</li>
+  <li><strong>Balun:</strong> 1:1 current choke balun at the feed point. DX Engineering DXE-BAL050-H10 or equivalent. A second choke 1/4 wavelength down the coax (about 17 feet on 20m) further suppresses common-mode current.</li>
+  <li><strong>Rotator:</strong> Yaesu G-800 or Hy-Gain Ham IV class. The path requires precise heading &mdash; a 5-degree error on long path costs measurable signal.</li>
+</ul>
+
+<p><strong>Commercial options worth pricing:</strong> Cushcraft A3S, Hy-Gain TH-3JRS, SteppIR DB18E (no traps, electrically resonant on every band 40-6m). For a single-band solution that maximizes long-path performance, an M2 20M4DX 4-element 20m monobander on a 26-foot boom delivers nearly 9&nbsp;dBd and a clean pattern. Verify current pricing on dxengineering.com before purchase.</p>
+
+<p><strong>Difficulty: moderate to high.</strong> Tower installation requires a permit in Snohomish County, professional concrete base work, and ideally a tower crew for raising. Budget roughly $4,000-$7,000 for a complete triband Yagi system on a 50-foot guyed tower including rotator, control cable, hardware, and feed line.</p>
+
+<h3>Alternative: Vertical with Extensive Radials</h3>
+<p>If a tower is not feasible (HOA, lot size, budget), a full-size 1/4-wave vertical for 20m with an extensive radial system is the next best choice for African DX.</p>
+<ul>
+  <li><strong>Antenna:</strong> DX Engineering DXE-MBVE-5 (multiband, 80-10m) or a homebrew 16.5-foot vertical for 20m monoband.</li>
+  <li><strong>Radials:</strong> Minimum 32 buried radials, each 16.5 feet long. More is better. Pacific Northwest soil conductivity (CN97) is moderate (0.005 to 0.01&nbsp;S/m in the Snohomish River valley) &mdash; adequate but not seawater. Expect 2-3&nbsp;dB ground loss versus a perfect ground.</li>
+  <li><strong>Feed line:</strong> LMR-400, 1:1 current choke at the feed point.</li>
+  <li><strong>Takeoff angle:</strong> 18-25 degrees on 20m with realistic radial efficiency. Slightly higher than a high Yagi but acceptable for the African path.</li>
+</ul>
+<p>A vertical hears more noise than a horizontal and offers no front-to-back rejection of QRM, both of which hurt on weak DX signals. Pair it with a small receive loop or beverage-on-ground (BOG) for low-noise listening on 80m and 40m if those bands are pursued.</p>
+
+<h3>Stealth/HOA Option</h3>
+<p>If the QTH has restrictions, an end-fed half-wave for 40m (132 feet of wire) sloped from a tall tree at 50 feet down to 20 feet provides surprisingly good results on 40-10m via a 49:1 unun (Myantennas EFHW-8010 or similar). Africa on 20m EFHW is realistic during good openings but expect 6-10&nbsp;dB less signal than from a Yagi. Note: site-specific analysis required &mdash; send tree heights, lot dimensions, and HOA status for a refined recommendation.</p>
+
+<h2>Receive-Side Considerations</h2>
+<p>Africa is a weak-signal proposition from CN97. Investing in receive performance pays dividends:</p>
+<ol>
+  <li><strong>In-line preamp:</strong> A low-noise preamp at the antenna helps overcome coax loss on 20m and above. Not strictly necessary with LMR-400 runs under 150 feet.</li>
+  <li><strong>Receive antenna for 40m and 80m:</strong> A K9AY loop fits in a 30-foot square footprint and provides 4-direction switchable receive with 15-20&nbsp;dB front-to-back. Essential for low-band Africa work.</li>
+  <li><strong>Noise mitigation:</strong> Snohomish suburbs are dense with switching power supplies, LED lighting, and solar inverters. Identify and choke or replace local noise sources with mix-31 ferrite snap-ons before blaming the antenna.</li>
+</ol>
+
+<h2>Operating Technique</h2>
+<p>Africa from CN97 is rarely a casual contact. Recommended practices:</p>
+<ul>
+  <li><strong>Spot the opening before calling.</strong> Use a Kiwi SDR in Africa (several public servers in ZS and 5Z) to monitor your own signal. WSPR on 20m at 1300 UTC will tell you if the long path is open before you waste time CQing.</li>
+  <li><strong>Use FT8 or CW on weak openings.</strong> SSB requires roughly 10&nbsp;dB more SNR than FT8 for a successful QSO. On a marginal Africa path, that 10&nbsp;dB is the difference between a contact and silence.</li>
+  <li><strong>Call short, listen long.</strong> Long-path signals fade with 30-90 second QSB cycles. Time your calls to the peaks.</li>
+  <li><strong>Work the gray line.</strong> The intersection of CN97 sunrise and African sunset (and vice versa) produces the strongest signals. Plot the gray line daily; the window shifts measurably across April-October.</li>
+</ul>
+
+<h2>Safety</h2>
+<p>Tower installation safety cannot be overstated. Never climb alone, never climb in winds above 15&nbsp;mph, and always inspect hardware before each climb. Snohomish County receives lightning strikes &mdash; install PolyPhaser IS-50UX surge protectors on every coax at the building entry, bonded to a station single-point ground per ARRL <em>Grounding and Bonding for the Radio Amateur</em>. During electrical storms, physically disconnect all antennas at the entry panel.</p>
+<p>Power line clearance is non-negotiable: no antenna, support rope, or guy wire may be installed where it could fall within 10 feet of any utility line. Snohomish County has both overhead distribution and transmission infrastructure &mdash; survey the site carefully.</p>
+
+<h2>Conclusion</h2>
+<p>The recommended package for KC7AVA: a 3-element triband Yagi at 50 feet, fed with LMR-400 through a 1:1 current choke balun, on a Rohn 25G guyed tower. Operate the long path on 20m at 1300-1400 UTC for southern Africa, the short path on 15m and 17m at 1500-1700 UTC for central Africa, and the late-afternoon 20m short-path window at 2300-0100 UTC for North Africa. Use FT8 on marginal openings and SSB or CW when the band is well open. Track the gray line daily and let the path geometry, not impatience, dictate when to call.</p>
+<p>Africa from the Pacific Northwest is hard. It is also extraordinarily satisfying when the QSO finally goes into the log.</p>
+
+<p class="signoff">73, and good luck on the path.</p>
+
+<p class="note">Note: This recommendation assumes a typical suburban Snohomish QTH with no significant terrain obstruction toward 25-220 degrees and no foil-faced roof or aggressive HOA. For a site-specific refinement, the author would need lot dimensions, tree heights, terrain profile (especially toward bearings 30 and 210), and any restrictive covenants. Soil conductivity at the specific lot can be measured with a 4-pin earth tester or estimated from the FCC M3 ground conductivity map for Washington State.</p>
+
+</body>
+</html>
