@@ -6,54 +6,109 @@
 <title>Africa DX Antenna Design Report | KC7AVA | CN97av</title>
 <style>
   :root {
-    --bg: #f3f6fb;
-    --panel: #ffffff;
-    --ink: #1b2430;
-    --muted: #5d6b7a;
-    --accent: #0d5cab;
-    --accent-soft: #e8f1fb;
-    --line: #d8e0ea;
-    --good: #0f6b45;
-    --warn: #7a4f00;
+    --bg: #061017;
+    --panel: #0c171d;
+    --panel-soft: #101e25;
+    --ink: #e6f0eb;
+    --muted: #9fb0aa;
+    --accent: #7fe0b1;
+    --accent-strong: #42b883;
+    --accent-soft: rgba(127, 224, 177, 0.12);
+    --line: #29404a;
+    --line-strong: #3b5d66;
+    --good: #9ef3c8;
+    --warn: #f4bf75;
+    --shadow: 0 18px 38px rgba(0, 0, 0, 0.34);
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    font-family: "Segoe UI", Arial, sans-serif;
-    background: linear-gradient(180deg, #edf3fb 0%, #f8fafd 240px, #f3f6fb 100%);
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    background:
+      radial-gradient(circle at top, rgba(66, 184, 131, 0.16) 0%, rgba(66, 184, 131, 0.08) 18%, transparent 42%),
+      linear-gradient(180deg, #0a141b 0%, #061017 100%);
     color: var(--ink);
     line-height: 1.6;
+    letter-spacing: 0.01em;
+    position: relative;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      repeating-linear-gradient(0deg, rgba(127, 224, 177, 0.045) 0, rgba(127, 224, 177, 0.045) 1px, transparent 1px, transparent 64px),
+      repeating-linear-gradient(90deg, rgba(127, 224, 177, 0.035) 0, rgba(127, 224, 177, 0.035) 1px, transparent 1px, transparent 64px);
+    opacity: 0.32;
   }
   .page {
     max-width: 1100px;
     margin: 0 auto;
     padding: 2rem 1rem 3rem;
+    position: relative;
+    z-index: 1;
   }
   .hero, .card, .callout, footer {
-    background: var(--panel);
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, rgba(16, 30, 37, 0.98) 0%, rgba(12, 23, 29, 0.98) 100%);
     border: 1px solid var(--line);
     border-radius: 16px;
-    box-shadow: 0 12px 30px rgba(16, 38, 66, 0.06);
+    box-shadow: var(--shadow);
+  }
+  .hero::before, .card::before, .callout::before, footer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(135deg, rgba(127, 224, 177, 0.1) 0%, transparent 28%),
+      linear-gradient(90deg, transparent 0%, rgba(244, 191, 117, 0.08) 100%);
+    opacity: 0.55;
   }
   .hero {
     padding: 2rem;
     margin-bottom: 1.5rem;
+    border-color: var(--line-strong);
+    box-shadow: 0 22px 48px rgba(0, 0, 0, 0.42);
+  }
+  .hero > *, .card > *, .callout > *, footer > * {
+    position: relative;
+    z-index: 1;
   }
   .eyebrow {
     color: var(--accent);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    font-size: 0.76rem;
     font-weight: 700;
+    font-family: Consolas, "Courier New", monospace;
+    margin-bottom: 0.5rem;
   }
   h1, h2, h3 { line-height: 1.2; margin: 0 0 0.75rem; }
-  h1 { font-size: clamp(2rem, 4vw, 3rem); }
-  h2 { font-size: 1.5rem; color: var(--accent); margin-top: 0; }
-  h3 { font-size: 1.08rem; }
+  h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    letter-spacing: 0.02em;
+    text-wrap: balance;
+  }
+  h2 {
+    font-size: 1.5rem;
+    color: var(--accent);
+    margin-top: 0;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-family: Consolas, "Courier New", monospace;
+  }
+  h3 {
+    font-size: 1.02rem;
+    color: #d7efe4;
+    letter-spacing: 0.03em;
+  }
   p { margin: 0 0 1rem; }
   .lead {
     font-size: 1.08rem;
-    color: #293648;
+    color: #d1ddd8;
     max-width: 70ch;
   }
   .grid {
@@ -62,30 +117,48 @@
     gap: 1rem;
     margin-top: 1.25rem;
   }
+  .grid > div {
+    padding: 0.95rem 1rem;
+    border: 1px solid rgba(127, 224, 177, 0.14);
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(127, 224, 177, 0.06) 0%, rgba(255, 255, 255, 0.01) 100%);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+  }
   .card, .callout {
     padding: 1.25rem;
     margin-bottom: 1.25rem;
   }
+  .card > h2:first-child,
+  .callout > h2:first-child {
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid rgba(127, 224, 177, 0.16);
+  }
   .callout {
-    background: var(--accent-soft);
-    border-left: 6px solid var(--accent);
+    background:
+      linear-gradient(180deg, rgba(18, 35, 39, 0.98) 0%, rgba(14, 28, 32, 0.98) 100%);
+    border-left: 6px solid var(--accent-strong);
   }
   .tag {
     display: inline-block;
     padding: 0.24rem 0.55rem;
     border-radius: 999px;
-    background: #edf5ff;
+    background: rgba(127, 224, 177, 0.08);
     color: var(--accent);
     font-size: 0.78rem;
     font-weight: 700;
     margin: 0 0.35rem 0.35rem 0;
+    border: 1px solid rgba(127, 224, 177, 0.18);
+    font-family: Consolas, "Courier New", monospace;
   }
   table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     margin: 1rem 0 0;
     overflow: hidden;
     border-radius: 12px;
+    border: 1px solid var(--line);
+    background: rgba(5, 12, 16, 0.5);
   }
   th, td {
     text-align: left;
@@ -94,16 +167,27 @@
     vertical-align: top;
   }
   th {
-    background: #133b67;
-    color: white;
+    background: linear-gradient(180deg, #17343a 0%, #11262c 100%);
+    color: var(--accent);
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.8rem;
+    font-family: Consolas, "Courier New", monospace;
   }
   tr:nth-child(even) td {
-    background: #f9fbfe;
+    background: rgba(127, 224, 177, 0.04);
   }
   ul {
     margin: 0.5rem 0 0;
     padding-left: 1.2rem;
+  }
+  ol {
+    margin: 0.75rem 0 0;
+    padding-left: 1.35rem;
+  }
+  li + li {
+    margin-top: 0.35rem;
   }
   .small {
     color: var(--muted);
@@ -119,13 +203,17 @@
   }
   .diagram {
     margin: 1.25rem 0 0;
+    padding: 1rem;
+    background: linear-gradient(180deg, rgba(7, 14, 18, 0.8) 0%, rgba(4, 10, 13, 0.92) 100%);
+    border: 1px solid var(--line);
+    border-radius: 16px;
   }
   .diagram svg {
     width: 100%;
     height: auto;
     display: block;
-    background: #f9fbfe;
-    border: 1px solid var(--line);
+    background: #eff5ef;
+    border: 1px solid #b6c7ba;
     border-radius: 12px;
   }
   .diagram figcaption {
@@ -135,10 +223,13 @@
     padding: 1rem 1.25rem;
     color: var(--muted);
     font-size: 0.92rem;
+    border-top: 1px solid var(--line-strong);
   }
   @media (max-width: 720px) {
     .hero, .card, .callout, footer { border-radius: 12px; }
     th, td { padding: 0.7rem; }
+    .diagram { padding: 0.75rem; }
+    body::before { opacity: 0.2; }
   }
 </style>
 </head>
@@ -306,78 +397,78 @@
           <desc id="rhombic-diagram-desc">Plan-view diagram showing a four-leg rhombic with the feedpoint at the near end, a terminating resistor at the far end, approximate dimensions, and a northeast heading note for the favored Africa path.</desc>
           <defs>
             <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
-              <path d="M0,0 L12,6 L0,12 z" fill="#0d5cab" />
+              <path d="M0,0 L12,6 L0,12 z" fill="#17766e" />
             </marker>
             <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
-              <path d="M0,0 L12,6 L0,12 z" fill="#0f6b45" />
+              <path d="M0,0 L12,6 L0,12 z" fill="#1f8a5c" />
             </marker>
             <marker id="arrow-muted" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-              <path d="M0,0 L10,5 L0,10 z" fill="#5d6b7a" />
+              <path d="M0,0 L10,5 L0,10 z" fill="#5f6d70" />
             </marker>
           </defs>
 
-          <rect x="150" y="138" width="640" height="332" rx="18" fill="none" stroke="#5d6b7a" stroke-width="2" stroke-dasharray="10 8" />
-          <text x="470" y="122" text-anchor="middle" font-size="18" fill="#5d6b7a" font-weight="700">Approximate site envelope ~130 ft × 275 ft</text>
+          <rect x="150" y="138" width="640" height="332" rx="18" fill="none" stroke="#5f6d70" stroke-width="2" stroke-dasharray="10 8" />
+          <text x="470" y="122" text-anchor="middle" font-size="18" fill="#5f6d70" font-weight="700">Approximate site envelope ~130 ft × 275 ft</text>
 
-          <polygon points="220,304 405,190 700,304 405,418" fill="#e8f1fb" stroke="#0d5cab" stroke-width="4" />
+          <polygon points="220,304 405,190 700,304 405,418" fill="#e1efe7" stroke="#17766e" stroke-width="4" />
 
-          <line x1="220" y1="304" x2="405" y2="190" stroke="#0d5cab" stroke-width="4" />
-          <line x1="405" y1="190" x2="700" y2="304" stroke="#0d5cab" stroke-width="4" />
-          <line x1="700" y1="304" x2="405" y2="418" stroke="#0d5cab" stroke-width="4" />
-          <line x1="405" y1="418" x2="220" y2="304" stroke="#0d5cab" stroke-width="4" />
+          <line x1="220" y1="304" x2="405" y2="190" stroke="#17766e" stroke-width="4" />
+          <line x1="405" y1="190" x2="700" y2="304" stroke="#17766e" stroke-width="4" />
+          <line x1="700" y1="304" x2="405" y2="418" stroke="#17766e" stroke-width="4" />
+          <line x1="405" y1="418" x2="220" y2="304" stroke="#17766e" stroke-width="4" />
 
-          <circle cx="220" cy="304" r="8" fill="#0d5cab" />
-          <circle cx="700" cy="304" r="8" fill="#7a4f00" />
-          <circle cx="405" cy="190" r="7" fill="#0d5cab" />
-          <circle cx="405" cy="418" r="7" fill="#0d5cab" />
+          <circle cx="220" cy="304" r="8" fill="#17766e" />
+          <circle cx="700" cy="304" r="8" fill="#a56a15" />
+          <circle cx="405" cy="190" r="7" fill="#17766e" />
+          <circle cx="405" cy="418" r="7" fill="#17766e" />
 
-          <line x1="98" y1="284" x2="210" y2="304" stroke="#1b2430" stroke-width="3" marker-end="url(#arrow-muted)" />
-          <text x="40" y="262" font-size="18" fill="#1b2430" font-weight="700">Feedpoint</text>
-          <text x="40" y="286" font-size="16" fill="#5d6b7a">Balanced feed / match</text>
+          <line x1="98" y1="284" x2="210" y2="304" stroke="#243139" stroke-width="3" marker-end="url(#arrow-muted)" />
+          <text x="40" y="262" font-size="18" fill="#243139" font-weight="700">Feedpoint</text>
+          <text x="40" y="286" font-size="16" fill="#5f6d70">Balanced feed / match</text>
 
-          <line x1="692" y1="278" x2="716" y2="278" stroke="#7a4f00" stroke-width="4" />
-          <line x1="716" y1="268" x2="728" y2="288" stroke="#7a4f00" stroke-width="4" />
-          <line x1="728" y1="268" x2="740" y2="288" stroke="#7a4f00" stroke-width="4" />
-          <line x1="740" y1="278" x2="764" y2="278" stroke="#7a4f00" stroke-width="4" />
-          <line x1="700" y1="304" x2="764" y2="304" stroke="#7a4f00" stroke-width="3" />
-          <line x1="744" y1="278" x2="820" y2="240" stroke="#7a4f00" stroke-width="2" />
-          <text x="828" y="232" font-size="18" fill="#7a4f00" font-weight="700">Termination</text>
-          <text x="828" y="256" font-size="16" fill="#5d6b7a">~550–600 Ω resistor</text>
-          <text x="828" y="278" font-size="16" fill="#5d6b7a">Non-inductive</text>
+          <line x1="692" y1="278" x2="716" y2="278" stroke="#a56a15" stroke-width="4" />
+          <line x1="716" y1="268" x2="728" y2="288" stroke="#a56a15" stroke-width="4" />
+          <line x1="728" y1="268" x2="740" y2="288" stroke="#a56a15" stroke-width="4" />
+          <line x1="740" y1="278" x2="764" y2="278" stroke="#a56a15" stroke-width="4" />
+          <line x1="700" y1="304" x2="764" y2="304" stroke="#a56a15" stroke-width="3" />
+          <line x1="744" y1="278" x2="820" y2="240" stroke="#a56a15" stroke-width="2" />
+          <text x="828" y="232" font-size="18" fill="#a56a15" font-weight="700">Termination</text>
+          <text x="828" y="256" font-size="16" fill="#5f6d70">~550–600 Ω resistor</text>
+          <text x="828" y="278" font-size="16" fill="#5f6d70">Non-inductive</text>
 
-          <line x1="712" y1="304" x2="874" y2="304" stroke="#0f6b45" stroke-width="5" marker-end="url(#arrow-green)" />
-          <text x="730" y="346" font-size="19" fill="#0f6b45" font-weight="700">Main lobe / favored direction</text>
-          <text x="730" y="370" font-size="16" fill="#5d6b7a">Toward Africa and Europe on the NE path</text>
+          <line x1="712" y1="304" x2="874" y2="304" stroke="#1f8a5c" stroke-width="5" marker-end="url(#arrow-green)" />
+          <text x="730" y="346" font-size="19" fill="#1f8a5c" font-weight="700">Main lobe / favored direction</text>
+          <text x="730" y="370" font-size="16" fill="#5f6d70">Toward Africa and Europe on the NE path</text>
 
-          <line x1="316" y1="248" x2="244" y2="200" stroke="#0d5cab" stroke-width="2" />
-          <text x="176" y="194" font-size="17" fill="#0d5cab" font-weight="700">Upper leg ~140 ft</text>
-          <line x1="316" y1="360" x2="244" y2="408" stroke="#0d5cab" stroke-width="2" />
-          <text x="176" y="430" font-size="17" fill="#0d5cab" font-weight="700">Lower leg ~140 ft</text>
-          <line x1="492" y1="224" x2="612" y2="164" stroke="#0d5cab" stroke-width="2" />
-          <text x="620" y="158" font-size="17" fill="#0d5cab" font-weight="700">Opposite legs ~140 ft each</text>
+          <line x1="316" y1="248" x2="244" y2="200" stroke="#17766e" stroke-width="2" />
+          <text x="176" y="194" font-size="17" fill="#17766e" font-weight="700">Upper leg ~140 ft</text>
+          <line x1="316" y1="360" x2="244" y2="408" stroke="#17766e" stroke-width="2" />
+          <text x="176" y="430" font-size="17" fill="#17766e" font-weight="700">Lower leg ~140 ft</text>
+          <line x1="492" y1="224" x2="612" y2="164" stroke="#17766e" stroke-width="2" />
+          <text x="620" y="158" font-size="17" fill="#17766e" font-weight="700">Opposite legs ~140 ft each</text>
 
-          <line x1="220" y1="486" x2="700" y2="486" stroke="#5d6b7a" stroke-width="2" marker-start="url(#arrow-muted)" marker-end="url(#arrow-muted)" />
-          <line x1="220" y1="468" x2="220" y2="504" stroke="#5d6b7a" stroke-width="2" />
-          <line x1="700" y1="468" x2="700" y2="504" stroke="#5d6b7a" stroke-width="2" />
-          <text x="460" y="479" text-anchor="middle" font-size="17" fill="#5d6b7a" font-weight="700">Long axis ~253 ft</text>
+          <line x1="220" y1="486" x2="700" y2="486" stroke="#5f6d70" stroke-width="2" marker-start="url(#arrow-muted)" marker-end="url(#arrow-muted)" />
+          <line x1="220" y1="468" x2="220" y2="504" stroke="#5f6d70" stroke-width="2" />
+          <line x1="700" y1="468" x2="700" y2="504" stroke="#5f6d70" stroke-width="2" />
+          <text x="460" y="479" text-anchor="middle" font-size="17" fill="#5f6d70" font-weight="700">Long axis ~253 ft</text>
 
-          <line x1="372" y1="190" x2="372" y2="418" stroke="#5d6b7a" stroke-width="2" marker-start="url(#arrow-muted)" marker-end="url(#arrow-muted)" />
-          <line x1="358" y1="190" x2="386" y2="190" stroke="#5d6b7a" stroke-width="2" />
-          <line x1="358" y1="418" x2="386" y2="418" stroke="#5d6b7a" stroke-width="2" />
-          <text x="352" y="312" text-anchor="end" font-size="17" fill="#5d6b7a" font-weight="700">Max width ~118 ft</text>
+          <line x1="372" y1="190" x2="372" y2="418" stroke="#5f6d70" stroke-width="2" marker-start="url(#arrow-muted)" marker-end="url(#arrow-muted)" />
+          <line x1="358" y1="190" x2="386" y2="190" stroke="#5f6d70" stroke-width="2" />
+          <line x1="358" y1="418" x2="386" y2="418" stroke="#5f6d70" stroke-width="2" />
+          <text x="352" y="312" text-anchor="end" font-size="17" fill="#5f6d70" font-weight="700">Max width ~118 ft</text>
 
-          <circle cx="176" cy="88" r="58" fill="#ffffff" stroke="#d8e0ea" stroke-width="2" />
-          <line x1="176" y1="132" x2="176" y2="48" stroke="#1b2430" stroke-width="3" marker-end="url(#arrow-muted)" />
-          <line x1="176" y1="88" x2="219" y2="88" stroke="#1b2430" stroke-width="2" />
-          <line x1="176" y1="88" x2="204" y2="55" stroke="#0d5cab" stroke-width="4" marker-end="url(#arrow-blue)" />
-          <text x="170" y="43" font-size="18" fill="#1b2430" font-weight="700">N</text>
-          <text x="224" y="93" font-size="18" fill="#1b2430" font-weight="700">E</text>
-          <text x="236" y="60" font-size="17" fill="#0d5cab" font-weight="700">~40° true</text>
-          <text x="236" y="82" font-size="15" fill="#5d6b7a">Aim rhombic centerline NE</text>
-          <text x="236" y="102" font-size="15" fill="#5d6b7a">from CN97av</text>
+          <circle cx="176" cy="88" r="58" fill="#fbfcf8" stroke="#bcc8be" stroke-width="2" />
+          <line x1="176" y1="132" x2="176" y2="48" stroke="#243139" stroke-width="3" marker-end="url(#arrow-muted)" />
+          <line x1="176" y1="88" x2="219" y2="88" stroke="#243139" stroke-width="2" />
+          <line x1="176" y1="88" x2="204" y2="55" stroke="#17766e" stroke-width="4" marker-end="url(#arrow-blue)" />
+          <text x="170" y="43" font-size="18" fill="#243139" font-weight="700">N</text>
+          <text x="224" y="93" font-size="18" fill="#243139" font-weight="700">E</text>
+          <text x="236" y="60" font-size="17" fill="#17766e" font-weight="700">~40° true</text>
+          <text x="236" y="82" font-size="15" fill="#5f6d70">Aim rhombic centerline NE</text>
+          <text x="236" y="102" font-size="15" fill="#5f6d70">from CN97av</text>
 
-          <text x="470" y="548" text-anchor="middle" font-size="18" fill="#1b2430" font-weight="700">Plan view for the report&apos;s recommended 20 meter rhombic</text>
-          <text x="470" y="573" text-anchor="middle" font-size="15" fill="#5d6b7a">Dimensions are approximate and should be adjusted to the actual supports, wire height, and property geometry.</text>
+          <text x="470" y="548" text-anchor="middle" font-size="18" fill="#243139" font-weight="700">Plan view for the report&apos;s recommended 20 meter rhombic</text>
+          <text x="470" y="573" text-anchor="middle" font-size="15" fill="#5f6d70">Dimensions are approximate and should be adjusted to the actual supports, wire height, and property geometry.</text>
         </svg>
         <figcaption class="small">Inline diagram of the recommended terminated rhombic: four roughly 140-foot legs, about 253 feet on the long axis and about 118 feet at maximum width, with a practical site envelope of roughly 130 by 275 feet. A support height around 35 to 50 feet is preferred, while about 25 to 30 feet is still workable on constrained sites. Keep the long axis centered near 40° true from CN97av for the report&apos;s northeast Africa path concept.</figcaption>
       </figure>
