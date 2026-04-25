@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Beverage Antenna: Low-Noise Receive on 160m and 80m, and How to Drive It with a Kenwood TS-590</title>
+<style>
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    max-width: 820px;
+    margin: 2em auto;
+    padding: 0 1.5em;
+    line-height: 1.55;
+    color: #1a1a1a;
+    background: #fdfdfb;
+  }
+  h1 {
+    font-size: 1.7em;
+    border-bottom: 2px solid #444;
+    padding-bottom: 0.3em;
+    margin-bottom: 0.2em;
+  }
+  h2 {
+    font-size: 1.3em;
+    margin-top: 1.8em;
+    color: #333;
+    border-bottom: 1px solid #bbb;
+    padding-bottom: 0.15em;
+  }
+  h3 {
+    font-size: 1.08em;
+    margin-top: 1.3em;
+    color: #444;
+  }
+  .subtitle {
+    font-style: italic;
+    color: #555;
+    margin-bottom: 1.5em;
+  }
+  table {
+    border-collapse: collapse;
+    margin: 1em 0;
+    width: 100%;
+    font-size: 0.95em;
+  }
+  th, td {
+    border: 1px solid #999;
+    padding: 0.4em 0.7em;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #ececec;
+  }
+  code {
+    font-family: Consolas, "Courier New", monospace;
+    background: #f0f0f0;
+    padding: 0 0.25em;
+    border-radius: 3px;
+  }
+  pre {
+    font-family: Consolas, "Courier New", monospace;
+    background: #f0f0f0;
+    padding: 0.6em 0.9em;
+    border-left: 3px solid #888;
+    overflow-x: auto;
+    font-size: 0.9em;
+  }
+  ul, ol {
+    margin: 0.6em 0 0.8em 1.5em;
+  }
+  .note {
+    font-size: 0.9em;
+    color: #555;
+    border-left: 3px solid #aaa;
+    padding: 0.6em 1em;
+    background: #f7f7f3;
+    margin-top: 2em;
+  }
+  .signoff {
+    font-style: italic;
+    margin-top: 1.5em;
+  }
+  .ascii {
+    font-family: Consolas, "Courier New", monospace;
+    background: #f5f5ee;
+    padding: 0.8em 1em;
+    border: 1px solid #ccc;
+    white-space: pre;
+    font-size: 0.85em;
+    line-height: 1.25;
+  }
+</style>
+</head>
+<body>
+
+<h1>The Beverage Antenna: Low-Noise Receive on 160m and 80m, and How to Drive It with a Kenwood TS-590</h1>
+<p class="subtitle">A practical introduction to the most effective low-band receive antenna ever invented, and the wiring that makes it usable on a modern transceiver</p>
+
+<h2>Introduction</h2>
+<p>The Beverage antenna, invented by Harold H. Beverage in 1921 for transatlantic commercial radiotelegraphy, remains the gold standard for low-noise directional reception on 160m and 80m. It is an unassuming antenna: a long wire, a few feet off the ground, terminated at the far end in a resistor. It has terrible gain. It cannot transmit. And yet, on Top Band, a properly built Beverage routinely produces signal-to-noise improvements of 15 to 25 dB over the transmit antenna. The QSO that a vertical or inverted-L cannot copy through the noise floor is often easy on the Beverage.</p>
+<p>This article covers what makes a Beverage work, how to build one in a typical rural or large-suburban yard, and specifically how to wire it into a Kenwood TS-590S or TS-590SG so you can switch instantly between transmit antenna and Beverage during a QSO.</p>
+
+<h2>Why a Beverage Works</h2>
+<p>The Beverage is not a high-efficiency radiator. Its radiation resistance is dominated by ground losses, and its actual antenna gain is roughly &minus;15 to &minus;20 dBi. That sounds catastrophic until you remember that on 160m and 80m the receiver is not noise-limited by its own internal noise figure. The receiver is limited by atmospheric and man-made noise arriving from every direction. What matters is not absolute signal level but signal-to-noise ratio.</p>
+<p>A Beverage achieves its SNR advantage through three mechanisms:</p>
+<ul>
+  <li><strong>Directivity.</strong> A 1-wavelength Beverage has a forward lobe of roughly 25 dB front-to-back ratio. Noise arriving from the back and sides is rejected.</li>
+  <li><strong>Wave-tilt selectivity.</strong> Vertically polarized signals from low elevation angles arrive with a forward tilt due to ground losses. The horizontal Beverage wire couples preferentially to this tilted electric field. High-angle local QRN couples poorly.</li>
+  <li><strong>Termination.</strong> A resistive termination at the far end absorbs energy that would otherwise reflect back, killing the rearward lobe and turning the antenna into a one-way travelling-wave device.</li>
+</ul>
+<p>The result: a Beverage hears the wanted signal at almost the same absolute level as the transmit antenna, but the noise floor drops dramatically. Net SNR gain on a quiet QTH can reach 20 dB. On a noisy suburban lot it is often the difference between reading the signal and not.</p>
+
+<h2>Physical Design</h2>
+
+<h3>Length</h3>
+<p>Beverage gain and pattern improve with length up to roughly 2 wavelengths, beyond which the main lobe narrows further but side lobes grow and the law of diminishing returns sets in. Practical guidelines:</p>
+<table>
+  <thead>
+    <tr><th>Length (feet)</th><th>Lambda on 160m</th><th>Lambda on 80m</th><th>Comment</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>270</td><td>0.5</td><td>1.0</td><td>Minimum useful on 80m; weak on 160m</td></tr>
+    <tr><td>540</td><td>1.0</td><td>2.0</td><td>Sweet spot for 160m, excellent on 80m</td></tr>
+    <tr><td>800</td><td>1.5</td><td>3.0</td><td>Strong directivity on both bands</td></tr>
+    <tr><td>1100</td><td>2.0</td><td>4.0</td><td>Maximum practical, narrow beamwidth</td></tr>
+  </tbody>
+</table>
+<p>For most operators, 500 to 600 feet is the practical compromise: long enough to be effective on 160m, short enough to fit on a typical rural lot or shared property easement.</p>
+
+<h3>Height</h3>
+<p>8 to 10 feet above ground. Higher reduces ground coupling and degrades the wave-tilt mechanism. Lower invites animal damage and adds resistive losses to the wire-to-ground path. T-posts at 100-foot intervals with insulators are the standard support.</p>
+
+<h3>Wire</h3>
+<p>14 to 18 AWG insulated copper or copper-clad steel. Insulation matters less electrically than mechanically; UV-resistant THHN or polyethylene-jacketed wire from The Wireman or Davis RF lasts decades. Soft-drawn copper sags and breaks; use Copperweld for spans over 150 feet between supports.</p>
+
+<h3>Termination</h3>
+<p>The far end is terminated to ground through a non-inductive resistor. The correct value is the antenna's characteristic impedance, which depends on height and ground conductivity but is almost always between 400 and 600 ohms. A 470-ohm or 500-ohm 2-watt carbon-composition or metal-oxide resistor (NOT wire-wound) is standard. Attach the resistor between the wire end and an 8-foot ground rod driven at the termination.</p>
+
+<h3>Feed-End Matching Transformer</h3>
+<p>The Beverage presents roughly 450 to 500 ohms to the feed line. A 9:1 unun transforms this to 50 ohms for coax. Wind the transformer on a 2-inch FT240-73 or FT240-43 toroid: 3 turns primary, 9 turns secondary, trifilar or with separate windings. Commercial alternatives are easier:</p>
+<ul>
+  <li>DX Engineering DXE-BFS Beverage feed system (matching transformer, termination resistor, and hardware)</li>
+  <li>Array Solutions BevPro feed and termination boxes</li>
+  <li>W7IUV / K9AY-style homebrew transformers (plans on w8ji.com)</li>
+</ul>
+
+<h3>Feed Line</h3>
+<p>RG-6 75-ohm CATV coax is ideal. It is cheap (often free), low-loss at HF, and the impedance mismatch into a 9:1 unun feeding a 50-ohm receiver is tolerable. Alternatively use RG-58 or RG-8X 50-ohm coax. Bury the coax or run it along a fence line away from the transmit antenna; current induced into the feed-line shield from the transmit antenna is the most common cause of disappointing Beverage performance.</p>
+
+<h3>Ground System</h3>
+<p>Both ends need an earth ground rod. A single 8-foot copper-clad rod at each end is the minimum. Add 2 to 4 short radials (15 to 30 feet) at each end if soil is dry or rocky.</p>
+
+<h2>Layout</h2>
+<pre class="ascii">
+   FEED END                                              TERMINATION END
+   (toward shack)                                        (toward target DX)
+
+   +-------+                                             +---------+
+   | 9:1   |                                             |  470 R  |
+   | unun  o-------------------------------------------- o         |
+   +---+---+      single wire, 8-10 ft above ground      +----+----+
+       |                                                      |
+       |                                                      |
+      GND rod                                               GND rod
+       |
+       |  (75-ohm RG-6 or 50-ohm coax to shack)
+       v
+    to TS-590 RX ANT input
+</pre>
+<p>Aim the antenna along the great-circle bearing to the target region. The "feed end" is the receiver end; the "termination end" points toward the desired DX. A Beverage points <em>toward</em> the termination &mdash; so a 540-foot wire fed at your shack and terminated to the northeast hears Europe.</p>
+
+<h2>Multi-Direction Coverage</h2>
+<p>One Beverage covers a 60-90 degree forward sector. Serious low-band operators install 4 to 8 Beverages radiating from a common feed location, switched at the shack. DX Engineering and Array Solutions sell remote switching boxes:</p>
+<ul>
+  <li>DXE-RBS Receive antenna switch (4 or 8 ports, weatherproof, DC over coax control)</li>
+  <li>Array Solutions SixPak / FourPak receive antenna switches</li>
+</ul>
+<p>For a single-Beverage installation, choose the bearing of greatest interest. From most of North America, that is roughly 45 degrees true (Europe). For Asian DX, 320 to 330 degrees. For Pacific, 240 degrees.</p>
+
+<h2>Reversible Beverages</h2>
+<p>A 2-wire reversible Beverage uses two parallel wires and a relay box at the far end. Switching the relay swaps which end is fed and which is terminated, reversing the direction. K9AY and N6RK have published designs. DX Engineering sells the DXE-RBSA reversible Beverage system with hardware for a single bidirectional installation. This doubles coverage from one wire run with modest extra complexity.</p>
+
+<h2>Connecting to the Kenwood TS-590S / TS-590SG</h2>
+<p>The TS-590 family is one of the most Beverage-friendly transceivers available, because Kenwood provided a dedicated receive antenna jack and software switching that exceeds what most contemporary radios offer.</p>
+
+<h3>Rear-Panel Connections</h3>
+<p>The TS-590S and TS-590SG have, on the rear panel:</p>
+<ul>
+  <li><strong>ANT 1</strong> &mdash; SO-239, primary transmit/receive antenna.</li>
+  <li><strong>ANT 2</strong> &mdash; SO-239, secondary transmit/receive antenna.</li>
+  <li><strong>RX ANT IN</strong> &mdash; RCA phono jack, receive-only input.</li>
+  <li><strong>RX ANT OUT</strong> &mdash; RCA phono jack, output to feed an external preselector or filter (the radio routes the chosen ANT 1 / ANT 2 signal here, so you can insert a band-pass filter or preamp and return it to RX ANT IN).</li>
+</ul>
+<p>The RX ANT IN jack is exactly what you want for a Beverage. Run the Beverage feed line into the shack, terminate it in a UHF-to-RCA adapter or a short pigtail, and plug it into RX ANT IN.</p>
+
+<h3>Menu Configuration</h3>
+<p>The receive antenna jack is disabled by default. Enable it via Menu 70 (TS-590S) or Menu A: 70 (TS-590SG):</p>
+<table>
+  <thead>
+    <tr><th>Menu</th><th>Setting</th><th>Effect</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>70 (590S) / A-70 (590SG)</td><td>RX ANT: ON</td><td>Enables the RX ANT IN jack as a selectable receive source.</td></tr>
+    <tr><td>71 (590S) / A-71 (590SG)</td><td>DRV: OFF</td><td>Disables the RX ANT OUT drive jack unless you are using an external preselector loop. Leave OFF for a simple Beverage installation.</td></tr>
+  </tbody>
+</table>
+<p>After enabling, the RX ANT button on the front panel (or accessible via the ANT button menu on some firmware revisions) toggles between the transmit antenna and the Beverage on receive. Transmit always uses ANT 1 or ANT 2; the radio automatically routes RF away from the receive jack on transmit, protecting it.</p>
+
+<h3>Transmit Protection &mdash; A Critical Note</h3>
+<p>Although the TS-590 internally isolates the RX ANT IN jack during transmit, this protection is not a substitute for proper installation. If the Beverage feed line is parallel to or near the transmit antenna feed line for any distance, induced RF on the Beverage line can exceed what the front-end relay can safely handle. Best practices:</p>
+<ul>
+  <li>Route Beverage coax at least 6 feet away from transmit-antenna feed line where possible.</li>
+  <li>Install a common-mode choke (mix-31 toroid, 8-12 turns of RG-58 or RG-6) on the Beverage coax at the shack entry.</li>
+  <li>For high-power stations (500W+), add an external receive-antenna T/R switch with hard relay isolation. DX Engineering RTR-1A and Array Solutions AS-RX-PROTECT are purpose-built. The TS-590 has a key-line output (REMOTE jack) that can drive these switches.</li>
+</ul>
+
+<h3>RIT, Diversity, and the Sub-Receiver Question</h3>
+<p>The TS-590 is a single-receiver radio. It does not support true diversity reception (simultaneous main and sub receivers on different antennas). On a TS-590, the Beverage is selected <em>instead of</em> the transmit antenna for receive; you cannot listen to both at once. This is fine for almost all Beverage applications &mdash; you make the QSO on the Beverage and switch back to the vertical to transmit.</p>
+<p>If true diversity is desired, the TS-590 is the wrong radio. Look at the Kenwood TS-890S, Icom IC-7610 / IC-7851, Yaesu FTDX-101D / MP, or Elecraft K4 (with the second receiver option).</p>
+
+<h2>Optional Front-End Enhancements</h2>
+
+<h3>Bandpass Filter on RX ANT</h3>
+<p>The TS-590 receiver is excellent but a Beverage is broadband and pulls in everything from AM broadcast at 1 MHz through shortwave broadcast on 4-7 MHz. A 160m or 80m bandpass filter inserted between the Beverage and the RX ANT IN jack reduces front-end intermodulation, especially in the evening when broadcast stations are strongest. Wire the filter using the RX ANT OUT / RX ANT IN loop:</p>
+<pre class="ascii">
+   RX ANT OUT ---&gt; [BPF for 160/80m] ---&gt; RX ANT IN
+                          ^
+                          |
+       Antenna source: select via menu 71 (DRV: ON)
+                       and connect Beverage to ANT 1 or ANT 2
+</pre>
+<p>This routes the front-panel-selected antenna out to the filter and back in, applying the filter only on receive. Array Solutions, ICE, and DX Engineering all sell amateur-band BPFs that fit this application. The simpler Beverage-direct approach (Beverage to RX ANT IN, menu 70 ON, menu 71 OFF) skips the filter and is fine for casual operation.</p>
+
+<h3>Preamplifier</h3>
+<p>A Beverage produces low signal levels. The TS-590's internal preamp (P.AMP button on front) compensates: turn it on when the Beverage is selected on 160m and 80m. If the receiver is still noise-floor limited (compare receiver noise with antenna connected vs. disconnected; the noise should rise audibly when the antenna is connected), an external low-noise preamp at the antenna feedpoint helps. W7IUV preamp boards are the gold standard. Mount in a weatherproof box at the antenna and feed DC up the coax via a bias tee.</p>
+
+<h2>Operating Tips</h2>
+<ul>
+  <li><strong>Use AGC SLOW or OFF on Beverage receive.</strong> Top Band signals fade slowly; fast AGC pumps on local QRN bursts that the Beverage was supposed to reject.</li>
+  <li><strong>Run the DSP narrow.</strong> 250 Hz CW or 1.8 kHz SSB filtering pairs naturally with the Beverage's quiet noise floor.</li>
+  <li><strong>Notch local birdies in software.</strong> The TS-590's Auto Notch and Manual Notch handle CW carriers well. Multi-notch (Manual Notch with multiple positions on the SG firmware) is essential in a noisy environment.</li>
+  <li><strong>Monitor your Beverage with the receiver disconnected from the transmit antenna.</strong> If you hear nothing at all, the feed line may be open or the matching transformer may be mis-wired. A good Beverage on 160m at night should sound noisier than a dead band but quieter than your TX antenna.</li>
+  <li><strong>Compare A/B regularly.</strong> Toggle RX ANT on and off in real time during a marginal QSO. The improvement is rarely subtle.</li>
+</ul>
+
+<h2>Common Failure Modes</h2>
+<ul>
+  <li><strong>Termination resistor not connected to a real ground.</strong> Without a low-impedance return path, the antenna behaves as an unterminated wire and loses its directivity. Check with a NanoVNA: the reflected impedance at the feed end should be roughly 450-550 ohms across 1.8-7 MHz. A wildly varying impedance vs. frequency indicates the termination is not seeing real ground.</li>
+  <li><strong>Common-mode current on the feed line.</strong> Forces the coax to act as part of the antenna and ruins the pattern. Add a choke at the matching transformer and at the shack entry.</li>
+  <li><strong>Transmit antenna coupling.</strong> The Beverage hears your transmit antenna's pattern, not its own. Symptom: the Beverage's apparent direction matches whatever direction the transmit antenna favors. Move feed lines apart and add chokes.</li>
+  <li><strong>Damage from livestock or mowers.</strong> Heights below 8 feet are vulnerable. Use bright marker tape on the wire and check the run after every storm and every mowing.</li>
+</ul>
+
+<h2>Beverage on Ground (BOG)</h2>
+<p>If overhead height is impossible, a Beverage laid directly on the ground works surprisingly well. Performance is roughly 6 dB worse than an elevated Beverage, but the directional pattern is preserved. BOGs are popular at temporary contest sites and DXpedition installations because deployment takes minutes &mdash; no posts, no insulators, no climbing. The only critical requirement is a good ground at both ends and the same termination resistor.</p>
+
+<h2>Commercial Packages</h2>
+<p>For an operator who wants to install a Beverage without homebrewing every component:</p>
+<ul>
+  <li><strong>DX Engineering DXE-BFS-1</strong> &mdash; Single Beverage feed and termination kit. Includes 9:1 transformer, 470-ohm 5W termination resistor, weatherproof boxes, hardware. Verify current pricing on dxengineering.com.</li>
+  <li><strong>DX Engineering DXE-RBS-1A</strong> &mdash; Reversible Beverage system with two-wire spreader hardware and a relay box.</li>
+  <li><strong>DX Engineering DXE-RBSV-1</strong> &mdash; Multi-direction Beverage switching system.</li>
+  <li><strong>Array Solutions BevPro-1, BevPro-2</strong> &mdash; Single-direction and reversible Beverage feed/termination kits.</li>
+  <li><strong>Wire and posts</strong> &mdash; The Wireman, Davis RF, or local fence supply for T-posts.</li>
+</ul>
+<p>A complete 540-foot single-direction Beverage with commercial feed/termination hardware, 250 feet of RG-6, and ten T-posts can be built for roughly $200-$300 plus labor.</p>
+
+<h2>Site Considerations</h2>
+<p>The Beverage requires a long, straight run of clear ground. Trees and brush in the path are tolerable; ferrous fences within a few feet are not. Avoid running parallel to power lines or telephone drops &mdash; not for safety (the Beverage is at low voltage on receive) but because those structures pick up the same broadband noise the Beverage is supposed to escape. A 10-foot lateral separation from any AC service is the practical minimum; more is better.</p>
+<p>Property easements, agricultural lease land, and right-of-way along section lines are common Beverage sites. Get permission in writing before stringing wire across someone else's land. The wire is nearly invisible at 8 feet but the matching transformer and ground rod at the feed end are not.</p>
+
+<h2>Safety</h2>
+<p>The Beverage itself carries minimal RF voltage on receive. The risks are mechanical and lightning-related:</p>
+<ul>
+  <li><strong>Power line clearance.</strong> Never string Beverage wire where it could fall onto a power distribution line. Although the Beverage operates at low voltage, a 540-foot wire dropped onto a 7.2 kV distribution feeder is lethal at the feed end. Maintain 10 feet minimum separation from any utility line, including the run path itself.</li>
+  <li><strong>Lightning.</strong> A 500-foot wire near ground level is an excellent lightning collector. Install a gas-discharge tube surge protector (PolyPhaser IS-50UX or ICE 196) on the Beverage coax at the shack entry, bonded to the station single-point ground. Disconnect during electrical storms. Reference the ARRL <em>Grounding and Bonding for the Radio Amateur</em> for proper SPG practice.</li>
+  <li><strong>Termination resistor heating.</strong> A 2-watt resistor is adequate for receive-only use. If the Beverage is exposed to RF from a nearby transmit antenna, the resistor can dissipate significant power and burn out. Use a 5-watt or 10-watt non-inductive resistor in such installations.</li>
+  <li><strong>Electric fences.</strong> If the run crosses a pasture, the Beverage and the fence wire must be physically separated. Inductive coupling between the two will inject 60 Hz buzz directly into the receiver.</li>
+</ul>
+
+<h2>Conclusion</h2>
+<p>A Beverage is the cheapest dB you will ever buy on 160m and 80m. For perhaps $200 in materials and a Saturday afternoon of T-post pounding, you transform a noisy low-band station into a competitive DX-listening machine. The TS-590S and TS-590SG make integration straightforward: enable Menu 70, plug the Beverage feed into RX ANT IN, push the RX ANT button when conditions favor it, and listen. Keep ANT 1 connected to your transmit antenna; the radio handles the switching automatically. Add a band-pass filter and an external T/R protection switch as the station grows.</p>
+<p>The Beverage will not help you transmit. It will help you hear the station that nobody else can. On Top Band, that is the entire game.</p>
+
+<p class="signoff">73, and may your noise floor be low.</p>
+
+<p class="note">Note: This article assumes a single fixed-direction Beverage at a rural or large-suburban QTH. Site-specific guidance &mdash; multi-direction switching layouts, reversible 2-wire systems, optimal length for your soil conductivity, or compact alternatives such as K9AY loops or BOG arrays for restricted lots &mdash; requires details on lot dimensions, target bearings, soil type, and noise environment. The ARRL Antenna Book chapter on receive antennas, ON4UN's <em>Low Band DXing</em>, and Tom Rauch's articles at w8ji.com are the standard references; consult them before committing to a final design.</p>
+
+</body>
+</html>
