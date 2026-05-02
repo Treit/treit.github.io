@@ -7,9 +7,11 @@
     (function () {
       try {
         var s = localStorage.getItem('site-style');
-        if (s === 'classic') document.documentElement.setAttribute('data-style', 'classic');
-        else document.documentElement.setAttribute('data-style', 'qex');
-        if (localStorage.getItem('qex-theme') === 'dark') {
+        document.documentElement.setAttribute('data-style', s === 'classic' ? 'classic' : 'qex');
+        var t = localStorage.getItem('qex-theme');
+        if (t === 'dark') {
+          document.documentElement.setAttribute('data-qex-theme', 'dark');
+        } else if (t !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
           document.documentElement.setAttribute('data-qex-theme', 'dark');
         }
       } catch (e) {

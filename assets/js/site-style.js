@@ -7,14 +7,21 @@
   var STYLE_KEY = 'site-style';
   var THEME_KEY = 'qex-theme';
   var DEFAULT_STYLE = 'qex';
+  var THEME_ORDER = ['auto', 'light', 'dark'];
 
   function currentStyle() {
     return document.documentElement.getAttribute('data-style') || DEFAULT_STYLE;
   }
-  function currentTheme() {
-    return document.documentElement.getAttribute('data-qex-theme') === 'dark'
-      ? 'dark'
-      : 'light';
+
+  function storedTheme() {
+    try {
+      var t = localStorage.getItem(THEME_KEY);
+      return (t === 'light' || t === 'dark') ? t : 'auto';
+    } catch (e) { return 'auto'; }
+  }
+
+  function prefersDark() {
+    return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
   }
 
   function applyStyle(style) {
@@ -28,18 +35,33 @@
   }
 
   function applyTheme(theme) {
-    if (theme === 'dark') {
+    var resolvedDark = (theme === 'dark') || (theme === 'auto' && prefersDark());
+    if (resolvedDark) {
       document.documentElement.setAttribute('data-qex-theme', 'dark');
     } else {
       document.documentElement.removeAttribute('data-qex-theme');
     }
-    try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+    try {
+      if (theme === 'auto') localStorage.removeItem(THEME_KEY);
+      else localStorage.setItem(THEME_KEY, theme);
+    } catch (e) {}
     syncButtons();
+  }
+
+  function nextTheme(t) {
+    var i = THEME_ORDER.indexOf(t);
+    return THEME_ORDER[(i + 1) % THEME_ORDER.length];
+  }
+
+  function themeLabel(t) {
+    if (t === 'dark') return 'Dark';
+    if (t === 'light') return 'Light';
+    return 'Auto';
   }
 
   function syncButtons() {
     var style = currentStyle();
-    var theme = currentTheme();
+    var theme = storedTheme();
     var sBtn = document.getElementById('siteStyleToggle');
     var tBtn = document.getElementById('qexThemeToggle');
     if (sBtn) {
@@ -47,9 +69,9 @@
       sBtn.setAttribute('aria-pressed', style === 'qex' ? 'true' : 'false');
     }
     if (tBtn) {
-      tBtn.textContent = theme === 'dark' ? 'Light' : 'Dark';
+      tBtn.textContent = themeLabel(theme);
+      tBtn.title = 'Theme: ' + themeLabel(theme) + ' (click to cycle)';
       tBtn.style.display = style === 'qex' ? '' : 'none';
-      tBtn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
     }
   }
 
@@ -63,8 +85,16 @@
     }
     if (tBtn) {
       tBtn.addEventListener('click', function () {
-        applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+        applyTheme(nextTheme(storedTheme()));
       });
+    }
+    if (window.matchMedia) {
+      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      var listener = function () {
+        if (storedTheme() === 'auto') applyTheme('auto');
+      };
+      if (mq.addEventListener) mq.addEventListener('change', listener);
+      else if (mq.addListener) mq.addListener(listener);
     }
     syncButtons();
   }
