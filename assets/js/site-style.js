@@ -65,12 +65,17 @@
     var sBtn = document.getElementById('siteStyleToggle');
     var tBtn = document.getElementById('qexThemeToggle');
     if (sBtn) {
-      sBtn.textContent = style === 'qex' ? 'Classic' : 'QEX';
+      sBtn.textContent = 'Style: ' + (style === 'qex' ? 'QEX' : 'Classic');
+      sBtn.title = 'Click to switch to ' + (style === 'qex' ? 'Classic' : 'QEX');
       sBtn.setAttribute('aria-pressed', style === 'qex' ? 'true' : 'false');
     }
     if (tBtn) {
-      tBtn.textContent = themeLabel(theme);
-      tBtn.title = 'Theme: ' + themeLabel(theme) + ' (click to cycle)';
+      var label = themeLabel(theme);
+      if (theme === 'auto') {
+        label += ' (' + (prefersDark() ? 'Dark' : 'Light') + ')';
+      }
+      tBtn.textContent = 'Theme: ' + label;
+      tBtn.title = 'Click to switch to ' + themeLabel(nextTheme(theme));
       tBtn.style.display = style === 'qex' ? '' : 'none';
     }
   }
