@@ -26,6 +26,24 @@
 
     {%- include footer.html -%}
 
+    <footer class="qex-footer" role="contentinfo">
+      <div class="qex-footer-inner">
+        <div class="qex-footer-name">{{ site.title | escape }}</div>
+        <ul class="qex-footer-links">
+          <li><a href="{{ "/about/" | relative_url }}">About Me</a></li>
+          {%- if site.github_username -%}
+            <li><a href="https://github.com/{{ site.github_username }}" rel="noopener">GitHub</a></li>
+          {%- endif -%}
+          {%- if site.twitter_username -%}
+            <li><a href="https://twitter.com/{{ site.twitter_username }}" rel="noopener">Twitter</a></li>
+          {%- endif -%}
+          {%- if site.email -%}
+            <li><a href="mailto:{{ site.email }}">Email</a></li>
+          {%- endif -%}
+        </ul>
+      </div>
+    </footer>
+
   </body>
 
 </html>

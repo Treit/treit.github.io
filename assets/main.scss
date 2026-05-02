@@ -23,6 +23,7 @@ $on-laptop:        800px !default;
 // Hide QEX-only chrome and the QEX-style post header in classic mode.
 html[data-style="classic"] .masthead,
 html[data-style="classic"] .qex-post-header,
+html[data-style="classic"] .qex-footer,
 html[data-style="classic"] .qex-theme-toggle { display: none; }
 
 // The classic/QEX style toggle is shown in both modes. Style it inconspicuously

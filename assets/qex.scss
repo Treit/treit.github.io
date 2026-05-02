@@ -286,6 +286,48 @@ html[data-style="qex"] .site-footer,
 html[data-style="qex"] .post-header,
 html[data-style="qex"] .page-content > .wrapper > .home > .page-heading { display: none; }
 
+/* QEX-styled footer: thin rule, small caps, centered colophon. */
+html[data-style="qex"] .qex-footer {
+  margin: 2.5em 0 0 0;
+  padding: 1.2em 0 0.4em 0;
+  border-top: 3px double var(--rule);
+  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  font-size: 0.78em;
+  text-align: center;
+  color: var(--fg-muted);
+}
+html[data-style="qex"] .qex-footer-name {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-weight: 700;
+  color: var(--fg);
+  margin-bottom: 0.5em;
+}
+html[data-style="qex"] .qex-footer-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 1.4em;
+}
+html[data-style="qex"] .qex-footer-links li {
+  margin: 0;
+  padding: 0;
+}
+html[data-style="qex"] .qex-footer-links a {
+  color: var(--fg-muted);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid transparent;
+}
+html[data-style="qex"] .qex-footer-links a:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
 html[data-style="qex"] .page-content { padding: 0; }
 html[data-style="qex"] .wrapper { max-width: none; padding: 0; margin: 0; }
 
