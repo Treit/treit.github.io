@@ -394,6 +394,60 @@ html[data-style="qex"] .home .rss-subscribe {
 
 @page { margin: 0.5in 0.55in; }
 
+/* Mobile / narrow viewports: drop the magazine margins, reduce padding, and
+   prevent absurd hyphenation of big headings (e.g. "Opti-mization"). */
+@media (max-width: 640px) {
+  html[data-style="qex"] body {
+    margin: 0;
+    padding: 1em 1em 1.5em 1em;
+    font-size: 12pt;
+    line-height: 1.5;
+    box-shadow: none;
+    hyphens: manual;
+  }
+  html[data-style="qex"] .doctitle {
+    font-size: 1.7em;
+    hyphens: manual;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+  html[data-style="qex"] h1,
+  html[data-style="qex"] h2,
+  html[data-style="qex"] h3,
+  html[data-style="qex"] h4,
+  html[data-style="qex"] h5,
+  html[data-style="qex"] h6 {
+    hyphens: manual;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+  html[data-style="qex"] h2 { font-size: 1em; }
+  html[data-style="qex"] h3 { font-size: 0.95em; }
+  html[data-style="qex"] .masthead {
+    font-size: 0.7em;
+    letter-spacing: 0.10em;
+    padding: 0.35em 0 0.25em 0;
+    margin-bottom: 1.1em;
+    gap: 0.6em;
+  }
+  html[data-style="qex"] .masthead .title { flex: 0 1 auto; }
+  html[data-style="qex"] .masthead .issue { flex: 0 0 auto; white-space: nowrap; }
+  html[data-style="qex"] .qex-article pre {
+    padding: 0.5em 0.6em;
+    font-size: 0.82em;
+  }
+  html[data-style="qex"] .site-style-toggle,
+  html[data-style="qex"] .qex-theme-select {
+    top: 6px;
+    font-size: 10px;
+    padding: 3px 6px;
+    letter-spacing: 0.08em;
+  }
+  html[data-style="qex"] .site-style-toggle { right: 6px; }
+  html[data-style="qex"] .qex-theme-select  { right: 70px; }
+  html[data-style="qex"] .qex-footer-links { gap: 0 0.9em; }
+}
+
 @media print {
   html[data-style="qex"] {
     --bg-page: #fff;
