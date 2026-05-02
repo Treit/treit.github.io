@@ -200,6 +200,21 @@ html[data-style="qex"] .qex-article th {
 }
 html[data-style="qex"] .qex-article tr:nth-child(even) td { background: var(--table-stripe); }
 
+/* Overrides for posts that ship their own .pretty-table styles. The hardcoded
+   dark-red palette and hover behavior collide with QEX (and with dark mode),
+   so we force the table onto the QEX palette and disable the legacy hover. */
+html[data-style="qex"] .qex-article .pretty-table th,
+html[data-style="qex"] .qex-article .pretty-table td {
+  color: var(--fg);
+  border-color: var(--rule);
+}
+html[data-style="qex"] .qex-article .pretty-table tr:hover th[scope=row],
+html[data-style="qex"] .qex-article .pretty-table tr:hover td,
+html[data-style="qex"] .qex-article .pretty-table tr:nth-child(even):hover td {
+  background: var(--accent);
+  color: #fff;
+}
+
 html[data-style="qex"] code {
   font-family: "SFMono-Regular", "Consolas", monospace;
   font-size: 0.88em;
