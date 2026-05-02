@@ -1,0 +1,370 @@
+---
+# QEX-magazine-styled stylesheet, ported from
+# https://github.com/Treit/scratch/blob/main/qexify/qexify.py
+# All rules are scoped under html[data-style="qex"] so classic minima styling
+# is unaffected. Dark mode uses html[data-style="qex"][data-qex-theme="dark"].
+---
+
+html[data-style="qex"] {
+  --bg-page: #ece9df;
+  --bg-body: #fff;
+  --fg: #111;
+  --fg-muted: #333;
+  --fg-dim: #222;
+  --rule: #000;
+  --accent: #6b1f0a;
+  --accent-bar: #b04a2f;
+  --code-bg: #f5f2e8;
+  --table-stripe: #fafaf6;
+  --shadow: 0 1px 3px rgba(0,0,0,0.18);
+}
+
+html[data-style="qex"][data-qex-theme="dark"] {
+  --bg-page: #0e0d0b;
+  --bg-body: #1a1916;
+  --fg: #e8e4d8;
+  --fg-muted: #c9c4b6;
+  --fg-dim: #d4cfc0;
+  --rule: #e8e4d8;
+  --accent: #e89478;
+  --accent-bar: #d6724f;
+  --code-bg: #25231e;
+  --table-stripe: #211f1b;
+  --shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+
+html[data-style="qex"] {
+  background: var(--bg-page);
+}
+
+html[data-style="qex"] body {
+  max-width: 10in;
+  margin: 0.4in auto;
+  padding: 0.6in 0.7in;
+  background: var(--bg-body);
+  color: var(--fg);
+  font-family: "Iowan Old Style", "Sitka Text", "Cambria", "Source Serif 4", "Source Serif Pro", "Charter", "Georgia", serif;
+  font-size: 13.5pt;
+  line-height: 1.55;
+  hyphens: auto;
+  text-align: left;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  box-shadow: var(--shadow);
+}
+
+html[data-style="qex"] body.wide-layout { max-width: 12in; }
+
+html[data-style="qex"] .site-style-toggle,
+html[data-style="qex"] .qex-theme-toggle {
+  position: fixed;
+  top: 10px;
+  z-index: 100;
+  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  background: var(--bg-body);
+  color: var(--fg);
+  border: 1px solid var(--rule);
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 2px;
+  opacity: 0.85;
+}
+html[data-style="qex"] .site-style-toggle  { right: 14px; }
+html[data-style="qex"] .qex-theme-toggle   { right: 96px; }
+html[data-style="qex"] .site-style-toggle:hover,
+html[data-style="qex"] .qex-theme-toggle:hover { opacity: 1; }
+
+html[data-style="qex"] h1,
+html[data-style="qex"] h2,
+html[data-style="qex"] h3,
+html[data-style="qex"] h4,
+html[data-style="qex"] h5,
+html[data-style="qex"] h6,
+html[data-style="qex"] .masthead,
+html[data-style="qex"] .caption,
+html[data-style="qex"] .figlabel,
+html[data-style="qex"] .byline,
+html[data-style="qex"] .doctitle {
+  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+}
+
+html[data-style="qex"] .masthead {
+  border-top: 3px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding: 0.4em 0 0.3em 0;
+  margin-bottom: 1.6em;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.78em;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+}
+html[data-style="qex"] .masthead .issue { font-weight: 400; letter-spacing: 0.10em; }
+html[data-style="qex"] .masthead .title {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: none;
+}
+html[data-style="qex"] .masthead .title:hover { color: var(--accent); }
+
+html[data-style="qex"] .doctitle {
+  font-size: 2.2em;
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.005em;
+  margin: 0 0 0.4em 0;
+  text-align: left;
+}
+
+html[data-style="qex"] .deck {
+  font-family: "Iowan Old Style", "Sitka Text", "Cambria", "Source Serif 4", "Source Serif Pro", "Charter", "Georgia", serif;
+  font-style: italic;
+  font-size: 1.15em;
+  line-height: 1.4;
+  margin: 0 0 1em 0;
+  color: var(--fg-dim);
+  text-align: left;
+  hyphens: none;
+}
+
+html[data-style="qex"] .byline {
+  font-size: 0.78em;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.4em;
+  margin: 0 0 1.4em 0;
+  color: var(--fg-muted);
+}
+
+html[data-style="qex"] h2 {
+  font-size: 1.05em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.2em;
+  margin: 1.8em 0 0.7em 0;
+}
+html[data-style="qex"] h3 {
+  font-size: 1em;
+  font-weight: 700;
+  margin: 1.2em 0 0.35em 0;
+  text-transform: none;
+  letter-spacing: 0;
+}
+html[data-style="qex"] h4 {
+  font-size: 1em;
+  font-style: italic;
+  font-weight: 400;
+  margin: 1em 0 0.2em 0;
+}
+
+html[data-style="qex"] .qex-article p { margin: 0 0 0.6em 0; }
+
+html[data-style="qex"] .qex-article ul,
+html[data-style="qex"] .qex-article ol { margin: 0.4em 0 0.7em 0; padding-left: 1.6em; }
+html[data-style="qex"] .qex-article li { margin: 0.1em 0; }
+
+html[data-style="qex"] .qex-article table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0;
+  font-size: 0.92em;
+}
+html[data-style="qex"] .qex-article .table-wrap {
+  overflow-x: auto;
+  margin: 0.7em 0 1em 0;
+}
+html[data-style="qex"] .qex-article .table-wrap > table { margin: 0; }
+html[data-style="qex"] .qex-article th,
+html[data-style="qex"] .qex-article td {
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding: 0.35em 0.55em;
+  text-align: left;
+  vertical-align: top;
+}
+html[data-style="qex"] .qex-article th {
+  background: var(--code-bg);
+  border-top: 2px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  font-size: 0.88em;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+html[data-style="qex"] .qex-article tr:nth-child(even) td { background: var(--table-stripe); }
+
+html[data-style="qex"] code {
+  font-family: "SFMono-Regular", "Consolas", monospace;
+  font-size: 0.88em;
+  background: var(--code-bg);
+  padding: 0 0.2em;
+  border-radius: 2px;
+}
+html[data-style="qex"] pre {
+  font-family: "SFMono-Regular", "Consolas", monospace;
+  font-size: 0.88em;
+  line-height: 1.42;
+  background: var(--code-bg);
+  border-left: 2px solid var(--rule);
+  padding: 0.6em 0.8em;
+  overflow-x: auto;
+  margin: 0.7em 0 1em 0;
+}
+html[data-style="qex"] pre code { background: none; padding: 0; font-size: 1em; }
+
+/* Some posts use inline styles on <pre> (legacy hardcoded backgrounds).
+   Force them onto the QEX palette so they don't fight the article look. */
+html[data-style="qex"] .qex-article pre[style] {
+  background: var(--code-bg) !important;
+  color: var(--fg) !important;
+  font-family: "SFMono-Regular", "Consolas", monospace !important;
+  border-left: 2px solid var(--rule);
+}
+html[data-style="qex"] .qex-article pre[style] span[style] {
+  color: var(--accent) !important;
+  background: transparent !important;
+}
+html[data-style="qex"] div.highlight,
+html[data-style="qex"] div.highlight pre,
+html[data-style="qex"] div.highlighter-rouge,
+html[data-style="qex"] figure.highlight,
+html[data-style="qex"] figure.highlight pre { background: transparent; }
+html[data-style="qex"] .highlight,
+html[data-style="qex"] .highlight pre,
+html[data-style="qex"] .highlight code { color: var(--fg); }
+
+@import "qex/syntax-light";
+@import "qex/syntax-dark";
+
+html[data-style="qex"] a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--accent);
+}
+html[data-style="qex"] a:hover { border-bottom-style: solid; }
+
+html[data-style="qex"] hr { border: 0; border-top: 1px solid var(--rule); margin: 1.4em 0; }
+
+html[data-style="qex"] blockquote {
+  border-left: 3px solid var(--accent-bar);
+  margin: 0.8em 0;
+  padding: 0.5em 0.8em 0.5em 0.9em;
+  color: var(--fg);
+  background: var(--code-bg);
+  text-align: left;
+  hyphens: manual;
+  font-style: normal;
+}
+html[data-style="qex"] blockquote p { margin: 0 0 0.5em 0; }
+html[data-style="qex"] blockquote p:last-child { margin-bottom: 0; }
+
+html[data-style="qex"] figure {
+  margin: 0.8em 0 1.1em 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding: 0.8em 0;
+  background: var(--bg-body);
+}
+html[data-style="qex"] figcaption {
+  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  font-size: 0.85em;
+  text-align: center;
+  margin-top: 0.5em;
+  color: var(--fg-muted);
+}
+
+/* Hide minima chrome that doesn't fit the QEX presentation. */
+html[data-style="qex"] .site-header,
+html[data-style="qex"] .site-footer,
+html[data-style="qex"] .post-header,
+html[data-style="qex"] .page-content > .wrapper > .home > .page-heading { display: none; }
+
+html[data-style="qex"] .page-content { padding: 0; }
+html[data-style="qex"] .wrapper { max-width: none; padding: 0; margin: 0; }
+
+/* Home / post list in QEX mode: clean serif index, no bullet markers. */
+html[data-style="qex"] .home .post-list-heading {
+  font-size: 1.05em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.2em;
+  margin: 1.8em 0 0.7em 0;
+}
+html[data-style="qex"] .home .post-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+html[data-style="qex"] .home .post-list > li {
+  margin: 0 0 1.1em 0;
+  padding: 0;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.8em;
+}
+html[data-style="qex"] .home .post-list h3 {
+  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  font-size: 1.25em;
+  font-weight: 700;
+  margin: 0.15em 0 0.15em 0;
+}
+html[data-style="qex"] .home .post-list h3 a {
+  border-bottom: none;
+  color: var(--fg);
+}
+html[data-style="qex"] .home .post-list h3 a:hover { color: var(--accent); }
+html[data-style="qex"] .home .post-list .post-meta {
+  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  font-size: 0.78em;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: var(--fg-muted);
+}
+html[data-style="qex"] .home .rss-subscribe {
+  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 1.4em;
+}
+
+@page { margin: 0.5in 0.55in; }
+
+@media print {
+  html[data-style="qex"] {
+    --bg-page: #fff;
+    --bg-body: #fff;
+    --fg: #111;
+    --fg-muted: #333;
+    --fg-dim: #222;
+    --rule: #000;
+    --accent: #000;
+    --accent-bar: #000;
+    --code-bg: #f5f2e8;
+    --table-stripe: #fafaf6;
+    --shadow: none;
+  }
+  html[data-style="qex"] body {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    font-size: 11pt;
+  }
+  html[data-style="qex"] a { color: #000; }
+  html[data-style="qex"] .site-style-toggle,
+  html[data-style="qex"] .qex-theme-toggle { display: none; }
+  html[data-style="qex"] h2,
+  html[data-style="qex"] h3,
+  html[data-style="qex"] table,
+  html[data-style="qex"] pre,
+  html[data-style="qex"] figure { page-break-inside: avoid; }
+  html[data-style="qex"] .table-wrap { overflow-x: visible; }
+}
