@@ -6,6 +6,11 @@
   <body>
 
     <button type="button" id="qexThemeToggle" class="qex-theme-toggle" aria-label="Toggle dark mode" style="display:none">Dark</button>
+    <select id="qexThemeSelect" class="qex-theme-select" aria-label="Theme" style="display:none">
+      <option value="auto">Theme: Auto</option>
+      <option value="light">Theme: Light</option>
+      <option value="dark">Theme: Dark</option>
+    </select>
     <button type="button" id="siteStyleToggle" class="site-style-toggle" aria-label="Toggle site style">Classic</button>
 
     {%- include header.html -%}

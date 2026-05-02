@@ -56,7 +56,7 @@ html[data-style="qex"] body {
 html[data-style="qex"] body.wide-layout { max-width: 12in; }
 
 html[data-style="qex"] .site-style-toggle,
-html[data-style="qex"] .qex-theme-toggle {
+html[data-style="qex"] .qex-theme-select {
   position: fixed;
   top: 10px;
   z-index: 100;
@@ -73,9 +73,9 @@ html[data-style="qex"] .qex-theme-toggle {
   opacity: 0.85;
 }
 html[data-style="qex"] .site-style-toggle  { right: 14px; }
-html[data-style="qex"] .qex-theme-toggle   { right: 96px; }
+html[data-style="qex"] .qex-theme-select   { right: 96px; }
 html[data-style="qex"] .site-style-toggle:hover,
-html[data-style="qex"] .qex-theme-toggle:hover { opacity: 1; }
+html[data-style="qex"] .qex-theme-select:hover { opacity: 1; }
 
 html[data-style="qex"] h1,
 html[data-style="qex"] h2,
@@ -417,7 +417,7 @@ html[data-style="qex"] .home .rss-subscribe {
   }
   html[data-style="qex"] a { color: #000; }
   html[data-style="qex"] .site-style-toggle,
-  html[data-style="qex"] .qex-theme-toggle { display: none; }
+  html[data-style="qex"] .qex-theme-select { display: none; }
   html[data-style="qex"] h2,
   html[data-style="qex"] h3,
   html[data-style="qex"] table,

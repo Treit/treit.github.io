@@ -63,34 +63,29 @@
     var style = currentStyle();
     var theme = storedTheme();
     var sBtn = document.getElementById('siteStyleToggle');
-    var tBtn = document.getElementById('qexThemeToggle');
+    var tSel = document.getElementById('qexThemeSelect');
     if (sBtn) {
-      sBtn.textContent = 'Style: ' + (style === 'qex' ? 'QEX' : 'Classic');
+      sBtn.textContent = style === 'qex' ? 'Classic' : 'QEX';
       sBtn.title = 'Click to switch to ' + (style === 'qex' ? 'Classic' : 'QEX');
       sBtn.setAttribute('aria-pressed', style === 'qex' ? 'true' : 'false');
     }
-    if (tBtn) {
-      var label = themeLabel(theme);
-      if (theme === 'auto') {
-        label += ' (' + (prefersDark() ? 'Dark' : 'Light') + ')';
-      }
-      tBtn.textContent = 'Theme: ' + label;
-      tBtn.title = 'Click to switch to ' + themeLabel(nextTheme(theme));
-      tBtn.style.display = style === 'qex' ? '' : 'none';
+    if (tSel) {
+      tSel.value = theme;
+      tSel.style.display = style === 'qex' ? '' : 'none';
     }
   }
 
   function wireUp() {
     var sBtn = document.getElementById('siteStyleToggle');
-    var tBtn = document.getElementById('qexThemeToggle');
+    var tSel = document.getElementById('qexThemeSelect');
     if (sBtn) {
       sBtn.addEventListener('click', function () {
         applyStyle(currentStyle() === 'qex' ? 'classic' : 'qex');
       });
     }
-    if (tBtn) {
-      tBtn.addEventListener('click', function () {
-        applyTheme(nextTheme(storedTheme()));
+    if (tSel) {
+      tSel.addEventListener('change', function () {
+        applyTheme(tSel.value);
       });
     }
     if (window.matchMedia) {
