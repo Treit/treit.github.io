@@ -5,11 +5,22 @@
 
   <body>
 
+    <button type="button" id="qexThemeToggle" class="qex-theme-toggle" aria-label="Toggle dark mode" style="display:none">Dark</button>
+    <button type="button" id="siteStyleToggle" class="site-style-toggle" aria-label="Toggle site style">Classic</button>
+
     {%- include header.html -%}
+
+    <div class="masthead">
+      <a class="title" href="{{ "/" | relative_url }}">{{ site.qex.masthead_label | default: "NOTES TO SELF" }}</a>
+      {%- assign masthead_date = page.date | default: site.time -%}
+      <span class="issue">{{ masthead_date | date: "%B %Y" | upcase }}</span>
+    </div>
 
     <main class="page-content" aria-label="Content">
       <div class="wrapper">
-        {{ content }}
+        <div class="qex-article">
+          {{ content }}
+        </div>
       </div>
     </main>
 
