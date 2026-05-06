@@ -30,7 +30,6 @@ Install-Module PSReadline # From pwsh window
 cargo install zoxide
 winget install Microsoft.DotNet.SDK.9
 winget install Microsoft.DotNet.SDK.10
-winget install notepad++
 winget install python
 winget install neovim
 winget install voidtools.everything
