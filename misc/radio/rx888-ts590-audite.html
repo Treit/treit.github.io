@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharing One HF Antenna Between a Kenwood TS-590 and an RX-888 MKII Using the QRO.cz RX Audite SDR Switch</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root {
+  --ink: #111;
+  --rule: #444;
+  --accent: #003366;
+  --warn-bg: #fff4d6;
+  --warn-bd: #b48a00;
+  --note-bg: #eef3fb;
+  --note-bd: #345d99;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, "Courier New", monospace;
+  --serif: "Times New Roman", "Liberation Serif", Georgia, serif;
+  --sans: "Helvetica Neue", Arial, "Segoe UI", sans-serif;
+}
+html { background: #f4f2ec; }
+body {
+  font-family: var(--serif);
+  color: var(--ink);
+  max-width: 7.5in;
+  margin: 0.5in auto;
+  padding: 0.5in 0.6in;
+  background: #fff;
+  line-height: 1.45;
+  font-size: 11.5pt;
+  box-shadow: 0 0 12px rgba(0,0,0,0.12);
+}
+h1, h2, h3, h4 { font-family: var(--sans); color: var(--accent); }
+h1 {
+  font-size: 20pt;
+  line-height: 1.2;
+  border-bottom: 2pt solid var(--accent);
+  padding-bottom: 6pt;
+  margin-bottom: 0.1in;
+}
+.byline { font-family: var(--sans); font-size: 10pt; color: #555; margin-bottom: 18pt; }
+h2 {
+  font-size: 13.5pt;
+  margin-top: 22pt;
+  border-bottom: 0.5pt solid var(--rule);
+  padding-bottom: 2pt;
+}
+h3 { font-size: 11.5pt; margin-top: 14pt; }
+.abstract {
+  font-size: 11pt;
+  border-left: 3pt solid var(--accent);
+  padding: 6pt 12pt;
+  margin: 12pt 0 18pt 0;
+  background: #fafaf6;
+}
+.abstract h2 { margin: 0 0 4pt 0; border: 0; font-size: 11pt; letter-spacing: 0.5pt; text-transform: uppercase; }
+table { border-collapse: collapse; width: 100%; margin: 10pt 0; font-size: 10.5pt; }
+th, td { border: 0.5pt solid var(--rule); padding: 4pt 6pt; vertical-align: top; text-align: left; }
+th { background: #eee; font-family: var(--sans); }
+code, .mono { font-family: var(--mono); font-size: 10pt; }
+.callout {
+  margin: 10pt 0;
+  padding: 8pt 12pt;
+  border-left: 3pt solid var(--note-bd);
+  background: var(--note-bg);
+  font-size: 10.5pt;
+}
+.warn {
+  border-left-color: var(--warn-bd);
+  background: var(--warn-bg);
+}
+.callout p:first-child { margin-top: 0; }
+.callout p:last-child { margin-bottom: 0; }
+figure { margin: 14pt 0; text-align: center; }
+figcaption { font-family: var(--sans); font-size: 10pt; color: #333; margin-top: 4pt; }
+ol.refs { font-size: 10pt; }
+ol.refs li { margin-bottom: 4pt; }
+a { color: var(--accent); text-decoration: none; border-bottom: 0.5pt dotted var(--accent); }
+.kbd {
+  font-family: var(--mono);
+  border: 0.5pt solid #aaa;
+  border-radius: 3pt;
+  padding: 0 4pt;
+  background: #f6f6f0;
+  font-size: 9.5pt;
+}
+hr.sect { border: 0; border-top: 0.5pt solid var(--rule); margin: 18pt 0; }
+@media print {
+  html, body { background: #fff; }
+  body { box-shadow: none; margin: 0; max-width: none; padding: 0.5in; }
+  a { color: var(--ink); border: 0; }
+  .no-print { display: none; }
+}
+</style>
+</head>
+<body>
+
+<h1>Sharing One HF Antenna Between a Kenwood TS-590 and an RX-888 MKII Using the QRO.cz RX Audite SDR Switch</h1>
+<div class="byline">A practical station integration note. Revision 1.</div>
+
+<section class="abstract">
+<h2>Abstract</h2>
+<p>The RX-888 MKII is a direct-sampling 16-bit SDR with an SMA antenna input that connects to the ADC almost directly. Its absolute maximum RF input is about <strong>+10 dBm</strong> (10 mW) and clipping begins well below that; even brief exposure to transmitter RF at the watt level will destroy it. The QRO.cz RX Audite SDR Switch is purpose-built for this scenario: it shares one transmit/receive antenna between a transceiver and an SDR, mutes and clamps the SDR port during transmit, and provides high voltage, surge, and overcurrent protection. This article describes the topology, the cabling bill of materials with order links, the configuration of both the Kenwood TS-590 and the RX-888 MKII, and a smoke-test commissioning sequence designed so that no failure mode short of catastrophic operator error puts full TX power on the SDR.</p>
+</section>
+
+<h2>1. Equipment Under Test</h2>
+
+<table>
+<thead>
+<tr><th>Device</th><th>Connector(s)</th><th>Key RF parameter</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td>Kenwood TS-590S/SG</td>
+  <td>ANT1, ANT2: SO-239. RX ANT IN, RX ANT OUT: RCA. DRV: RCA. PTT/SEND: REMOTE 7-pin DIN, ACC2 13-pin DIN.</td>
+  <td>100 W TX on HF, 1.8 to 50 MHz.</td>
+  <td>Two transmit/receive antenna ports plus a separate receive antenna loop on RCA jacks. The MKE pin on the REMOTE jack (pin&nbsp;4, paired with COM on pin&nbsp;2) is grounded by an internal control relay during TX and is the cleanest PTT source for an external switch.</td>
+</tr>
+<tr>
+  <td>QRO.cz RX Audite SDR Switch (MK3)</td>
+  <td>Main TX/RX ANT: SO-239. TRX: SO-239. INBAND RX ANT: SO-239. SDR RX OUT: <strong>SMA female</strong>. PTT IN, PTT OUT: RCA. DC 2.1&nbsp;mm coaxial (center positive), 13.8 V.</td>
+  <td>0.1 to 60 MHz. Max TX through-path 250 W (200 W recommended). RF limiter on SDR port: typ. +4 dBm. Isolation TX-to-SDR with SDR routed to INBAND or dummy load: 100 dB at 14 MHz, 80 dB at 50 MHz. PTT lead/tail minimum 20/20 ms.</td>
+  <td>Hard relay switch, not VOX. The PTT input is mandatory; without a PTT signal the device cannot mute the SDR during transmit and the unit falls back to the always-on RF limiter only.</td>
+</tr>
+<tr>
+  <td>RX-888 MKII</td>
+  <td>Antenna in: <strong>SMA female</strong>. USB 3.0 type B.</td>
+  <td>HF mode (0.1 to 32 MHz) is direct-sampling into a 16-bit ADC (analog-to-digital converter) at 130 MS/s, no RF AGC, no protection diodes ahead of the ADC beyond an LNA stage. Practical clip point is around -10 dBm; absolute survival is on the order of +10 dBm.</td>
+  <td>Treat the input as if it were the analog input pin of an ADC, because functionally that is what it is. Static discharge on the center pin can also kill it. Bond all chassis to a common station ground.</td>
+</tr>
+</tbody>
+</table>
+
+<h2>2. Why a Bare Tee or Diode-Pair Splitter Is Not Acceptable</h2>
+
+<p>The most common failures of receive-only SDRs in shared-antenna installations fall into three buckets. First, the operator transmits with the SDR still connected directly to the antenna; even 5 W into an unprotected SMA port will destroy the front end of an RX-888. Second, a nearby station or a lightning-induced surge couples energy in through the antenna while the radio is off; back-to-back diode pads (the protection found in cheap "SDR splitters") will conduct but cannot dissipate sustained energy and have nothing in series to limit it. Third, common-mode currents on the coax cause RF to enter the SDR through its USB shield, which the antenna-side splitter cannot fix.</p>
+
+<p>The RX Audite addresses all three. It uses a relay-switched signal path commanded by the transceiver's PTT line, so during transmit the SDR port is physically disconnected from the antenna and routed instead either to an internal dummy load or to a separate INBAND RX antenna port. In addition, a soft-clipping RF limiter rated for sustained input sits on the SDR port at all times, supplemented by an over-voltage clamp ( > 60 V AC ) and a resettable current "SuperFuse" (> 100 mA). When the unit is unpowered or its front-panel switch is OFF, the antenna is routed to the SDR through these protections only, which is the safe failure mode for a desktop accessory.</p>
+
+<h2>3. Recommended Topology</h2>
+
+<p>For a station with one HF antenna, one TS-590, and one RX-888 MKII, the recommended wiring is a single-line block: antenna into the Audite, transceiver hung off the Audite's TRX port, SDR hung off the Audite's SDR RX port, and a PTT line from the TS-590 REMOTE jack into the Audite's PTT IN. The TS-590 RX ANT IN/OUT loop is left unused in this baseline; section&nbsp;6 describes an optional second hardware mute that uses it.</p>
+
+<figure>
+<svg viewBox="0 0 820 620" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Block diagram showing the antenna feeding the RX Audite, with TRX going to the TS-590 and SDR going to the RX-888 MKII, plus a PTT line from the TS-590 REMOTE jack to the Audite PTT IN.">
+  <defs>
+    <style>
+      .b { fill: #fff; stroke: #003366; stroke-width: 1.4; }
+      .l { stroke: #003366; stroke-width: 1.4; fill: none; }
+      .lp { stroke: #b48a00; stroke-width: 1.4; fill: none; stroke-dasharray: 5 3; }
+      .lg { stroke: #444; stroke-width: 1; fill: none; stroke-dasharray: 2 2; }
+      .t { font-family: Helvetica, Arial, sans-serif; font-size: 11px; fill: #111; }
+      .tt { font-family: Helvetica, Arial, sans-serif; font-size: 10px; fill: #444; }
+      .lbl { font-family: Helvetica, Arial, sans-serif; font-size: 10px; fill: #003366; font-weight: bold; }
+      .plbl { font-family: Helvetica, Arial, sans-serif; font-size: 10px; fill: #b48a00; font-weight: bold; }
+    </style>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#003366"/>
+    </marker>
+  </defs>
+
+  <!-- Antenna -->
+  <g transform="translate(20,40)">
+    <path class="l" d="M40,80 L40,30 M20,30 L60,30 M25,40 L55,40 M30,50 L50,50"/>
+    <text class="t" x="0" y="105">HF Antenna</text>
+    <text class="tt" x="0" y="120">PL-259</text>
+  </g>
+
+  <!-- TS-590 (top right) -->
+  <g transform="translate(560,40)">
+    <rect class="b" x="0" y="0" width="240" height="120" rx="6"/>
+    <text class="lbl" x="120" y="22" text-anchor="middle">Kenwood TS-590S/SG</text>
+    <circle class="b" cx="14" cy="60" r="6"/>
+    <text class="t" x="26" y="64">ANT1 (SO-239)</text>
+    <circle class="b" cx="14" cy="96" r="6"/>
+    <text class="plbl" x="26" y="100">REMOTE pin 4 (MKE) / pin 2 (COM)</text>
+  </g>
+
+  <!-- Audite (center, taller) -->
+  <g transform="translate(200,200)">
+    <rect class="b" x="0" y="0" width="260" height="280" rx="6"/>
+    <text class="lbl" x="130" y="24" text-anchor="middle">QRO.cz RX Audite SDR Switch</text>
+    <text class="tt" x="130" y="42" text-anchor="middle">PTT-controlled relay + RF limiter</text>
+
+    <circle class="b" cx="14" cy="90" r="6"/>
+    <text class="t" x="26" y="94">Main TX/RX ANT (SO-239)</text>
+
+    <circle class="b" cx="246" cy="90" r="6"/>
+    <text class="t" x="240" y="94" text-anchor="end">TRX (SO-239)</text>
+
+    <circle class="b" cx="14" cy="150" r="6"/>
+    <text class="t" x="26" y="154">INBAND RX ANT (SO-239)</text>
+    <text class="tt" x="26" y="168">optional</text>
+
+    <circle class="b" cx="246" cy="180" r="6"/>
+    <text class="t" x="240" y="184" text-anchor="end">SDR RX OUT (SMA)</text>
+
+    <circle class="b" cx="14" cy="240" r="6"/>
+    <text class="t" x="26" y="244">PTT IN (RCA)</text>
+
+    <circle class="b" cx="246" cy="240" r="6"/>
+    <text class="t" x="240" y="244" text-anchor="end">DC 13.8 V</text>
+  </g>
+
+  <!-- RX-888 (bottom right) -->
+  <g transform="translate(560,360)">
+    <rect class="b" x="0" y="0" width="240" height="100" rx="6"/>
+    <text class="lbl" x="120" y="24" text-anchor="middle">RX-888 MKII</text>
+    <circle class="b" cx="14" cy="58" r="6"/>
+    <text class="t" x="26" y="62">ANT (SMA female)</text>
+    <text class="tt" x="26" y="80">USB 3.0 to PC</text>
+  </g>
+
+  <!-- Antenna to Audite Main TX/RX ANT (290 abs) -->
+  <path class="l" marker-end="url(#arr)" d="M70,120 C120,120 140,290 208,290"/>
+  <text class="lbl" x="78" y="200">Existing feedline</text>
+  <text class="tt" x="78" y="214">PL-259 to PL-259</text>
+
+  <!-- Audite TRX to TS-590 ANT1: from (446,290) to (560,100) -->
+  <path class="l" marker-end="url(#arr)" d="M452,290 C520,290 540,100 560,100"/>
+  <text class="lbl" x="476" y="178">Cable A</text>
+  <text class="tt" x="476" y="192">PL-259 jumper, RG-8X, 1 m</text>
+
+  <!-- Audite SDR RX OUT to RX-888: from (446,380) to (560,418) -->
+  <path class="l" marker-end="url(#arr)" d="M452,380 C500,380 520,418 560,418"/>
+  <text class="lbl" x="468" y="365">Cable B</text>
+  <text class="tt" x="468" y="379">SMA-M to SMA-M, RG-316, 1 m</text>
+
+  <!-- PTT: TS-590 REMOTE (560,136) routed left around boxes, down, into Audite PTT IN (208,440) -->
+  <path class="lp" marker-end="url(#arr)" d="M560,136 L520,136 L520,540 L160,540 L160,440 L208,440"/>
+  <text class="plbl" x="280" y="532">Cable C: PTT (REMOTE pin 4 MKE / pin 2 COM to RCA, shielded)</text>
+
+  <!-- Ground bus -->
+  <path class="lg" d="M40,590 L800,590"/>
+  <text class="tt" x="40" y="605">Single-point station ground (chassis bonds for TS-590, RX Audite, RX-888 MKII, PC)</text>
+</svg>
+<figcaption>Figure 1. Recommended baseline topology. Solid lines are RF; dashed amber line is the PTT keying line; dotted line is the station ground bus.</figcaption>
+</figure>
+
+<h2>4. Cabling Bill of Materials</h2>
+
+<p>All cables below are commercially available; the Audite vendor (HamParts.shop, the e-shop arm of QRO.cz) sells matching jumpers, which avoids the most common homebrew error of a poorly crimped SMA. Lengths assume the SDR sits next to the transceiver. If the SDR is across the desk, scale up to 2 m or 3 m. Do not use RG-58 patch cords for the SDR port at HF; the loss is irrelevant but the shielding on cheap RG-58 patch cables is not, and the SDR port is the one place where common-mode pickup matters.</p>
+
+<table>
+<thead>
+<tr><th>Ref</th><th>Cable</th><th>Connectors</th><th>Cable type / length</th><th>Suggested source</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td>A</td>
+  <td>Audite TRX to TS-590 ANT1</td>
+  <td>PL-259 male to PL-259 male</td>
+  <td>RG-8X or RG-58U, 1 m</td>
+  <td>DX Engineering DXE-8XDM050-3 (3 ft RG-8X PL-259 jumper) or HamParts.shop "RF coax jumper cable PL-259 to PL-259"</td>
+</tr>
+<tr>
+  <td>B</td>
+  <td>Audite SDR RX OUT to RX-888 MKII</td>
+  <td>SMA male to SMA male</td>
+  <td>RG-316 or RG-400 double-shielded, 1 m</td>
+  <td>HamParts.shop "RF coax jumper cable RG-316 SMA male to SMA male 1 m" (about &euro;9). Pasternack PE3C0500-3 or similar at Mouser/Digi-Key as alternates.</td>
+</tr>
+<tr>
+  <td>C</td>
+  <td>TS-590 PTT to Audite PTT IN</td>
+  <td>3.5 mm TRS or bare wire to 7-pin DIN on TS-590; RCA male on Audite</td>
+  <td>Shielded two-conductor, 1 m</td>
+  <td><strong>Recommended off-the-shelf:</strong> DX Engineering <span class="kbd">DXE-KWD-RTR</span> ("Keying Cable, Amplifier or Accessory PTT Only, 7-pin DIN to RCA phono, fits most Kenwood Xcvr Remote Jack, for NCC-2 &amp; RTR-2, 5&nbsp;ft."). Explicitly listed as compatible with TS-590, TS-590S, and TS-590SG. Per DX Engineering's product description, "the RED plug center pin is connected to the shield ... to key the amp relay," which is exactly the pin&nbsp;4 (MKE) to RCA tip / pin&nbsp;2 (COM) to RCA shield, ground-on-TX wiring the Audite PTT IN expects. The cable is sold for use with DX Engineering receive-transmit interfaces (RTR-2, NCC-2); the Audite is the same class of device electrically. Homebrew alternative: 7-pin 270&deg; DIN plug, shielded two-conductor cable, RCA male; solder pin&nbsp;4 to the center conductor and pin&nbsp;2 to the shield. Either way, verify with a multimeter before connecting to the Audite (see section&nbsp;5).</td>
+</tr>
+<tr>
+  <td>D</td>
+  <td>Audite DC power</td>
+  <td>2.1 mm x 5.5 mm coaxial, center positive</td>
+  <td>13.8 V at up to 0.7 A; supplied with the unit</td>
+  <td>Use the included plug; pull power from the same 13.8 V supply that runs the TS-590 to keep grounds common.</td>
+</tr>
+<tr>
+  <td>E</td>
+  <td>Antenna feedline</td>
+  <td>Existing</td>
+  <td>Whatever feeds the antenna today</td>
+  <td>Move the existing PL-259 from TS-590 ANT1 to the Audite "Main TX/RX ANT" port.</td>
+</tr>
+<tr>
+  <td>F</td>
+  <td>Common station ground</td>
+  <td>Lug to chassis screw</td>
+  <td>3/4" copper braid or 10 AWG, as short as possible</td>
+  <td>Bond Audite GND screw, TS-590 chassis ground stud, and RX-888 chassis to the same single-point station ground.</td>
+</tr>
+</tbody>
+</table>
+
+<div class="callout">
+<p><strong>Order recommendation.</strong> Order three items off the shelf and skip the soldering iron entirely: (1)&nbsp;the matching SMA-male to SMA-male RG-316 jumper from HamParts.shop (Cable&nbsp;B) to avoid a guaranteed-bad SMA crimp attempt on the most sensitive connection in the chain; (2)&nbsp;any quality RG-8X or RG-213 PL-259 jumper for Cable&nbsp;A; (3)&nbsp;the DX Engineering <span class="kbd">DXE-KWD-RTR</span> for Cable&nbsp;C. The DXE-KWD-RTR is the same physical cable DX Engineering sells for keying their RTR-2 and NCC-2 receive-transmit interfaces, which are functionally the same class of device as the Audite, and it is explicitly listed as compatible with the TS-590S and TS-590SG.</p>
+</div>
+
+<h2>5. TS-590 REMOTE Jack PTT Wiring</h2>
+
+<p>The TS-590 REMOTE jack is a 7-pin DIN connector on the rear panel. The full pinout, taken from the Kenwood TS-590S Instruction Manual ("Connecting Peripheral Equipment", REMOTE CONNECTOR table), is:</p>
+
+<table>
+<thead>
+<tr><th>Pin</th><th>Name</th><th>Function</th><th>I/O</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td>SPO</td><td>Speaker output</td><td>O</td></tr>
+<tr><td>2</td><td>COM</td><td>Common terminal (signal ground for the relay contacts on pins&nbsp;4 and&nbsp;5)</td><td>I/O</td></tr>
+<tr><td>3</td><td>SS</td><td>Standby input: when externally grounded, the transceiver enters TX mode</td><td>I</td></tr>
+<tr><td>4</td><td>MKE</td><td>Internal control relay: connected to COM (pin&nbsp;2) when the linear amplifier is keyed for TX</td><td>I/O</td></tr>
+<tr><td>5</td><td>BRK</td><td>Internal control relay: connected to COM (pin&nbsp;2) during RX</td><td>I/O</td></tr>
+<tr><td>6</td><td>ALC</td><td>ALC input from the amplifier (approximately &minus;7&nbsp;V)</td><td>I</td></tr>
+<tr><td>7</td><td>RL</td><td>Approximately +12&nbsp;V&nbsp;DC output during TX, 10&nbsp;mA max</td><td>O</td></tr>
+</tbody>
+</table>
+
+<p>The line we want is <strong>pin&nbsp;4 (MKE)</strong>, returned through <strong>pin&nbsp;2 (COM)</strong>. During TX an internal mechanical relay shorts pin&nbsp;4 to pin&nbsp;2; during RX the relay is open. This is exactly the "open&nbsp;=&nbsp;RX, ground&nbsp;=&nbsp;TX" signal the Audite PTT IN expects. The Kenwood manual states it directly: "For amplifiers that enter TX mode when the control terminal is grounded, connect pin&nbsp;2 of the REMOTE connector to the GND terminal of the amplifier and connect pin&nbsp;4 of the connector to the control terminal of the amplifier." The Audite is electrically identical to such an amplifier from the radio's point of view.</p>
+
+<p>Wire pin&nbsp;4 to the RCA center pin and pin&nbsp;2 to the RCA shell with shielded two-conductor cable; tie the cable shield to pin&nbsp;2 only at the TS-590 end to avoid a ground loop. Do <strong>not</strong> use pin&nbsp;7 (RL): it sources +12&nbsp;V during TX, which is the wrong polarity for the Audite's active-low PTT input and will simply leave the switch in RX during transmit. Do not use pin&nbsp;3 (SS) either: that pin is an input that <em>causes</em> the radio to transmit when grounded, not an output that reports its TX state.</p>
+
+<div class="callout warn">
+<p><strong>Required menu setting.</strong> The MKE/BRK relay is only driven if the TS-590 linear amplifier control relay is enabled. Set <span class="kbd">Menu&nbsp;53 (HF LINEAR AMPLIFIER CONTROL RELAY)</span> to <span class="kbd">2</span> (standard) or <span class="kbd">3</span> (slow, for amplifiers that need extra keying delay). The default of <span class="kbd">OFF</span> leaves pin&nbsp;4 unconnected and the Audite will never see PTT. For 6&nbsp;m operation also set <span class="kbd">Menu&nbsp;54</span> the same way.</p>
+</div>
+
+<div class="callout warn">
+<p><strong>Verify before connecting.</strong> Before plugging the cable into the Audite, check the wiring with a multimeter. With the radio off and the cable unplugged from the Audite, you should read open circuit between RCA tip and RCA shell. With the radio on, Menu&nbsp;53 set to 2, and the radio in RX, you should still read open. Press PTT into a dummy load (or hold MOX with the antenna disconnected) and the meter should read continuity (a few ohms or less) tip-to-shell. If the polarity is reversed, the cable is wired wrong; rework before connecting it to the Audite.</p>
+</div>
+
+<div class="callout warn">
+<p><strong>PTT timing and break-in.</strong> The Audite specifies a minimum PTT lead/tail of 20&nbsp;ms. The TS-590's MKE relay timing in the standard linear-amp setting is comfortably above this, but full break-in (FBK) CW will not give the Audite enough lead time and will hot-switch its relay. Use semi break-in (SBK) or longer for CW, and avoid VOX with very short hang times. The Audite is not a QSK device.</p>
+</div>
+
+<h2>6. Optional Belt-and-Braces: Use the TS-590 RX ANT Loop as a Second Hardware Mute</h2>
+
+<p>The TS-590 has an RX ANT IN/OUT pair on RCA jacks that lets you insert a filter or splitter into the receive path. When TX is active, the TS-590 internally disconnects this loop. Routing the SDR through this loop in series with the Audite gives a second, completely independent hardware disconnect: even if the Audite's relay welded shut and its limiter failed simultaneously, the TS-590's own TX/RX switch would still mute the SDR side. The cost is two more RCA-to-PL-259 adapters and the loss of the ability to use the SDR while the TS-590 is off (because the TS-590 then opens the loop).</p>
+
+<p>For the level of paranoia implied by "I MUST NOT fry the SDR," the baseline single-Audite topology in section 3 is sufficient. The TS-590 RX ANT loop trick is most useful if the SDR is also being used as a panadapter that follows the TS-590's IF or first mixer, which is a different configuration outside the scope of this note.</p>
+
+<h2>7. RX-888 MKII Configuration</h2>
+
+<p>The MKII is a USB 3.0 device with no front panel; everything is set in the host application (HDSDR plus the SDDC ExtIO, or SDR Console, or ka9q-radio under Linux). For a shared-antenna station, the relevant items are:</p>
+
+<table>
+<thead>
+<tr><th>Setting</th><th>Recommended value</th><th>Reason</th></tr>
+</thead>
+<tbody>
+<tr><td>Mode</td><td>HF direct-sampling, 64 MS/s or 128 MS/s</td><td>Covers 0.1 to 32 MHz directly into the ADC; no tuner involved.</td></tr>
+<tr><td>RF gain / "ATTN"</td><td>Maximum attenuation, minimum LNA, on first power-up</td><td>If a fault path develops, you want the most headroom you can buy in software; raise gain only after the smoke test passes.</td></tr>
+<tr><td>DC offset / "DC blocker"</td><td>On</td><td>Helps spot anomalous DC at the ADC, which can be the first sign of a damaged LNA stage.</td></tr>
+<tr><td>Software AGC</td><td>Off during commissioning</td><td>You want to see absolute ADC level when key-down testing.</td></tr>
+</tbody>
+</table>
+
+<h2>8. Commissioning Sequence (Smoke Test)</h2>
+
+<p>Do not skip steps. Each one is a checkpoint that, if it fails, is recoverable; subsequent steps are not.</p>
+
+<table>
+<thead>
+<tr><th>Step</th><th>Action</th><th>Pass criterion</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td>Power off everything. Wire the system per Figure 1, but with a 50 ohm dummy load on the Audite "Main TX/RX ANT" port and the antenna disconnected.</td><td>All connectors finger-tight, station ground bonded, USB to RX-888 not yet connected.</td></tr>
+<tr><td>2</td><td>Apply 13.8 V to the Audite. Power on the TS-590 only. Front-panel POWER switch on the Audite OFF.</td><td>Audite DC LED on, no PTT LED, no smoke.</td></tr>
+<tr><td>3</td><td>Connect USB to the RX-888. Open the SDR application. Confirm noise floor on a quiet HF frequency.</td><td>Receiver sees the dummy load (very low noise floor, no signals).</td></tr>
+<tr><td>4</td><td>Turn the Audite POWER switch ON. Confirm SDR still works through the live signal path with the limiter inline.</td><td>Noise floor unchanged or slightly different; no oscillation.</td></tr>
+<tr><td>5</td><td>Set the TS-590 to 5 W output, CW mode, into the dummy load. Tap the key briefly.</td><td>Audite PTT LED lights on key-down. SDR application shows the limiter clamping (a short, contained event), not a runaway level. No fault.</td></tr>
+<tr><td>6</td><td>Disconnect USB, raise the TS-590 to 100 W, key down for 2 seconds into the dummy load with the Audite live.</td><td>No heat from the Audite SDR port, no relay chatter, no fault. Reconnect USB and verify the SDR still enumerates and receives normally.</td></tr>
+<tr><td>7</td><td>Replace the dummy load with the real antenna. Repeat step&nbsp;5 at low power on a quiet portion of a band you have permission to use.</td><td>Same behavior as step 5 with the antenna in line.</td></tr>
+<tr><td>8</td><td>Resume normal operating power.</td><td>System ready.</td></tr>
+</tbody>
+</table>
+
+<div class="callout warn">
+<p><strong>If at any step the SDR's noise floor jumps abnormally on key-down, stop.</strong> The most likely cause is a missing or wrong PTT connection: the Audite is not seeing PTT and the SDR port is being limited only by the diode clamp, which for a 100&nbsp;W carrier produces a very loud spike at the SDR. Check Cable C, verify Menu&nbsp;53 is set to 2 or 3, and re-run the multimeter polarity check from section&nbsp;5 before going further.</p>
+</div>
+
+<h2>9. Failure Modes and Mitigations</h2>
+
+<table>
+<thead>
+<tr><th>Failure</th><th>Effect</th><th>Mitigation already in place</th><th>Additional mitigation worth considering</th></tr>
+</thead>
+<tbody>
+<tr><td>PTT cable disconnected, or Menu&nbsp;53 left OFF</td><td>Audite never mutes; SDR port relies on RF limiter alone, which clamps but is not designed for a 100&nbsp;W carrier.</td><td>Limiter clamps to about +4&nbsp;dBm; SuperFuse opens above 100&nbsp;mA.</td><td>Wire the PTT cable with strain relief; confirm Menu&nbsp;53 is 2 or 3; verify keying on every session via the Audite front-panel PTT LED.</td></tr>
+<tr><td>Relay welded closed (very rare)</td><td>SDR sees attenuated TX signal even with PTT correct.</td><td>Limiter and overcurrent fuse still in series.</td><td>Add the optional TS-590 RX ANT loop in series (section&nbsp;6) for an independent second mute.</td></tr>
+<tr><td>Lightning surge or nearby strike</td><td>High-voltage transient on antenna line.</td><td>HV protection > 60 V AC and current SuperFuse on the SDR line.</td><td>Install a Polyphaser IS-50UX gas-tube arrestor at the building entry, bonded to single-point ground. The Audite is not a substitute for a real arrestor.</td></tr>
+<tr><td>Static discharge on antenna</td><td>Tens of kV, microsecond pulse.</td><td>Limiter handles in-band RF; arrestor at the entry handles surge.</td><td>Disconnect feedline at the entry panel during storms. No electronic device alone is sufficient.</td></tr>
+<tr><td>Strong nearby station blow-by</td><td>SDR shows out-of-band ADC clipping.</td><td>Inherent ADC dynamic range plus optional Audite preamp stage with high IP3.</td><td>Add a band-pass filter (Array Solutions or W3NQN-style) ahead of the SDR if the SDR is used near a contest-grade neighbor.</td></tr>
+</tbody>
+</table>
+
+<h2>10. Summary</h2>
+
+<p>The QRO.cz RX Audite SDR Switch is exactly the right device for sharing one HF antenna between a TS-590 and an RX-888 MKII without risking the SDR. The wiring is one PL-259 jumper from Audite TRX to TS-590 ANT1, one SMA jumper from Audite SDR RX OUT to the RX-888 MKII, one homebrew or off-the-shelf REMOTE-DIN-to-RCA PTT cable wired pin&nbsp;4 (MKE) to RCA tip and pin&nbsp;2 (COM) to RCA shell, with TS-590 Menu&nbsp;53 set to 2 or 3, and one DC supply. Both PL-259 and SMA jumpers can be ordered ready-made from the Audite vendor (HamParts.shop) so that the entire signal path from antenna to ADC uses connectors that someone other than the operator has crimped. With the smoke-test sequence in section 8 followed in order, no single failure short of forgetting to plug in the PTT line will put more than a few milliwatts on the SDR's SMA input.</p>
+
+<hr class="sect">
+
+<h2>References</h2>
+<ol class="refs">
+<li>QRO.cz / HamParts.shop, "RX Audite SDR Switch (MK3) product page," <a href="https://hamparts.shop/rx-audite-sdr-switch.html">hamparts.shop/rx-audite-sdr-switch.html</a>. Specifications: 0.1 to 60 MHz, 250 W max, +4 dBm SDR-port limiter, 100 dB isolation at 14 MHz.</li>
+<li>QRO.cz / HamParts.shop, "RX Audite SDR Switch manual (MK3)," <a href="https://hamparts.shop/blog/rx-audite-sdr-switch-manual.html">hamparts.shop/blog/rx-audite-sdr-switch-manual.html</a>. Front and rear panel descriptions, jumper settings, PTT timing, RF limiter measurements.</li>
+<li>RX-888 SDDC project, "RX-888 quick start," <a href="https://www.rx-888.com/rx/guide/quickstart.html">rx-888.com/rx/guide/quickstart.html</a>. PC requirements, driver install, ExtIO and HDSDR setup.</li>
+<li>Kenwood Corporation, "TS-590S Instruction Manual," chapter 13 "Connecting Peripheral Equipment": REMOTE CONNECTOR pinout table (pin&nbsp;1&nbsp;SPO, pin&nbsp;2&nbsp;COM, pin&nbsp;3&nbsp;SS, pin&nbsp;4&nbsp;MKE, pin&nbsp;5&nbsp;BRK, pin&nbsp;6&nbsp;ALC, pin&nbsp;7&nbsp;RL) and "HF/50&nbsp;MHz LINEAR AMPLIFIER" wiring guidance ("connect pin&nbsp;2 ... to the GND terminal of the amplifier and connect pin&nbsp;4 ... to the control terminal of the amplifier"). Menu&nbsp;53 / Menu&nbsp;54 enable the internal linear amplifier control relay.</li>
+<li>ARRL, <em>Grounding and Bonding for the Radio Amateur</em>, second edition, for single-point ground practice referenced in section 3 and 8.</li>
+<li>Polyphaser, "IS-50UX coaxial surge protector," <a href="https://www.polyphaser.com">polyphaser.com</a>, for entry-panel lightning protection cited in section 9.</li>
+</ol>
+
+</body>
+</html>
