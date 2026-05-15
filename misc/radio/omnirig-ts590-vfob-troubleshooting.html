@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Omnirig + Kenwood TS-590 VFO B Death Loop: CLI Troubleshooting Report</title>
+<style>
+  body { font-family: Segoe UI, Arial, sans-serif; max-width: 980px; margin: 2em auto; padding: 0 1.5em; color: #1b1b1b; line-height: 1.55; }
+  h1, h2, h3 { color: #0b3d6b; }
+  h1 { border-bottom: 2px solid #0b3d6b; padding-bottom: 0.3em; }
+  h2 { margin-top: 2em; border-bottom: 1px solid #ccc; padding-bottom: 0.2em; }
+  code, pre { font-family: Consolas, "Courier New", monospace; }
+  pre { background: #f4f6f8; border: 1px solid #d6dde3; border-radius: 4px; padding: 0.8em 1em; overflow-x: auto; }
+  code { background: #f4f6f8; padding: 0.1em 0.35em; border-radius: 3px; }
+  table { border-collapse: collapse; margin: 0.8em 0; }
+  th, td { border: 1px solid #c4ccd3; padding: 0.4em 0.8em; text-align: left; vertical-align: top; }
+  th { background: #eaf0f6; }
+  .warn { background: #fff4e0; border-left: 4px solid #d68a00; padding: 0.6em 1em; margin: 1em 0; }
+  .note { background: #eef6ff; border-left: 4px solid #2b78c8; padding: 0.6em 1em; margin: 1em 0; }
+  .bad  { background: #fdecec; border-left: 4px solid #c83434; padding: 0.6em 1em; margin: 1em 0; }
+  .good { background: #ecfaee; border-left: 4px solid #2f9e44; padding: 0.6em 1em; margin: 1em 0; }
+  ul { padding-left: 1.4em; }
+  a { color: #0b3d6b; }
+</style>
+</head>
+<body>
+
+<h1>Omnirig + Kenwood TS-590 &mdash; VFO B Death Loop</h1>
+<p><strong>Symptom.</strong> With Omnirig connected to a Kenwood TS-590, only VFO A is usable. Selecting VFO B (from software or the front panel) causes the radio to oscillate between A and B every poll cycle. Front-panel input is overridden faster than it can be applied. Killing Omnirig restores normal operation.</p>
+<p><strong>Diagnosis.</strong> The shipped Omnirig <code>.ini</code> for the TS-590 family either (a) misparses the <code>IF;</code> status response when the receive VFO is B, or (b) issues an unconditional <code>FR0;</code>/<code>FT0;</code> write inside its STATUS poll block. Either causes Omnirig to slam the rig back to VFO A on every poll (every 100&ndash;500&nbsp;ms). This is the well-known cause of the symptom and is reproducible on both the original TS-590S and the TS-590SG with the wrong <code>.ini</code> selected.</p>
+
+<h2>1. Authoritative downloads</h2>
+
+<table>
+<tr><th>Item</th><th>Direct URL</th><th>Notes</th></tr>
+<tr>
+  <td>Omnirig installer (latest)</td>
+  <td><a href="https://dxatlas.com/OmniRig/Files/OmniRig.zip">dxatlas.com/OmniRig/Files/OmniRig.zip</a></td>
+  <td>Contains <code>OmniRigSetup.exe</code>. Author: VE3NEA / Afreet.</td>
+</tr>
+<tr>
+  <td>Omnirig product page</td>
+  <td><a href="https://dxatlas.com/OmniRig/">dxatlas.com/OmniRig/</a></td>
+  <td>Lists supported rigs incl. TS-590.</td>
+</tr>
+<tr>
+  <td>Kenwood software hub (TS-590S / SG)</td>
+  <td><a href="https://www.kenwood.com/i/products/info/amateur/software_download.html">kenwood.com/i/products/info/amateur/software_download.html</a></td>
+  <td>Master index of firmware, control programs, drivers, manuals.</td>
+</tr>
+<tr>
+  <td>TS-590SG firmware (v1.07, Mar 2020)</td>
+  <td><a href="https://www.kenwood.com/i/products/info/amateur/ts_590g/ts590g_update_e.html">.../ts_590g/ts590g_update_e.html</a></td>
+  <td>Latest firmware for the SG. Use this if your radio is a TS-590SG.</td>
+</tr>
+<tr>
+  <td>TS-590S firmware (v2.05, Mar 2020)</td>
+  <td><a href="https://www.kenwood.com/i/products/info/amateur/ts_590/ts590_update_e.html">.../ts_590/ts590_update_e.html</a></td>
+  <td>Final firmware for the original (non-G) TS-590S.</td>
+</tr>
+<tr>
+  <td>Kenwood Virtual COM Port driver</td>
+  <td><a href="https://www.kenwood.com/i/products/info/amateur/vcp_e.html">.../amateur/vcp_e.html</a></td>
+  <td>Required for USB-CAT on the SG. Install before plugging USB.</td>
+</tr>
+<tr>
+  <td>ARCP-590G control program</td>
+  <td><a href="https://www.kenwood.com/i/products/info/amateur/ts_590g/arcp590g_e.html">.../ts_590g/arcp590g_e.html</a></td>
+  <td>Use as an Omnirig-independent CAT reference.</td>
+</tr>
+<tr>
+  <td>PC Command Reference (CAT) &mdash; TS-590S/SG</td>
+  <td><a href="https://www.kenwood.com/i/products/info/amateur/pdf/ts590_g_pc_command_en_rev3.pdf">ts590_g_pc_command_en_rev3.pdf</a></td>
+  <td>Definitive command set. Reference when editing <code>.ini</code>.</td>
+</tr>
+<tr>
+  <td>TS-590SG In-Depth Manual</td>
+  <td><a href="https://www.kenwood.com/i/products/info/amateur/pdf/TS-590SG_IDM.pdf">TS-590SG_IDM.pdf</a></td>
+  <td>Menu numbers, port pinouts, baud settings.</td>
+</tr>
+</table>
+
+<div class="note">
+<strong>Community <code>.ini</code> files.</strong> Corrected TS-590S / TS-590SG <code>.ini</code> profiles are shared in two main places:
+<ul>
+  <li>The historical Omnirig user-files area on dxatlas.com (<code>/OmniRig/Files/</code>). Open the parent directory in a browser and look for <code>TS-590S.ini</code> / <code>TS-590SG.ini</code> contributed by HB9DTX, VE3NEA, and others.</li>
+  <li>GitHub mirrors. Search GitHub for <code>"TS-590SG.ini" Omnirig</code>. Reputable forks include those linked from N1MM+ and Log4OM documentation.</li>
+</ul>
+Always inspect the file in a text editor before installing &mdash; see <a href="#ini-anatomy">section&nbsp;5</a>.
+</div>
+
+<h2>2. Quick orientation: which radio do you have?</h2>
+<p>The two variants take different <code>.ini</code> files because the SG changed several CAT response semantics:</p>
+<ul>
+  <li><strong>TS-590S</strong> (original, 2010, discontinued). Use <code>TS-590S.ini</code>. Latest firmware: 2.05.</li>
+  <li><strong>TS-590SG</strong> (2014). Use <code>TS-590SG.ini</code>. Latest firmware: 1.07.</li>
+</ul>
+<p>To check firmware <em>without</em> Omnirig running:</p>
+<ol>
+  <li>Power the radio off.</li>
+  <li>Hold <strong>A=B</strong> while pressing <strong>POWER</strong>.</li>
+  <li>The display shows the firmware version. Release the keys.</li>
+</ol>
+
+<h2 id="cli">3. CLI troubleshooting (PowerShell 7+)</h2>
+
+<h3>3.1 Locate the Omnirig install and inspect rig profiles</h3>
+<pre>
+# Find the Omnirig install (default is under Program Files (x86)\Afreet)
+Get-ChildItem 'C:\Program Files (x86)\Afreet','C:\Program Files\Afreet' -Recurse -Filter 'OmniRig.exe' -ErrorAction SilentlyContinue |
+    Select-Object FullName, @{n='Version';e={ (Get-Item $_.FullName).VersionInfo.FileVersion }}
+
+# List installed rig profiles
+$rigsDir = 'C:\Program Files (x86)\Afreet\OmniRig\Rigs'
+Get-ChildItem $rigsDir -Filter 'TS-590*.ini' | Select-Object FullName, Length, LastWriteTime
+</pre>
+
+<h3>3.2 Back up the existing profile before any edit</h3>
+<pre>
+$stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+Copy-Item "$rigsDir\TS-590S.ini"  "$rigsDir\TS-590S.ini.$stamp.bak"  -ErrorAction SilentlyContinue
+Copy-Item "$rigsDir\TS-590SG.ini" "$rigsDir\TS-590SG.ini.$stamp.bak" -ErrorAction SilentlyContinue
+Get-ChildItem $rigsDir -Filter 'TS-590*' | Format-Table Name, Length, LastWriteTime
+</pre>
+
+<h3>3.3 Search the profile for the two known offending patterns</h3>
+<pre>
+# (a) STATUS blocks that *write* FR/FT (this is the death-loop trigger)
+Select-String -Path "$rigsDir\TS-590*.ini" -Pattern '^\s*Command\s*=\s*FR[01];|^\s*Command\s*=\s*FT[01];' -Context 4,2
+
+# (b) Validation masks that assume IF; byte 30 (RX VFO) == '0'
+Select-String -Path "$rigsDir\TS-590*.ini" -Pattern 'Validation' -Context 1,4
+</pre>
+<div class="bad"><strong>Bad pattern (do NOT keep in any STATUS block):</strong>
+<pre>[STATUS1]
+Command=IF;FR0;FT0;
+ReplyLength=38
+Validation=...
+</pre>
+The trailing <code>FR0;FT0;</code> rewrites the radio to VFO A on every poll. It belongs only in explicit user-action WRITE blocks (<code>[pmVfoA]</code>, <code>[pmVfoAA]</code>, etc.), never in <code>[STATUS*]</code>.</div>
+
+<h3>3.4 Verify the COM port is reachable independently of Omnirig</h3>
+<pre>
+# List COM ports
+[System.IO.Ports.SerialPort]::GetPortNames() | Sort-Object
+
+# Open the port at the radio's configured rate (Menu 62 on 590S, Menu 77 on 590SG)
+# Common settings: 115200,N,8,1 over USB; or whatever you set on the rear DB9.
+$port = New-Object System.IO.Ports.SerialPort 'COM5',115200,'None',8,'One'
+$port.NewLine = ';'
+$port.ReadTimeout = 1500
+$port.Open()
+try {
+    $port.WriteLine('FA')      # query VFO A frequency
+    Start-Sleep -Milliseconds 200
+    $port.ReadExisting()       # should return e.g. 'FA00014250000;'
+    $port.WriteLine('IF')      # full status
+    Start-Sleep -Milliseconds 200
+    $port.ReadExisting()
+} finally {
+    $port.Close()
+}
+</pre>
+<p>The byte at offset 30 (1-based) of the <code>IF;</code> response is the receive VFO indicator: <code>0</code> = VFO A, <code>1</code> = VFO B. Switch the radio to VFO B from the front panel (with Omnirig closed!) and re-issue <code>IF;</code>; the indicator must change. If it does not, the radio is reporting incorrectly and a firmware update is in order.</p>
+
+<h3>3.5 Check the Omnirig settings persisted in the registry</h3>
+<pre>
+# Omnirig 1.x stores per-rig settings here
+Get-ItemProperty 'HKCU:\Software\Afreet\OmniRig\RIG1','HKCU:\Software\Afreet\OmniRig\RIG2' -ErrorAction SilentlyContinue |
+    Format-List RigType, Port, Baud, Poll, Timeout, Dtr, Rts
+</pre>
+
+<h3>3.6 Tail the Omnirig debug log while reproducing</h3>
+<p>Omnirig 2.x writes to <code>%LOCALAPPDATA%\Afreet\OmniRig2</code>. Enable logging via the tray-icon menu (Settings &rarr; Log) then:</p>
+<pre>
+Get-ChildItem "$env:LOCALAPPDATA\Afreet" -Recurse -Filter '*.log' | Sort-Object LastWriteTime -Descending | Select-Object -First 3
+Get-Content "$env:LOCALAPPDATA\Afreet\OmniRig2\OmniRig.log" -Wait -Tail 50
+</pre>
+<p>Watch the trace as you press <strong>A/B</strong> on the rig. A correctly-behaved log shows one <code>IF;</code> per poll and no <code>FR</code>/<code>FT</code> writes unless you initiate a VFO change in software. A failing log shows <code>FR0;</code> emitted on every poll cycle.</p>
+
+<h2 id="ini-anatomy">4. Editing the <code>.ini</code> safely</h2>
+<p>Open the chosen profile in a UTF-8-aware editor:</p>
+<pre>
+notepad "$rigsDir\TS-590SG.ini"
+# or
+code   "$rigsDir\TS-590SG.ini"
+</pre>
+<p>Three things to verify or change:</p>
+<ol>
+  <li><strong>Remove writes from STATUS.</strong> In every <code>[STATUS&hellip;]</code> section, the <code>Command=</code> line should contain <em>only</em> read commands (<code>IF;</code>, <code>SM0;</code>, <code>FA;</code>, <code>FB;</code>, <code>MD;</code>, etc.). If you see <code>FR</code> or <code>FT</code> there, comment the section out by prefixing each line with <code>;</code> and add a corrected one.</li>
+  <li><strong>Validation mask must not pin RX VFO.</strong> Validation strings use a <code>Mask</code>/<code>Flags</code> pair of equal length. Bytes you don't care about must be <code>00</code> in the mask. The byte aligned to <code>IF;</code> offset 30 (RX VFO) should be <code>00</code> in any STATUS validation mask, or you'll fail validation the moment you go to VFO B.</li>
+  <li><strong>VFO write commands must use the right verbs.</strong>
+    <ul>
+      <li><code>FR0;</code> &mdash; set RX to VFO A</li>
+      <li><code>FR1;</code> &mdash; set RX to VFO B</li>
+      <li><code>FT0;</code> / <code>FT1;</code> &mdash; set TX VFO</li>
+    </ul>
+    These belong in <code>[pmVfoA]</code>, <code>[pmVfoB]</code>, <code>[pmVfoAA]</code>, <code>[pmVfoBB]</code>, <code>[pmVfoAB]</code>, <code>[pmVfoBA]</code>, <code>[pmSplitOn]</code>, <code>[pmSplitOff]</code>.
+  </li>
+</ol>
+<p>Reference: Kenwood "PC Control Command Reference" linked in section&nbsp;1.</p>
+
+<h2>5. Settings to apply in Omnirig itself</h2>
+<table>
+<tr><th>Setting</th><th>Recommended value</th><th>Why</th></tr>
+<tr><td>Rig type</td><td><code>TS-590S</code> or <code>TS-590SG</code> exactly matching the radio</td><td>Mismatch is the single most common root cause of this symptom.</td></tr>
+<tr><td>Poll int.</td><td>500 ms</td><td>Anything &lt; 250 ms turns minor mismatches into a runaway loop.</td></tr>
+<tr><td>Timeout</td><td>4000 ms</td><td>Tolerate occasional radio busy without forcing a re-init.</td></tr>
+<tr><td>Port</td><td>Either the rear DB-9 or the USB virtual COM &mdash; not both</td><td>Mixing the two ports causes identical-looking symptoms.</td></tr>
+<tr><td>DTR / RTS</td><td>Both <code>OFF</code> (or per radio menu)</td><td>The TS-590 doesn't need handshake. Leaving lines asserted can confuse some USB-serial bridges.</td></tr>
+</table>
+
+<h2>6. Radio menu items to confirm</h2>
+<table>
+<tr><th>Function</th><th>TS-590S menu</th><th>TS-590SG menu</th><th>Recommended</th></tr>
+<tr><td>COM port (rear DB-9) baud</td><td>Menu 62</td><td>Menu 77</td><td>Match Omnirig (<strong>115200</strong> typical)</td></tr>
+<tr><td>USB baud (virtual COM)</td><td>Menu 63</td><td>Menu 78</td><td><strong>115200</strong></td></tr>
+<tr><td>PC control type</td><td>n/a</td><td>Menu 79</td><td>Default unless instructed otherwise</td></tr>
+</table>
+<p>Set both menus the same so it doesn't matter which port you used.</p>
+
+<h2>7. End-to-end fix and verify procedure</h2>
+
+<ol>
+  <li>Close every program touching CAT (logger, WSJT-X, fldigi, Hamlib, Omnirig client).
+    <pre>Get-Process | Where-Object { $_.ProcessName -match 'OmniRig|wsjtx|fldigi|N1MM|Log4OM|HRD|jtdx' } | Format-Table Id, ProcessName</pre>
+  </li>
+  <li>Confirm radio firmware is current (sections&nbsp;1 and&nbsp;2). Update if older than the table.</li>
+  <li>Back up <code>.ini</code> profiles (section&nbsp;3.2).</li>
+  <li>Run the quick scan in section&nbsp;3.3. If either pattern is present, replace the profile with a known-good community version <strong>or</strong> hand-edit per section&nbsp;4.</li>
+  <li>In Omnirig settings: confirm rig type, set Poll = 500 ms, Timeout = 4000 ms.</li>
+  <li>Open Omnirig's built-in client only (no logger). Click <strong>Show</strong>. Verify frequency and mode track the front panel for VFO A.</li>
+  <li><strong>Press A/B on the radio to select VFO B.</strong> Expected: the Omnirig display follows to VFO B's frequency. <em>No</em> oscillation. Front-panel A/B button continues to work.</li>
+  <li>Toggle split (RX A / TX B): Omnirig should report split state and the radio should remain stable.</li>
+  <li>Tail the log (section&nbsp;3.6) for one full minute and confirm zero <code>FR</code>/<code>FT</code> traffic during steady-state polling.</li>
+  <li>Re-launch the logger / digital-mode software one at a time and re-test after each.</li>
+</ol>
+
+<div class="good"><strong>Pass criteria.</strong> All of the following hold for at least 5&nbsp;minutes of continuous operation on each VFO:
+<ul>
+  <li>Front-panel A/B selection persists.</li>
+  <li>Omnirig reads correct frequency on whichever VFO is active.</li>
+  <li>No <code>FR0;</code>/<code>FR1;</code>/<code>FT0;</code>/<code>FT1;</code> in the Omnirig log unless triggered by a deliberate user action.</li>
+  <li>Split engages and disengages cleanly from both ends.</li>
+</ul>
+</div>
+
+<h2>8. If it still fails after a clean <code>.ini</code></h2>
+<ol>
+  <li><strong>Try the other Omnirig major version.</strong> Versions 1.x and 2.x have different polling state machines. On the TS-590 family, one usually works where the other doesn't on a given firmware revision. They install side by side.</li>
+  <li><strong>Reinstall.</strong> Uninstall Omnirig, delete <code>%LOCALAPPDATA%\Afreet\OmniRig*</code> and the <code>Rigs\</code> folder, reinstall, then re-deploy your verified <code>.ini</code>.</li>
+  <li><strong>Cross-check with ARCP-590G.</strong> Kenwood's own control program speaks the radio directly &mdash; if VFO B works there but not under Omnirig, the radio and cable are exonerated and the problem is unambiguously Omnirig configuration.</li>
+  <li><strong>Bypass via Hamlib.</strong> If a logger only needs frequency/mode tracking (not Omnirig specifically), <code>rigctld -m 2028 -r COM5 -s 115200</code> can substitute and is less aggressive about VFO writes. This is a workaround, not a fix.</li>
+  <li><strong>Open a ticket.</strong> Email VE3NEA (Alex Shovkoplyas) via the contact link on <a href="https://dxatlas.com/">dxatlas.com</a>. Attach: Omnirig version, exact <code>.ini</code> in use, radio firmware version, a 60-second debug log capturing the failure.</li>
+</ol>
+
+<h2>9. Useful references</h2>
+<ul>
+  <li><a href="https://dxatlas.com/OmniRig/">Omnirig home</a> &mdash; supported rigs and current download.</li>
+  <li><a href="https://www.kenwood.com/i/products/info/amateur/pdf/ts590_g_pc_command_en_rev3.pdf">PC Control Command Reference for TS-590S/SG</a> (PDF, 607 KB) &mdash; CAT command bible.</li>
+  <li><a href="https://www.kenwood.com/i/products/info/amateur/pdf/TS-590SG_IDM.pdf">TS-590SG In-Depth Manual</a> (PDF, 6 MB) &mdash; menu reference, port wiring.</li>
+  <li><a href="https://www.kenwood.com/i/products/info/amateur/software_download.html">Kenwood amateur software downloads</a> &mdash; firmware, drivers, control software.</li>
+</ul>
+
+<hr>
+<p style="font-size: 0.85em; color: #555;">Generated 2026-05-14. Path: <code>%USERPROFILE%\radio\omnirig-ts590-vfob-troubleshooting.html</code></p>
+
+</body>
+</html>
