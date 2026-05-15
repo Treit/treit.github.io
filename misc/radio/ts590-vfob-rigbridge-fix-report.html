@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kenwood TS-590 OmniRig VFO B Loop Fix</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --text: #e5e7eb;
+      --muted: #cbd5e1;
+      --line: #334155;
+      --red-bg: #3b1116;
+      --red-fg: #fecaca;
+      --green-bg: #12351d;
+      --green-fg: #bbf7d0;
+      --blue-bg: #172554;
+      --blue-fg: #bfdbfe;
+      --code-bg: #020617;
+      --link: #93c5fd;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 20px 64px;
+    }
+    h1, h2, h3 {
+      line-height: 1.2;
+    }
+    h1 {
+      margin-bottom: 0.25rem;
+      font-size: clamp(2rem, 5vw, 3.6rem);
+    }
+    h2 {
+      border-top: 1px solid var(--line);
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      font-size: 1.65rem;
+    }
+    h3 {
+      margin-top: 1.6rem;
+      font-size: 1.2rem;
+    }
+    a {
+      color: var(--link);
+    }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+      font-size: 0.94rem;
+    }
+    pre {
+      overflow-x: auto;
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1rem 0;
+      background: rgba(17, 24, 39, 0.65);
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 0.65rem 0.8rem;
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      background: #1f2937;
+    }
+    .lede {
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 850px;
+    }
+    .card {
+      background: rgba(17, 24, 39, 0.82);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 1rem 1.2rem;
+      margin: 1rem 0;
+    }
+    .good, .bad, .note {
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      margin: 1rem 0;
+    }
+    .good {
+      background: var(--green-bg);
+      color: var(--green-fg);
+      border: 1px solid #166534;
+    }
+    .bad {
+      background: var(--red-bg);
+      color: var(--red-fg);
+      border: 1px solid #991b1b;
+    }
+    .note {
+      background: var(--blue-bg);
+      color: var(--blue-fg);
+      border: 1px solid #1d4ed8;
+    }
+    .diff {
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow-x: auto;
+      padding: 0.8rem 0;
+      white-space: pre;
+    }
+    .diff div {
+      padding: 0 1rem;
+      font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+      font-size: 0.92rem;
+      min-height: 1.35rem;
+    }
+    .diff .del {
+      background: var(--red-bg);
+      color: var(--red-fg);
+    }
+    .diff .add {
+      background: var(--green-bg);
+      color: var(--green-fg);
+    }
+    .diff .ctx {
+      color: #e5e7eb;
+    }
+    .path {
+      color: #fde68a;
+    }
+    .toc {
+      columns: 2;
+      column-gap: 2rem;
+      padding-left: 1.2rem;
+    }
+    @media (max-width: 720px) {
+      .toc {
+        columns: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Kenwood TS-590 OmniRig VFO B Loop Fix</h1>
+  <p class="lede">
+    A from-scratch setup and change report for fixing the HDSDR/OmniRig/Hamlib VFO B loop where a TS-590 beeps and flickers instead of sitting stably on VFO B.
+  </p>
+
+  <div class="good">
+    <strong>Result:</strong> the stable fix is to keep OmniRig talking TS-2000 CAT over the virtual COM port, but replace stock <code>rigctlcom</code> with a tiny raw Kenwood CAT bridge that forwards status polls to <code>rigctld</code> using Hamlib's raw <code>w</code> command. This avoids Hamlib's target-VFO polling path, which was the source of the repeated VFO switching.
+  </div>
+
+  <ul class="toc">
+    <li><a href="#summary">Summary</a></li>
+    <li><a href="#architecture">Final architecture</a></li>
+    <li><a href="#setup">From-scratch setup</a></li>
+    <li><a href="#diffs">Red/green diffs</a></li>
+    <li><a href="#validation">Validation and minimal-change proof</a></li>
+    <li><a href="#alternatives">Alternative implementations</a></li>
+    <li><a href="#troubleshooting">Troubleshooting checklist</a></li>
+  </ul>
+
+  <h2 id="summary">1. Summary</h2>
+  <p>
+    The failure was not a front-panel A/B problem in the radio. The failure was caused by the PC-side CAT bridge. In the broken configuration, OmniRig polls the rig by sending normal TS-2000 status commands such as <code>IF;</code>. Stock <code>rigctlcom</code> answers those TS-2000 commands by calling Hamlib VFO APIs. On a TS-590, those calls physically emit Kenwood <code>FR0</code> and <code>FR1</code> commands. After one switch to VFO B, the bridge keeps tugging the radio away from B and back again, producing the beep/flicker loop.
+  </p>
+  <p>
+    The replacement bridge does less, on purpose. It opens the radio side of the virtual COM pair, receives OmniRig's CAT commands, and forwards them to <code>rigctld</code> as raw Kenwood CAT with <code>w IF;</code>, <code>w FA;</code>, and similar. Raw reads do not ask Hamlib to retarget VFOs, so the radio can remain on VFO B without being poked every poll interval.
+  </p>
+
+  <table>
+    <tr>
+      <th>Item</th>
+      <th>Final value</th>
+    </tr>
+    <tr>
+      <td>Radio</td>
+      <td>Kenwood TS-590 through Hamlib model <code>2031</code></td>
+    </tr>
+    <tr>
+      <td>Real CAT port</td>
+      <td><code>COM3</code> at <code>115200</code> baud on the tested station</td>
+    </tr>
+    <tr>
+      <td>Hamlib daemon</td>
+      <td><code>rigctld</code> on <code>127.0.0.1:4532</code></td>
+    </tr>
+    <tr>
+      <td>Virtual COM pair</td>
+      <td><code>COM10</code> is the bridge/radio side; <code>COM11</code> is the OmniRig/HDSDR side</td>
+    </tr>
+    <tr>
+      <td>OmniRig rig type</td>
+      <td><code>TS-2000</code>, not <code>TS-590</code>, because the OmniRig side is TS-2000-compatible CAT</td>
+    </tr>
+    <tr>
+      <td>Replacement bridge</td>
+      <td><a href="safe_ts590_omnirig_bridge.py"><code>safe_ts590_omnirig_bridge.py</code></a></td>
+    </tr>
+  </table>
+
+  <h2 id="architecture">2. Final architecture</h2>
+  <pre>HDSDR
+  |
+  v
+OmniRig RIG1: TS-2000, COM11, 115200 baud, 500 ms poll
+  |
+  v
+Virtual null modem pair: COM11 &lt;--&gt; COM10
+  |
+  v
+safe_ts590_omnirig_bridge.py on COM10
+  |
+  v
+rigctld TCP 127.0.0.1:4532
+  |
+  v
+TS-590 on COM3 at 115200 baud</pre>
+
+  <p>
+    The key design rule is: OmniRig can continue to believe it is talking to a TS-2000, but the bridge must not translate status reads through Hamlib's VFO-targeting APIs. It must forward raw Kenwood CAT reads instead.
+  </p>
+
+  <h2 id="setup">3. From-scratch setup for Randy KC7AVA</h2>
+
+  <h3>3.1 Install prerequisites</h3>
+  <ol>
+    <li>Install OmniRig and configure HDSDR to use OmniRig.</li>
+    <li>Install Hamlib for Windows and note the path to <code>rigctld.exe</code> and <code>rigctl.exe</code>. The tested station used <code>C:\tools\hamlib\hamlib-w64-4.7.1\bin</code>.</li>
+    <li>Install a virtual null-modem pair such as com0com. Create a pair equivalent to <code>COM10</code> and <code>COM11</code>.</li>
+    <li>Install Python 3 and pyserial:
+      <pre>python -m pip install pyserial</pre>
+    </li>
+    <li>Download <a href="safe_ts590_omnirig_bridge.py"><code>safe_ts590_omnirig_bridge.py</code></a> and save it as <code>%USERPROFILE%\Apps\RigBridge\safe_ts590_omnirig_bridge.py</code>.</li>
+  </ol>
+
+  <h3>3.2 Configure OmniRig</h3>
+  <p>
+    In OmniRig, configure RIG1 like this. Do not select TS-590 here when using this bridge path.
+  </p>
+  <table>
+    <tr><th>Setting</th><th>Value</th></tr>
+    <tr><td>Rig type</td><td><code>TS-2000</code></td></tr>
+    <tr><td>Port</td><td><code>COM11</code></td></tr>
+    <tr><td>Baud</td><td><code>115200</code></td></tr>
+    <tr><td>RTS</td><td>Low / disabled</td></tr>
+    <tr><td>DTR</td><td>Low / disabled</td></tr>
+    <tr><td>Poll</td><td><code>500 ms</code></td></tr>
+    <tr><td>Timeout</td><td><code>4000 ms</code></td></tr>
+  </table>
+
+  <p>
+    The live OmniRig file is normally:
+  </p>
+  <pre>%APPDATA%\Afreet\Products\OmniRig\OmniRig.ini</pre>
+
+  <p>
+    The relevant INI values should look like this:
+  </p>
+  <pre>[RIG1]
+RigType=TS-2000
+Port=11
+BaudRate=12
+RtsMode=0
+DtrMode=0
+PollMs=500
+TimeoutMs=4000</pre>
+
+  <h3>3.3 Start rigctld</h3>
+  <p>
+    Adjust <code>COM3</code> if Randy's TS-590 appears on a different Windows COM port.
+  </p>
+  <pre>C:\tools\hamlib\hamlib-w64-4.7.1\bin\rigctld.exe `
+  -m 2031 `
+  -r COM3 `
+  -s 115200 `
+  -t 4532 `
+  -T 127.0.0.1 `
+  -W 10 `
+  -w 1</pre>
+
+  <p>
+    The <code>-w 1</code> startup write delay is retained from the previous anti-click setup. The <code>-W 10</code> twiddle timeout helps reduce VFO churn in some Hamlib paths, but it is not the root fix by itself.
+  </p>
+
+  <h3>3.4 Start the safe bridge</h3>
+  <pre>python %USERPROFILE%\Apps\RigBridge\safe_ts590_omnirig_bridge.py `
+  --serial-port \\.\COM10 `
+  --baud 115200 `
+  --rigctld 127.0.0.1:4532 `
+  --log %USERPROFILE%\safe-ts590-omnirig-bridge.log</pre>
+
+  <h3>3.5 Optional PowerShell helpers</h3>
+  <p>
+    These are the essential helper variables and start command. They can be adapted into <code>%USERPROFILE%\Documents\PowerShell\Microsoft.PowerShell_profile.ps1</code>.
+  </p>
+  <pre>$script:HamlibBin = 'C:\tools\hamlib\hamlib-w64-4.7.1\bin'
+$script:RigctldExe = Join-Path $script:HamlibBin 'rigctld.exe'
+$script:RigctlExe = Join-Path $script:HamlibBin 'rigctl.exe'
+$script:RigctldEndpoint = '127.0.0.1:4532'
+$script:RigctldArgs = @(
+    '-m', '2031',
+    '-r', 'COM3',
+    '-s', '115200',
+    '-t', '4532',
+    '-T', '127.0.0.1',
+    '-W', '10',
+    '-w', '1'
+)
+$script:SafeRigBridgeScriptPath = Join-Path $env:USERPROFILE 'Apps\RigBridge\safe_ts590_omnirig_bridge.py'
+$script:SafeRigBridgeLogPath = Join-Path $env:USERPROFILE 'safe-ts590-omnirig-bridge.log'
+
+function Start-Rigctld {
+    Start-Process -FilePath $script:RigctldExe -ArgumentList $script:RigctldArgs -WindowStyle Minimized
+}
+
+function Start-RigBridge {
+    Start-Process -FilePath 'python' `
+        -ArgumentList @(
+            $script:SafeRigBridgeScriptPath,
+            '--serial-port', '\\.\COM10',
+            '--baud', '115200',
+            '--rigctld', $script:RigctldEndpoint,
+            '--log', $script:SafeRigBridgeLogPath
+        ) `
+        -WindowStyle Minimized
+}</pre>
+
+  <h3>3.6 Verification</h3>
+  <ol>
+    <li>Start <code>rigctld</code>.</li>
+    <li>Start the safe bridge.</li>
+    <li>Start OmniRig/HDSDR.</li>
+    <li>Confirm VFO A is stable.</li>
+    <li>Press the TS-590 front-panel A/B button once to select VFO B.</li>
+    <li>Expected result: one transition to VFO B, no repeated beeps, no display flicker loop, and the bridge log shows only harmless CAT reads.</li>
+  </ol>
+
+  <p>
+    Example healthy log lines after switching to VFO B:
+  </p>
+  <pre>INFO CAT IF; (read)
+INFO CAT reply b'IF00013054053      100000002031000080;'
+INFO CAT FA; (read)
+INFO CAT reply b'FA00014038729;'
+INFO CAT FB; (read)
+INFO CAT reply b'FB00013054053;'</pre>
+
+  <h2 id="diffs">4. Red/green diff report</h2>
+
+  <h3>4.1 PowerShell: rigctld arguments</h3>
+  <p>
+    This change is retained, but it is not the main VFO B fix. It helps keep Hamlib from rapidly twiddling target VFOs in code paths that still use that behavior.
+  </p>
+  <div class="diff" role="img" aria-label="Diff of rigctld arguments">
+<div class="ctx">$script:RigctldArgs = @(</div>
+<div class="ctx">    '-m', '2031',</div>
+<div class="ctx">    '-r', 'COM3',</div>
+<div class="ctx">    '-s', '115200',</div>
+<div class="ctx">    '-t', '4532',</div>
+<div class="ctx">    '-T', '127.0.0.1',</div>
+<div class="add">+    '-W', '10',</div>
+<div class="ctx">    '-w', '1'</div>
+<div class="ctx">)</div>
+  </div>
+
+  <h3>4.2 PowerShell: bridge process</h3>
+  <p>
+    This is the important change. Stock <code>rigctlcom</code> was replaced by the safe raw bridge.
+  </p>
+  <div class="diff" role="img" aria-label="Diff replacing rigctlcom with safe Python bridge">
+<div class="ctx">function Start-RigBridge {</div>
+<div class="del">-    Start-Process -FilePath $script:RigctlcomExe `</div>
+<div class="del">-        -ArgumentList @(</div>
+<div class="del">-            '-m', '2014',</div>
+<div class="del">-            '-r', $script:RigctlcomRadioSide,</div>
+<div class="del">-            '-s', "$script:RigctlcomBaud",</div>
+<div class="del">-            '-t', '4532',</div>
+<div class="del">-            '-T', '127.0.0.1'</div>
+<div class="del">-        ) `</div>
+<div class="del">-        -WindowStyle Minimized</div>
+<div class="add">+    Start-Process -FilePath 'python' `</div>
+<div class="add">+        -ArgumentList @(</div>
+<div class="add">+            $script:SafeRigBridgeScriptPath,</div>
+<div class="add">+            '--serial-port', $script:RigctlcomRadioSide,</div>
+<div class="add">+            '--baud', "$script:RigctlcomBaud",</div>
+<div class="add">+            '--rigctld', $script:RigctldEndpoint,</div>
+<div class="add">+            '--log', $script:SafeRigBridgeLogPath</div>
+<div class="add">+        ) `</div>
+<div class="add">+        -WindowStyle Minimized</div>
+<div class="ctx">}</div>
+  </div>
+
+  <h3>4.3 PowerShell: stop old and new bridge processes</h3>
+  <p>
+    The stop helper now terminates the Python bridge and also cleans up any leftover legacy <code>rigctlcom</code> process so both bridges cannot fight over the COM pair.
+  </p>
+  <div class="diff" role="img" aria-label="Diff of Stop-RigBridge">
+<div class="ctx">function Stop-RigBridge {</div>
+<div class="del">-    $oldRigctlcom = Get-Process -Name rigctlcom -ErrorAction SilentlyContinue</div>
+<div class="del">-    if ($oldRigctlcom) { $oldRigctlcom | Stop-Process -Force }</div>
+<div class="add">+    $proc = Get-CimInstance Win32_Process |</div>
+<div class="add">+        Where-Object {</div>
+<div class="add">+            $_.Name -match '^(python.*|py)\.exe$' -and</div>
+<div class="add">+            $_.CommandLine -like "*$script:SafeRigBridgeScriptPath*"</div>
+<div class="add">+        }</div>
+<div class="add">+    if ($proc) { $proc | ForEach-Object { Stop-Process -Id $_.ProcessId -Force } }</div>
+<div class="add">+</div>
+<div class="add">+    $oldRigctlcom = Get-Process -Name rigctlcom -ErrorAction SilentlyContinue</div>
+<div class="add">+    if ($oldRigctlcom) { $oldRigctlcom | ForEach-Object { Stop-Process -Id $_.Id -Force } }</div>
+<div class="ctx">}</div>
+  </div>
+
+  <h3>4.4 OmniRig live config</h3>
+  <p>
+    The final setup keeps OmniRig on <code>TS-2000</code>. Earlier attempts to switch OmniRig directly to <code>TS-590</code> were reverted because the COM bridge side presents TS-2000-compatible CAT.
+  </p>
+  <div class="diff" role="img" aria-label="Diff of OmniRig live config">
+<div class="ctx">[RIG1]</div>
+<div class="del">-RigType=TS-590</div>
+<div class="add">+RigType=TS-2000</div>
+<div class="ctx"> Port=11</div>
+<div class="ctx"> BaudRate=12</div>
+<div class="ctx"> RtsMode=0</div>
+<div class="ctx"> DtrMode=0</div>
+<div class="ctx"> PollMs=500</div>
+<div class="ctx"> TimeoutMs=4000</div>
+  </div>
+
+  <h3>4.5 OmniRig TS-2000 rig profile overlay</h3>
+  <p>
+    An IF-only TS-2000 profile overlay was tested while isolating the problem. It comments out the <code>FA;</code> and <code>FB;</code> status polls. That overlay reduces traffic, but the final safe-bridge validation showed it is not required to fix VFO B. With the safe bridge and the original TS-2000 profile restored, <code>IF;</code>, <code>FA;</code>, and <code>FB;</code> reads all remained safe and produced zero <code>FR0</code>/<code>FR1</code> or <code>FT0</code>/<code>FT1</code> write commands.
+  </p>
+  <div class="diff" role="img" aria-label="Optional diff of TS-2000 profile overlay">
+<div class="ctx">[STATUS2]</div>
+<div class="del">-Command=(FA;)</div>
+<div class="add">+; Disabled during troubleshooting: raw safe bridge makes this optional.</div>
+<div class="add">+; Command=(FA;)</div>
+<div class="ctx"></div>
+<div class="ctx">[STATUS3]</div>
+<div class="del">-Command=(FB;)</div>
+<div class="add">+; Disabled during troubleshooting: raw safe bridge makes this optional.</div>
+<div class="add">+; Command=(FB;)</div>
+  </div>
+
+  <h2 id="validation">5. Validation and minimal-change proof</h2>
+
+  <h3>5.1 Broken stock bridge reproduced the exact symptom</h3>
+  <p>
+    In the broken run, the only user action was to get to VFO B and wait. The stock bridge path then repeatedly moved the radio's receive VFO away from B and back to B.
+  </p>
+  <div class="bad">
+    <strong>Bad evidence:</strong> stock <code>rigctlcom</code> plus OmniRig polling produced repeated physical Kenwood <code>FR0</code> and <code>FR1</code> commands after the VFO B switch.
+  </div>
+  <pre>rig_set_vfo called vfo=VFOA
+kenwood_transaction called cmd=FR0
+rig_set_vfo called vfo=VFOB
+kenwood_transaction called cmd=FR1
+rig_set_vfo called vfo=VFOA
+kenwood_transaction called cmd=FR0
+rig_set_vfo called vfo=VFOB
+kenwood_transaction called cmd=FR1</pre>
+
+  <p>
+    The matching <code>rigctlcom</code> side showed OmniRig status polling, not a deliberate instruction from the operator to leave VFO B. That is why changing the front-panel behavior or simply starting from VFO A could not solve the issue.
+  </p>
+
+  <h3>5.2 <code>-W 10 -w 1</code> alone was not enough</h3>
+  <p>
+    Adding Hamlib's twiddle timeout reduced some unwanted churn, but it still allowed unwanted VFO targeting in the stock bridge path. It is useful as a secondary mitigation, not a standalone fix.
+  </p>
+
+  <h3>5.3 Safe bridge with the original TS-2000 profile proved the minimal fix</h3>
+  <p>
+    To check whether the OmniRig profile overlay was actually required, the TS-2000 overlay was temporarily disabled and the stock TS-2000 profile was used with the safe raw bridge. After switching to VFO B, the bridge saw normal status reads and no VFO-write commands.
+  </p>
+  <div class="good">
+    <strong>Minimal-change test:</strong> with the original TS-2000 profile, the safe bridge handled 22 <code>IF;</code> reads, 21 <code>FA;</code> reads, and 22 <code>FB;</code> reads, produced zero <code>FR</code>/<code>FT</code> write commands, and the radio remained on <code>VFOB</code>.
+  </div>
+  <pre>IF        : 22
+FA        : 21
+FB        : 22
+FRFT      : 0
+FinalVfo  : VFOB</pre>
+
+  <h3>5.4 Healthy safe-bridge log</h3>
+  <p>
+    After the safe bridge fix, status polling while on VFO B looked like this: read-only CAT commands go through, and no bridge-originated VFO selection writes appear.
+  </p>
+  <pre>INFO CAT IF; (read)
+INFO CAT reply b'IF00014040000      100000002031000080;'
+INFO CAT IF; (read)
+INFO CAT reply b'IF00014040000      100000002031000080;'
+INFO CAT IF; (read)
+INFO CAT reply b'IF00014040000      100000002031000080;'</pre>
+
+  <h3>5.5 Minimal final change set</h3>
+  <table>
+    <tr>
+      <th>Change</th>
+      <th>Required for VFO B loop?</th>
+      <th>Reason</th>
+    </tr>
+    <tr>
+      <td>Replace stock <code>rigctlcom</code> with raw safe bridge</td>
+      <td>Yes</td>
+      <td>Removes the Hamlib target-VFO translation path that emits <code>FR0</code>/<code>FR1</code>.</td>
+    </tr>
+    <tr>
+      <td>Keep OmniRig configured as <code>TS-2000</code> on <code>COM11</code></td>
+      <td>Yes</td>
+      <td>That is the CAT personality presented to OmniRig/HDSDR over the virtual COM pair.</td>
+    </tr>
+    <tr>
+      <td>Add <code>-W 10</code> to <code>rigctld</code></td>
+      <td>No, but retained</td>
+      <td>Helpful defensive setting, but not sufficient by itself.</td>
+    </tr>
+    <tr>
+      <td>Comment out <code>FA;</code>/<code>FB;</code> in TS-2000.ini</td>
+      <td>No</td>
+      <td>Validated safe bridge remains stable even with the original TS-2000 profile.</td>
+    </tr>
+    <tr>
+      <td>Change OmniRig to <code>TS-590</code></td>
+      <td>No; avoid</td>
+      <td>Wrong abstraction for this bridge path and was reverted.</td>
+    </tr>
+  </table>
+
+  <h2 id="alternatives">6. Alternative implementations that avoid Python</h2>
+
+  <table>
+    <tr>
+      <th>Option</th>
+      <th>Would it work?</th>
+      <th>Pros</th>
+      <th>Cons</th>
+      <th>Recommendation</th>
+    </tr>
+    <tr>
+      <td>C executable</td>
+      <td>Yes</td>
+      <td>Small single EXE, no runtime dependency, direct Win32 serial and Winsock APIs.</td>
+      <td>More code for buffering, timeouts, error handling, installer/signing, and logging. Easier to introduce memory or handle-lifetime bugs.</td>
+      <td>Good if this becomes a packaged utility for multiple shacks.</td>
+    </tr>
+    <tr>
+      <td>Rust executable</td>
+      <td>Yes</td>
+      <td>Single EXE, memory safe, good serial/TCP crates, easier robust parsing than C.</td>
+      <td>Requires Rust toolchain to build; slightly larger binary; still needs release packaging.</td>
+      <td>Best compiled replacement if we want to move beyond Python later.</td>
+    </tr>
+    <tr>
+      <td>PowerShell bridge</td>
+      <td>Possible</td>
+      <td>No separate compiled language; can use <code>System.IO.Ports.SerialPort</code> and <code>System.Net.Sockets.TcpClient</code>.</td>
+      <td>Less ideal for continuous low-latency serial IO. Buffering, event callbacks, process lifetime, and clean shutdown are more fragile. It is also easier for the bridge to be disrupted by profile reloads or console state.</td>
+      <td>Acceptable for a quick proof of concept, not preferred for the always-on bridge.</td>
+    </tr>
+    <tr>
+      <td>Python bridge</td>
+      <td>Already works</td>
+      <td>Very small, readable, easy to modify at the station, good enough performance for 500 ms OmniRig polling.</td>
+      <td>Requires Python and <code>pyserial</code>.</td>
+      <td>Keep this for now unless packaging or deployment friction becomes a real issue.</td>
+    </tr>
+  </table>
+
+  <p>
+    The important implementation detail is independent of language: the bridge should forward raw Kenwood CAT reads to <code>rigctld</code> with the raw <code>w</code> command and should not answer OmniRig status polls by calling Hamlib target-VFO APIs.
+  </p>
+
+  <h2 id="troubleshooting">7. Troubleshooting checklist</h2>
+  <div class="card">
+    <h3>If VFO B still loops</h3>
+    <ol>
+      <li>Make sure <code>rigctlcom.exe</code> is not running. Only the safe bridge should own <code>COM10</code>.</li>
+      <li>Confirm OmniRig is on <code>TS-2000</code>, <code>COM11</code>, <code>115200</code> baud.</li>
+      <li>Confirm the safe bridge log shows <code>Starting safe TS-590 OmniRig bridge</code>.</li>
+      <li>Confirm the safe bridge log does not show repeated <code>CAT FR0;</code>, <code>CAT FR1;</code>, <code>CAT FT0;</code>, or <code>CAT FT1;</code>.</li>
+      <li>Confirm <code>rigctld</code> is controlling the real TS-590 port, not the virtual COM pair.</li>
+      <li>Confirm the virtual pair is crossed correctly: OmniRig uses <code>COM11</code>, the safe bridge uses <code>COM10</code>.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3>Useful commands</h3>
+    <pre>taskkill /f /im rigctlcom.exe
+taskkill /f /im rigctld.exe
+
+C:\tools\hamlib\hamlib-w64-4.7.1\bin\rigctl.exe -m 2 -r 127.0.0.1:4532 v
+C:\tools\hamlib\hamlib-w64-4.7.1\bin\rigctl.exe -m 2 -r 127.0.0.1:4532 f
+
+Get-Content $env:USERPROFILE\safe-ts590-omnirig-bridge.log -Tail 80</pre>
+  </div>
+
+  <h2>8. Files</h2>
+  <table>
+    <tr><th>File</th><th>Purpose</th></tr>
+    <tr>
+      <td><a href="safe_ts590_omnirig_bridge.py"><code>safe_ts590_omnirig_bridge.py</code></a></td>
+      <td>Downloadable safe raw CAT bridge.</td>
+    </tr>
+    <tr>
+      <td><code>%USERPROFILE%\Documents\PowerShell\Microsoft.PowerShell_profile.ps1</code></td>
+      <td>Local helper functions that start <code>rigctld</code> and the safe bridge.</td>
+    </tr>
+    <tr>
+      <td><code>%APPDATA%\Afreet\Products\OmniRig\OmniRig.ini</code></td>
+      <td>Live OmniRig configuration. RIG1 should remain <code>TS-2000</code> on <code>COM11</code>.</td>
+    </tr>
+    <tr>
+      <td><code>%USERPROFILE%\safe-ts590-omnirig-bridge.log</code></td>
+      <td>Bridge validation log.</td>
+    </tr>
+  </table>
+</main>
+</body>
+</html>
