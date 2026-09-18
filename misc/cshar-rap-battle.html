@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="C-Sharp Seventeen: Mike versus Patrick in a .NET engineering rap battle.">
+  <meta name="theme-color" content="#080b10">
+  <title>C-Sharp Seventeen | Mike vs. Patrick</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --background: #080b10;
+      --panel: #0e131b;
+      --panel-raised: #141b25;
+      --text: #e8edf4;
+      --muted: #8d99a8;
+      --line: #273241;
+      --mike: #53d6ff;
+      --mike-soft: rgba(83, 214, 255, 0.12);
+      --patrick: #ff9e57;
+      --patrick-soft: rgba(255, 158, 87, 0.12);
+      --crowd: #c7ff6b;
+      --announcer: #be9cff;
+      --code: #f2d27a;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(83, 214, 255, 0.09), transparent 28rem),
+        radial-gradient(circle at 85% 15%, rgba(255, 158, 87, 0.08), transparent 26rem),
+        linear-gradient(180deg, #0b0f15 0, var(--background) 30rem);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+
+    body::before {
+      position: fixed;
+      z-index: -1;
+      inset: 0;
+      background-image: linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+      background-size: 100% 4px;
+      content: "";
+      pointer-events: none;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    code {
+      padding: 0.08em 0.28em;
+      border: 1px solid rgba(242, 210, 122, 0.22);
+      border-radius: 0.28em;
+      color: var(--code);
+      background: rgba(242, 210, 122, 0.08);
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.9em;
+      white-space: nowrap;
+    }
+
+    .hero {
+      position: relative;
+      display: grid;
+      min-height: 92vh;
+      place-items: center;
+      padding: 5rem 1.25rem 4rem;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .hero::after {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: min(70rem, 94vw);
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--line), transparent);
+      content: "";
+      transform: translateX(-50%);
+    }
+
+    .hero-content {
+      width: min(76rem, 100%);
+    }
+
+    .eyebrow {
+      margin: 0 0 1.3rem;
+      color: var(--announcer);
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: clamp(0.72rem, 2vw, 0.9rem);
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(3.3rem, 12vw, 9.5rem);
+      font-weight: 900;
+      letter-spacing: -0.075em;
+      line-height: 0.82;
+      text-transform: uppercase;
+    }
+
+    h1 span {
+      display: block;
+      color: transparent;
+      background: linear-gradient(90deg, var(--mike), #d5f6ff 42%, #fff 50%, #ffe5d1 58%, var(--patrick));
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+
+    .matchup {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 2.2rem 0 1.4rem;
+      gap: clamp(0.7rem, 3vw, 2rem);
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: clamp(1rem, 3vw, 1.45rem);
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .mike-name {
+      color: var(--mike);
+    }
+
+    .patrick-name {
+      color: var(--patrick);
+    }
+
+    .versus {
+      display: grid;
+      width: 2.8rem;
+      height: 2.8rem;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      place-items: center;
+      color: var(--muted);
+      background: var(--panel);
+      font-size: 0.76rem;
+    }
+
+    .hero-copy {
+      max-width: 42rem;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: clamp(1rem, 2.2vw, 1.2rem);
+    }
+
+    .scroll-cue {
+      display: inline-block;
+      margin-top: 2.4rem;
+      padding: 0.65rem 1rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: 0.78rem;
+      text-decoration: none;
+      transition: border-color 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    .scroll-cue:hover,
+    .scroll-cue:focus-visible {
+      border-color: var(--mike);
+      color: var(--text);
+      transform: translateY(-2px);
+    }
+
+    main {
+      width: min(72rem, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 4rem 0 6rem;
+    }
+
+    .intro {
+      max-width: 48rem;
+      margin: 0 auto 3rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(190, 156, 255, 0.28);
+      border-radius: 1rem;
+      background: linear-gradient(135deg, rgba(190, 156, 255, 0.1), rgba(14, 19, 27, 0.94));
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .intro p {
+      margin: 0;
+      font-size: clamp(1rem, 2.4vw, 1.3rem);
+      font-weight: 650;
+    }
+
+    .intro p + p {
+      margin-top: 0.32rem;
+    }
+
+    .intro .title-call {
+      margin-top: 1rem;
+      color: var(--announcer);
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: clamp(1.25rem, 4vw, 2rem);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .round {
+      margin-top: 4rem;
+    }
+
+    .round-heading {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.4rem;
+      gap: 1rem;
+    }
+
+    .round-heading::before,
+    .round-heading::after {
+      height: 1px;
+      flex: 1;
+      background: var(--line);
+      content: "";
+    }
+
+    .round-heading h2 {
+      margin: 0;
+      color: var(--muted);
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: 0.82rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .verse {
+      position: relative;
+      max-width: 56rem;
+      margin: 1rem 0;
+      padding: clamp(1.25rem, 4vw, 2rem);
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      background: linear-gradient(145deg, var(--panel-raised), var(--panel));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .verse::before {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      content: "";
+    }
+
+    .verse.mike {
+      margin-right: auto;
+      border-color: rgba(83, 214, 255, 0.26);
+      background: linear-gradient(145deg, var(--mike-soft), var(--panel) 42%);
+    }
+
+    .verse.mike::before {
+      left: 0;
+      background: var(--mike);
+    }
+
+    .verse.patrick {
+      margin-left: auto;
+      border-color: rgba(255, 158, 87, 0.26);
+      background: linear-gradient(215deg, var(--patrick-soft), var(--panel) 42%);
+      text-align: right;
+    }
+
+    .verse.patrick::before {
+      right: 0;
+      background: var(--patrick);
+    }
+
+    .speaker {
+      margin-bottom: 1rem;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: 0.78rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .mike .speaker {
+      color: var(--mike);
+    }
+
+    .patrick .speaker {
+      color: var(--patrick);
+    }
+
+    .bars {
+      margin: 0;
+      font-size: clamp(1rem, 2.3vw, 1.16rem);
+      font-weight: 570;
+      white-space: pre-line;
+    }
+
+    .bars strong {
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .crowd {
+      margin: 2.2rem auto;
+      color: var(--crowd);
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: clamp(1rem, 4vw, 1.65rem);
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      text-align: center;
+      text-shadow: 0 0 24px rgba(199, 255, 107, 0.28);
+    }
+
+    .final-exchange {
+      max-width: 52rem;
+      margin: 4rem auto 0;
+      padding: clamp(1.5rem, 5vw, 3rem);
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      background: #090c11;
+      box-shadow: var(--shadow);
+    }
+
+    .dialogue {
+      display: grid;
+      grid-template-columns: minmax(5rem, auto) 1fr;
+      margin: 0;
+      gap: 0.8rem 1rem;
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+    }
+
+    .dialogue dt {
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .dialogue dd {
+      margin: 0;
+    }
+
+    .dialogue .mike-label {
+      color: var(--mike);
+    }
+
+    .dialogue .patrick-label {
+      color: var(--patrick);
+    }
+
+    .dialogue .pause {
+      color: var(--muted);
+      letter-spacing: 0.4em;
+    }
+
+    .exit {
+      margin-top: 4rem;
+      padding: 1.25rem;
+      border: 1px solid rgba(190, 156, 255, 0.28);
+      border-radius: 0.8rem;
+      color: var(--announcer);
+      background: rgba(190, 156, 255, 0.07);
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: clamp(0.9rem, 2.3vw, 1.1rem);
+      text-align: center;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 0.62em;
+      height: 1em;
+      margin-left: 0.2em;
+      background: currentColor;
+      vertical-align: -0.15em;
+      animation: blink 1.1s steps(2, jump-none) infinite;
+    }
+
+    footer {
+      padding: 2rem 1rem 3rem;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: 0.74rem;
+      text-align: center;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .hero {
+        min-height: 82vh;
+      }
+
+      .verse.patrick {
+        text-align: left;
+      }
+
+      .dialogue {
+        grid-template-columns: 1fr;
+        gap: 0.2rem;
+      }
+
+      .dialogue dd {
+        margin-bottom: 0.8rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      .cursor {
+        animation: none;
+      }
+    }
+
+    @media print {
+      :root {
+        color-scheme: light;
+        --background: #fff;
+        --panel: #fff;
+        --panel-raised: #fff;
+        --text: #111;
+        --muted: #444;
+        --line: #aaa;
+        --mike: #006a88;
+        --patrick: #984500;
+        --crowd: #466d00;
+        --announcer: #604591;
+        --code: #684f00;
+        --shadow: none;
+      }
+
+      body {
+        background: #fff;
+      }
+
+      body::before,
+      .scroll-cue {
+        display: none;
+      }
+
+      .hero {
+        min-height: auto;
+        padding: 2rem 1rem;
+      }
+
+      h1 span {
+        color: #111;
+      }
+
+      main {
+        width: 100%;
+        padding: 1rem 0;
+      }
+
+      .verse,
+      .intro,
+      .final-exchange {
+        break-inside: avoid;
+        box-shadow: none;
+      }
+
+      .verse.mike,
+      .verse.patrick {
+        background: #fff;
+      }
+
+      .bars strong {
+        color: #000;
+      }
+    }
+
+    :root {
+      color-scheme: light;
+      --background: #fff;
+      --panel: #fff;
+      --panel-raised: #fff;
+      --text: #000;
+      --muted: #000;
+      --line: #000;
+      --mike: #000;
+      --patrick: #000;
+      --crowd: #000;
+      --announcer: #000;
+      --code: #000;
+      --shadow: none;
+    }
+
+    html {
+      scroll-behavior: auto;
+    }
+
+    body {
+      color: #000;
+      background: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 16px;
+      line-height: 1.45;
+    }
+
+    body::before,
+    .hero,
+    footer {
+      display: none;
+    }
+
+    main {
+      width: min(800px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 2rem 0;
+    }
+
+    code {
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      color: #000;
+      background: transparent;
+      font-size: 0.95em;
+    }
+
+    .intro,
+    .verse,
+    .final-exchange,
+    .exit {
+      max-width: none;
+      margin: 0 0 2rem;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      color: #000;
+      background: #fff;
+      box-shadow: none;
+      text-align: left;
+    }
+
+    .intro p {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 400;
+    }
+
+    .intro p + p {
+      margin-top: 0;
+    }
+
+    .intro .eyebrow,
+    .intro .title-call,
+    .speaker,
+    .round-heading h2 {
+      margin: 0 0 0.75rem;
+      color: #000;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .intro .eyebrow::before,
+    .speaker::before,
+    .round-heading h2::before {
+      content: "[";
+    }
+
+    .intro .eyebrow::after,
+    .speaker::after,
+    .round-heading h2::after {
+      content: "]";
+    }
+
+    .intro .title-call {
+      margin-top: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .round {
+      margin-top: 2.5rem;
+    }
+
+    .round-heading {
+      display: none;
+    }
+
+    .round-heading::before,
+    .round-heading::after,
+    .verse::before {
+      display: none;
+    }
+
+    .verse.mike,
+    .verse.patrick {
+      margin: 0 0 2rem;
+      border: 0;
+      background: #fff;
+      text-align: left;
+    }
+
+    .bars {
+      font-size: 1rem;
+      font-weight: 400;
+    }
+
+    .bars strong {
+      color: #000;
+      font-weight: 700;
+    }
+
+    .crowd {
+      margin: 2rem 0;
+      color: #000;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0;
+      text-align: left;
+      text-shadow: none;
+    }
+
+    .final-exchange {
+      margin-top: 0;
+    }
+
+    .dialogue {
+      display: grid;
+      grid-template-columns: 6rem 1fr;
+      gap: 0.75rem 1rem;
+      font-size: 1rem;
+    }
+
+    .dialogue dt {
+      color: #000;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 700;
+      text-transform: none;
+    }
+
+    .dialogue dt::before {
+      content: "[";
+    }
+
+    .dialogue dt::after {
+      content: "]";
+    }
+
+    .dialogue .mike-label,
+    .dialogue .patrick-label,
+    .dialogue .pause {
+      color: #000;
+    }
+
+    .exit {
+      margin-top: 2.5rem;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 1rem;
+      text-align: left;
+    }
+
+    .exit strong::before {
+      content: "[";
+    }
+
+    .exit strong::after {
+      content: "]";
+    }
+
+    .cursor {
+      display: none;
+    }
+
+    @media (max-width: 620px) {
+      .dialogue {
+        grid-template-columns: 1fr;
+        gap: 0.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-content">
+      <p class="eyebrow">Two engineers enter. One build turns green.</p>
+      <h1>C-Sharp <span>Seventeen</span></h1>
+      <div class="matchup" aria-label="Mike versus Patrick">
+        <span class="mike-name">Mike</span>
+        <span class="versus">VS</span>
+        <span class="patrick-name">Patrick</span>
+      </div>
+      <p class="hero-copy">A .NET engineering rap battle featuring performance, architecture, questionable abstractions, and one devastating final code review.</p>
+      <a class="scroll-cue" href="#battle">Enter the runtime ↓</a>
+    </div>
+  </header>
+
+  <main id="battle">
+    <section class="intro" aria-labelledby="intro-title">
+      <p class="eyebrow" id="intro-title">Intro - Announcer</p>
+      <p>Ladies and gentlemen, devs and architects,</p>
+      <p>Garbage collectors and memory compactors,</p>
+      <p>Two engineers enter, one build turns green,</p>
+      <p>It’s Mike versus Patrick…</p>
+      <p class="title-call">C-Sharp Seventeen!</p>
+    </section>
+
+    <section class="round" aria-labelledby="round-one">
+      <div class="round-heading">
+        <h2 id="round-one">Round 1</h2>
+      </div>
+
+      <article class="verse mike">
+        <div class="speaker">Mike - Round 1</div>
+        <p class="bars">Yo Patrick, step back, let the runtime begin,
+You brought Java conventions to a C# win.
+I’m <code>Span&lt;T&gt;</code> slicing, zero-copy attack,
+You’re calling <code>.ToList()</code> just to iterate back.
+
+I got nullable enabled, every warning gets seen,
+Your codebase got more question marks than a product team.
+I’m async all the way, no blocking my thread,
+You <code>.Result</code> on a Task, now the process is dead.
+
+<code>ConfigureAwait</code>? Man, I know when it matters,
+While you’re spawning abstractions like architectural shrapnel.
+Ten interfaces deep just to open a file,
+I delete nine layers and BenchmarkDotNet smiles.</p>
+      </article>
+
+      <article class="verse patrick">
+        <div class="speaker">Patrick - Round 1</div>
+        <p class="bars">Mike talks performance like the profiler’s his priest,
+Shaves twelve nanoseconds then deploys it to the East.
+You got <code>CollectionsMarshal</code>, unsafe tricks galore,
+Congratulations, dude, you saved a microsecond… maybe four.
+
+You call my code abstract? Yours needs a map,
+Half the team sees <code>ref struct</code> and immediately naps.
+You optimized the hot path, great technical feat,
+Too bad that path runs once every seventeen weeks.
+
+I write boring code. Yeah. Boring code ships.
+While Mike’s reading CoreCLR source for branch-prediction tips.
+You found six allocations, declared total war,
+Then spent three engineering days removing four.</p>
+      </article>
+
+      <p class="crowd" aria-label="Crowd reacts">OOOOOOOOHHHH!</p>
+    </section>
+
+    <section class="round" aria-labelledby="round-two">
+      <div class="round-heading">
+        <h2 id="round-two">Round 2</h2>
+      </div>
+
+      <article class="verse mike">
+        <div class="speaker">Mike - Round 2</div>
+        <p class="bars">Four allocations? Patrick, better check that trace,
+I caught your closure allocating every call in the race.
+LINQ in the inner loop, boxing in the stack,
+Gen Zero saw your PR and said,
+<strong>“OH HELL, HE’S BACK.”</strong>
+
+You made a <code>ManagerFactoryProviderService</code>, why?
+For a class with one method returning <code>true</code> or <code>false</code>.
+Dependency injection got dependencies injected,
+The container saw your graph and said, “Request rejected.”
+
+I got records, patterns, primary constructors in play,
+You still write getters like it’s 2008 every day.
+Twenty lines of ceremony just to move one DTO,
+<code>with { Name = newName }</code>
+There.
+<strong>LET’S GO.</strong></p>
+      </article>
+
+      <article class="verse patrick">
+        <div class="speaker">Patrick - Round 2</div>
+        <p class="bars">Oh, you want modern C#? Then explain this crime:
+You learned a new language feature and used it <strong>nine times</strong>.
+Pattern match a boolean? Collection expressions too?
+Mike sees fresh syntax:
+<strong>“PUT IT EVERYWHERE, WOO!”</strong>
+
+Your pull request says “minor cleanup,” everybody knows,
+That means seventy files and half the namespace goes.
+One renamed interface, three projects rearranged,
+<code>git diff --stat</code> looking clinically deranged.
+
+And don’t talk DI, you register every class,
+Singleton, scoped, transient, whole <code>IServiceCollection</code> mass.
+Then production throws an exception, you know what Mike’ll say:
+
+<strong>“Interesting.”</strong>
+
+Bro.
+
+<strong>IT’S TWO A.M.</strong></p>
+      </article>
+
+      <p class="crowd" aria-label="Crowd reacts louder">OOOOOOOOOOOOHHHHHH!</p>
+    </section>
+
+    <section class="round" aria-labelledby="final-round">
+      <div class="round-heading">
+        <h2 id="final-round">Final Round</h2>
+      </div>
+
+      <article class="verse mike">
+        <div class="speaker">Mike - Final Round</div>
+        <p class="bars">Patrick, you’re good, but this ends at compile,
+I’ve been shipping .NET since <code>ArrayList</code> was in style.
+Generics came around, I was already prepared,
+You discovered <code>yield return</code> and got legitimately scared.
+
+I speak IL, JIT, GC, locks,
+Know why your innocent string landed straight on the LOH rocks.
+I bring traces, measurements, evidence, facts,
+You bring, “It seemed faster when I ran it in Debug like that.”
+
+When latency spikes, I don’t guess, I inspect,
+CPU flame graph, allocation stack, cause and effect.
+No folklore performance, no cargo-cult lore,
+Show me the numbers,
+
+<strong>THEN SHOW ME SOME MORE.</strong>
+
+So Patrick, respect, but the verdict’s compiled,
+No warning suppression, no exceptions filed.
+You can merge your PR when the benchmarks come back,
+
+But until then, my friend…
+
+<strong>GET OUTTA MY STACK.</strong></p>
+      </article>
+
+      <section class="final-exchange" aria-label="Patrick's final response">
+        <dl class="dialogue">
+          <dt class="patrick-label">Patrick</dt>
+          <dd>That was impressive.<br>One question, though.<br><br>Did you write all that yourself?</dd>
+
+          <dt class="mike-label">Mike</dt>
+          <dd class="pause">…</dd>
+
+          <dt class="patrick-label">Patrick</dt>
+          <dd>Or did you ask Copilot?</dd>
+        </dl>
+      </section>
+
+      <p class="crowd" aria-label="Crowd erupts">OOOOOOOOOOOOOOOOOOOOHHHHHHHHHHHH!!!</p>
+    </section>
+
+    <section class="exit" aria-label="Announcer closes the battle">
+      <strong>ANNOUNCER:</strong> <code>Process exited with code -1.</code><br>
+      No rematch scheduled.<span class="cursor" aria-hidden="true"></span>
+    </section>
+  </main>
+
+  <footer>
+    Built on .NET, beef, and reproducible benchmarks.
+  </footer>
+</body>
+</html>
